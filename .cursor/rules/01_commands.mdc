@@ -1,0 +1,35 @@
+---
+description: >-
+  InfDrawing 项目命令与规则同步说明
+alwaysApply: true
+---
+
+# 项目命令
+
+```bash
+# InfDrawing 前后端开发命令（脚手架搭建后更新具体命令）
+
+# 前端开发（待脚手架确定后更新）
+cd frontend && npm run dev
+
+# 前端构建
+cd frontend && npm run build
+
+# 后端开发（待脚手架确定后更新）
+cd backend && .venv/bin/uvicorn app.main:app --reload
+
+# 后端测试
+cd backend && .venv/bin/pytest tests/
+
+# 同步 Agent 规则
+python .agent-rules/sync_agent_rules.py
+```
+
+Windows 用户可将 `.venv/bin/` 替换为 `.venv\Scripts\`。
+
+## 规则维护
+
+- **Source of truth**：`.agent-rules/*.md`
+- **勿直接编辑** `AGENTS.md` 或 `.cursor/rules/00_synced.mdc` — 会被同步脚本覆盖
+- 修改规则后运行 `python .agent-rules/sync_agent_rules.py` 并一并 commit 源文件与生成文件
+

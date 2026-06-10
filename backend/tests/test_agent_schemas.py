@@ -17,3 +17,21 @@ def test_agent_plan_request_override() -> None:
         intent_override=IntentType.TXT2IMG,
     )
     assert req.intent_override == IntentType.TXT2IMG
+
+
+def test_decompose_intent_type() -> None:
+    plan = IntentPlan(
+        intent=IntentType.DECOMPOSE,
+        refined_prompt="clean background",
+        target_tool="comfyui_decompose_v1",
+    )
+    assert plan.intent == IntentType.DECOMPOSE
+
+
+def test_text_edit_intent_type() -> None:
+    plan = IntentPlan(
+        intent=IntentType.TEXT_EDIT,
+        refined_prompt="WORLD",
+        target_tool="comfyui_text_edit_v1",
+    )
+    assert plan.intent == IntentType.TEXT_EDIT

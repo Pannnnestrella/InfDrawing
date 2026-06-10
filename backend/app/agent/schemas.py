@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 class IntentType(str, Enum):
     TXT2IMG = "txt2img"
     INPAINT = "inpaint"
+    DECOMPOSE = "decompose"
+    TEXT_EDIT = "text_edit"
 
 
 class IntentPlan(BaseModel):

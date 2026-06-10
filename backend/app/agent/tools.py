@@ -9,4 +9,12 @@ TOOL_REGISTRY = {
         "intent": IntentType.INPAINT,
         "workflow": "sd15_inpaint_api.json",
     },
+    "comfyui_decompose_v1": {
+        "intent": IntentType.DECOMPOSE,
+        "workflow": None,
+    },
+    "comfyui_text_edit_v1": {
+        "intent": IntentType.TEXT_EDIT,
+        "workflow": None,
+    },
 }

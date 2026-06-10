@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     comfyui_base_url: str = "http://127.0.0.1:8188"
     comfyui_output_dir: Path = Path(r"D:\ComfyUI\output")
 
+    dashscope_api_key: str = ""
+
     repo_root: Path = Path(__file__).resolve().parents[2]
     data_dir: Path = repo_root / "data"
     uploads_dir: Path = data_dir / "uploads"

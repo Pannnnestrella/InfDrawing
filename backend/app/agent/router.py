@@ -10,7 +10,13 @@ from app.config import settings
 
 def _fallback_plan(request: AgentPlanRequest) -> IntentPlan:
     intent = request.intent_override or IntentType.TXT2IMG
-    tool = "comfyui_inpaint_v1" if intent == IntentType.INPAINT else "comfyui_txt2img_v1"
+    tool_by_intent = {
+        IntentType.TXT2IMG: "comfyui_txt2img_v1",
+        IntentType.INPAINT: "comfyui_inpaint_v1",
+        IntentType.DECOMPOSE: "comfyui_decompose_v1",
+        IntentType.TEXT_EDIT: "comfyui_text_edit_v1",
+    }
+    tool = tool_by_intent.get(intent, "comfyui_txt2img_v1")
     return IntentPlan(
         intent=intent,
         refined_prompt=request.user_message,
@@ -30,8 +36,8 @@ def _extract_json(content: str) -> dict:
 
 async def plan_intent(request: AgentPlanRequest) -> IntentPlan:
     if request.intent_override:
-        return _fallback_plan(request)
-
+        return _fallback_plan(request) # 直接用用户选的 intent
+     # 调 Ollama ...
     payload = {
         "model": settings.ollama_model,
         "messages": [

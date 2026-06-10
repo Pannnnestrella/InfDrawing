@@ -58,6 +58,26 @@ class ComfyUIClient:
         workflow["5"]["inputs"].update({"seed": seed, "steps": steps, "cfg": cfg})
         return workflow
 
+    def has_flux_txt2img_workflow(self) -> bool:
+        """Return True when a Flux txt2img workflow template is present."""
+        return (self.workflows_dir / "flux_schnell_txt2img_api.json").exists()
+
+    def build_flux_txt2img_workflow(
+        self,
+        *,
+        prompt: str,
+        negative_prompt: str,
+        seed: int = 42,
+        steps: int = 4,
+        cfg: float = 1.0,
+    ) -> dict:
+        """Build Flux Schnell workflow (requires flux_schnell_txt2img_api.json)."""
+        workflow = deepcopy(self.load_workflow("flux_schnell_txt2img_api.json"))
+        workflow["2"]["inputs"]["text"] = prompt
+        workflow["3"]["inputs"]["text"] = negative_prompt
+        workflow["5"]["inputs"].update({"seed": seed, "steps": steps, "cfg": cfg})
+        return workflow
+
     def build_inpaint_workflow(
         self,
         *,

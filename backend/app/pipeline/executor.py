@@ -29,6 +29,9 @@ class TaskManager:
     def get(self, task_id: str) -> TaskState | None:
         return self._tasks.get(task_id)
 
+    def register(self, task: TaskState) -> None:
+        self._tasks[task.task_id] = task
+
 
 task_manager = TaskManager()
 

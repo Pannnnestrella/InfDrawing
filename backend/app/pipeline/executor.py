@@ -14,7 +14,18 @@ class TaskState:
     status: str = "queued"
     image_path: Path | None = None
     error: str | None = None
+    last_event: dict[str, Any] | None = None
     events: asyncio.Queue[dict[str, Any]] = field(default_factory=asyncio.Queue)
+
+    async def emit(self, payload: dict[str, Any]) -> None:
+        """Publish a task event and retain the latest payload for WS reconnect."""
+        self.last_event = payload
+        await self.events.put(payload)
+
+    @property
+    def is_terminal(self) -> bool:
+        """Return True when the task has completed or failed."""
+        return self.status in {"complete", "error"}
 
 
 class TaskManager:
@@ -51,7 +62,7 @@ async def run_comfyui_task(
     async def _poll() -> None:
         elapsed = 0.0
         task.status = "running"
-        await task.events.put({"type": "progress", "task_id": task.task_id, "status": "running"})
+        await task.emit({"type": "progress", "task_id": task.task_id, "status": "running"})
         while elapsed < timeout:
             history = await client.get_history(prompt_id)
             if prompt_id in history:
@@ -59,7 +70,7 @@ async def run_comfyui_task(
                 if copied:
                     task.image_path = copied
                     task.status = "complete"
-                    await task.events.put(
+                    await task.emit(
                         {
                             "type": "complete",
                             "task_id": task.task_id,
@@ -71,7 +82,7 @@ async def run_comfyui_task(
             elapsed += poll_interval
         task.status = "error"
         task.error = "timeout"
-        await task.events.put(
+        await task.emit(
             {"type": "error", "task_id": task.task_id, "message": "ComfyUI task timed out"}
         )
 

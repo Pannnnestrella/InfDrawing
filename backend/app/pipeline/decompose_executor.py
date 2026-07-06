@@ -37,7 +37,7 @@ async def _wait_comfyui_output(
 
 
 async def _emit(task: TaskState, payload: dict[str, Any]) -> None:
-    await task.events.put(payload)
+    await task.emit(payload)
 
 
 def _image_to_png_bytes(image: Image.Image) -> bytes:

@@ -23,27 +23,74 @@
 |------|------|------|
 | 交互层 | 无限画布、图层、Mask | Next.js + tldraw |
 | 中控层 | 意图识别、Prompt 改写 | FastAPI + Ollama（Qwen2.5-7B） |
-| 执行层 | txt2img / inpaint | ComfyUI（SD 1.5，API 模式） |
+| 执行层 | txt2img / inpaint / 拆解 / 文字编辑 | ComfyUI（SD 1.5，API 模式） |
 
 ---
 
-## 本地环境
+## 一键启动（推荐）
 
-新成员部署开发环境，请按顺序阅读：
-
-1. [**docs/environment_setup.md**](docs/environment_setup.md) — 安装 Ollama、ComfyUI、模型下载与验收清单
-2. [**进度.md**](进度.md) — 确认当前项目阶段与待办事项
-
-**日常启动（生图时）：**
+**前置**：已完成 [环境部署](docs/environment_setup.md)（Ollama、ComfyUI、backend `.venv`、frontend `npm install`）。Ollama 需已在后台运行。
 
 ```powershell
-# ComfyUI（另开终端）
+# 仓库根目录
+.\scripts\dev.ps1          # 启动 ComfyUI + 后端 + 前端，并打开浏览器
+.\scripts\dev.ps1 status   # 检查四个服务健康状态
+.\scripts\dev.ps1 stop      # 停止由脚本启动的进程
+.\scripts\dev.ps1 restart   # 重启
+```
+
+脚本会为 ComfyUI、FastAPI、Next.js 各开一个 **PowerShell 窗口**（便于看日志）。首次启动 ComfyUI 可能需 30–60 秒。
+
+| 服务 | 地址 |
+|------|------|
+| 前端（画布） | http://127.0.0.1:3000 |
+| 后端 API / Swagger | http://127.0.0.1:8000/docs |
+| ComfyUI | http://127.0.0.1:8188 |
+| Ollama | http://localhost:11434 |
+
+**可选环境变量**（路径与端口非默认时）：
+
+| 变量 | 默认 | 说明 |
+|------|------|------|
+| `INFD_COMFYUI_DIR` | `D:\ComfyUI` | ComfyUI 安装目录 |
+| `INFD_COMFYUI_ENV` | `comfyui` | ComfyUI 使用的 Conda 环境名 |
+| `INFD_COMFYUI_PORT` | `8188` | ComfyUI 端口 |
+| `INFD_BACKEND_PORT` | `8000` | FastAPI 端口 |
+| `INFD_FRONTEND_PORT` | `3000` | Next.js 端口 |
+
+**能力自检**（后端启动后）：
+
+```powershell
+backend\.venv\Scripts\python.exe scripts\check_capabilities.py
+```
+
+---
+
+## 手动启动
+
+若不想用脚本，可按顺序开四个终端：
+
+```powershell
+# 1. Ollama — 通常安装后自启，无需手动操作
+
+# 2. ComfyUI
 cd D:\ComfyUI
 conda activate comfyui
 python main.py --lowvram --port 8188
 
-# Ollama 通常后台自启；API: http://localhost:11434/v1
+# 3. 后端
+cd backend
+.\.venv\Scripts\activate
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+# 4. 前端
+cd frontend
+npm run dev
 ```
+
+> Windows 上若 `uvicorn app.main:app --reload` 无输出即退出，请改用 `python -m uvicorn`（见上文）。
+
+联调步骤与验收清单见 [`docs/environment_setup.md` §7.1](docs/environment_setup.md)。
 
 ---
 
@@ -52,15 +99,41 @@ python main.py --lowvram --port 8188
 ```
 ├── README.md
 ├── 进度.md                          # 项目进度追踪
+├── scripts/
+│   ├── dev.ps1                      # 一键启动 / 停止 / 状态检查
+│   └── check_capabilities.py        # 环境能力探测 CLI
 ├── AGENTS.md                        # Cursor Agent 主指令（auto-generated）
 ├── docs/
 │   └── environment_setup.md         # 环境部署指南
 ├── .agent-rules/                    # Agent 规则源文件（编辑后需 sync）
 ├── .planning/                       # 任务规划与审批记录
-├── .cursor/                         # Cursor 规则与会话状态
-├── frontend/                        # Web 前端（待初始化）
-└── backend/                         # FastAPI 后端（待初始化）
+├── .cursor/                         # IDE 与会话状态（含 dev-services.json）
+├── frontend/                        # Next.js 16 + tldraw 无限画布
+│   └── src/
+│       ├── app/                     # 页面布局
+│       ├── canvas/                  # 画布、Mask、右键菜单
+│       ├── agent-panel/             # 侧栏对话 UI
+│       └── lib/                     # API、WebSocket、canvas-bridge
+└── backend/                         # FastAPI 后端
+    └── app/
+        ├── api/                     # REST + WebSocket 路由
+        ├── agent/                   # Ollama 意图规划
+        ├── pipeline/                # ComfyUI 生图管线
+        └── system/                  # GPU / 服务能力探测
 ```
+
+---
+
+## 主要功能（阶段一 MVP）
+
+| 功能 | 入口 |
+|------|------|
+| 文生图 txt2img | 侧栏「生图」或画布右键 |
+| 局部重绘 inpaint | 侧栏选图 + Mask 刷选 |
+| 元素拆解 | 侧栏 / 右键，rembg + inpaint 双图层 |
+| 文字编辑 | OCR 检测 + inpaint 抹字 + 矢量叠字 |
+
+侧栏会根据 `GET /system/capabilities` 自动灰显不可用功能。
 
 ---
 
@@ -86,7 +159,7 @@ python .agent-rules/sync_agent_rules.py
 
 | 阶段 | 目标 | 状态 |
 |------|------|------|
-| **阶段一 — 原型** | 无限画布 + 基本交互 + Agent + 生图链路 | 🟡 进行中 |
+| **阶段一 — 原型** | 无限画布 + Agent + 生图链路 + Lovart 式扩展 | 🟢 功能闭环，待录屏 demo |
 | **阶段二 — 部署** | 云服务器流畅交互、性能与视觉优化 | ⏸ 未开始 |
 
 详细进度见 [**进度.md**](进度.md)。

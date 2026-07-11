@@ -113,6 +113,7 @@ npm run dev
 │       ├── app/                     # 页面布局
 │       ├── canvas/                  # 画布、Mask、右键菜单
 │       ├── agent-panel/             # 侧栏对话 UI
+│       │   └── hooks/               # 按模式拆分的 flow hooks
 │       └── lib/                     # API、WebSocket、canvas-bridge
 └── backend/                         # FastAPI 后端
     └── app/
@@ -134,6 +135,18 @@ npm run dev
 | 文字编辑 | OCR 检测 + inpaint 抹字 + 矢量叠字 |
 
 侧栏会根据 `GET /system/capabilities` 自动灰显不可用功能。
+
+---
+
+## 近期工程改进（2026-07）
+
+| 改进 | 说明 |
+|------|------|
+| **一键启动** | `scripts/dev.ps1` — 启停 ComfyUI / 后端 / 前端，含健康检查 |
+| **WS 重连** | 生图任务 WebSocket 意外断开后自动重连；后端重放 `last_event` |
+| **侧栏重构** | `ChatPanel` 拆为 `useTxt2ImgFlow` / `useInpaintFlow` 等 hooks，便于维护 |
+
+提交：`1cd93c2` · 详细进度见 [**进度.md**](进度.md)
 
 ---
 

@@ -2,7 +2,7 @@
 
 > 适用平台：**Windows 10/11**  
 > 目标：在本地搭建 InfDrawing 阶段一所需的基础组件（Ollama + ComfyUI）  
-> 最后验证日期：2025-06-08  
+> 最后验证日期：2026-07-06  
 > 验证硬件：NVIDIA GeForce RTX 4060 Laptop GPU（8GB 显存）
 
 本文档整理自项目实际安装过程，供团队成员从零部署环境时参考。
@@ -310,7 +310,7 @@ scripts/comfyui/workflows/sd15_inpaint_basic.json  →  D:\ComfyUI\workflows\
 **测试图**（可用脚本一键生成）：
 
 ```powershell
-D:\Anaconda3\envs\comfyui\python.exe D:\Desktop\Fan_Files\Codes\vibe_template\scripts\comfyui\make_test_images.py
+D:\Anaconda3\envs\comfyui\python.exe D:\Desktop\Fan_Files\Codes\infDrawing\scripts\comfyui\make_test_images.py
 ```
 
 生成文件：
@@ -350,24 +350,36 @@ Load Checkpoint (inpaint ckpt) ───┼→ VAE Encode (for Inpainting) → K
 
 ```text
 1. Ollama（安装后通常后台自启，无需手动操作）
-2. 需要生图时：启动 ComfyUI
-3. 启动 InfDrawing 后端 FastAPI
-4. 启动 InfDrawing 前端 Next.js
-5. 本地录屏演示
+2. 仓库根目录执行 .\scripts\dev.ps1（推荐，一键启动 ComfyUI + 后端 + 前端）
+   或按下方命令分别手动启动
+3. 本地录屏演示
 ```
 
-**InfDrawing 后端：**
+### 一键启动（推荐）
 
 ```powershell
-cd D:\Desktop\Fan_Files\Codes\vibe_template\backend
-.\.venv\Scripts\activate
-uvicorn app.main:app --reload --port 8000
+cd D:\Desktop\Fan_Files\Codes\infDrawing
+.\scripts\dev.ps1          # 启动并打开浏览器
+.\scripts\dev.ps1 status   # 健康检查
+.\scripts\dev.ps1 stop       # 停止脚本记录的进程
 ```
+
+详见 [`README.md`](../README.md) 中的环境变量说明（`INFD_COMFYUI_DIR` 等）。
+
+**InfDrawing 后端（手动）：**
+
+```powershell
+cd D:\Desktop\Fan_Files\Codes\infDrawing\backend
+.\.venv\Scripts\activate
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+> Windows 上 `uvicorn app.main:app --reload` 可能无输出即退出，请优先使用 `python -m uvicorn`。
 
 **InfDrawing 前端：**
 
 ```powershell
-cd D:\Desktop\Fan_Files\Codes\vibe_template\frontend
+cd D:\Desktop\Fan_Files\Codes\infDrawing\frontend
 npm run dev
 ```
 
@@ -403,33 +415,40 @@ curl.exe -s http://localhost:11434/api/tags   # API 健康检查
 
 ## 7.1 InfDrawing 全链路联调（已验证）
 
-> 2025-06-08 实测：前端 tldraw 画布 + 后端 FastAPI + ComfyUI API **txt2img / inpaint 均已打通**。
+> 2025-06-08 起持续验证：tldraw 画布 + FastAPI + ComfyUI **txt2img / inpaint / 拆解 / 文字编辑** 均已打通。  
+> 2026-07-06 起推荐通过 `.\scripts\dev.ps1` 启动全套服务。
 
-### 前置：三服务同时运行
+### 前置：四服务同时运行
 
-按 §7 顺序启动 Ollama（通常自启）→ ComfyUI → backend → frontend。
+Ollama（通常自启）→ 执行 `.\scripts\dev.ps1`，或按 §7 手动启动 ComfyUI → backend → frontend。
 
 ### 测试 A — txt2img（文生图）
 
 1. 浏览器打开 `http://127.0.0.1:3000`
 2. 等待左侧 tldraw 画布加载完成（首次约 10–30 秒）
-3. 右侧 Intent 选 **txt2img**
+3. 右侧模式选 **生图**
 4. 输入 prompt，例如：`a cute cat on a windowsill, soft lighting`
-5. 点击 **发送** → 状态变为 `complete` → 下方显示生成图
+5. 点击 **发送** → 对话流显示进度 → 生成图回贴画布
+
+也可在画布空白处 **右键 → AI 生图**。
 
 ### 测试 B — inpaint（局部重绘）
 
-1. 若尚无测试图，先生成：
+1. 在画布上放置或生成一张图片并**选中**
+2. 右侧模式选 **局部重绘** → 点击 **刷选 Mask（画布）**
+3. 在 Mask 编辑器中涂抹重绘区域 → 完成
+4. 输入 prompt，例如：`a bright red apple, highly detailed`
+5. 点击 **发送** → 约 20–40 秒 → 结果回贴画布
 
-```powershell
-D:\Anaconda3\envs\comfyui\python.exe D:\Desktop\Fan_Files\Codes\vibe_template\scripts\comfyui\make_test_images.py
-```
+### 测试 C — 元素拆解（可选）
 
-2. 右侧 Intent 选 **inpaint**
-3. **原图** 选 `D:\ComfyUI\input\test.png`
-4. **Mask** 选 `D:\ComfyUI\input\test_mask.png`（白区=重绘区域）
-5. Prompt 输入，例如：`a bright red apple, highly detailed`
-6. 点击 **发送** → 约 20–40 秒 → 状态 `complete`，结果图显示 mask 区域已重绘
+1. 选中画布图片 → 侧栏 **元素拆解** → 发送（prompt 可留空使用默认）
+2. 完成后应回贴 background + foreground 两个图层
+
+### 测试 D — 文字编辑（可选）
+
+1. 选中含文字的图片 → 侧栏 **文字编辑**
+2. OCR 自动检测文字块 → 选择要替换的块 → 输入新文字 → 发送
 
 ### 备选：Swagger 直接调 API
 
@@ -440,14 +459,17 @@ D:\Anaconda3\envs\comfyui\python.exe D:\Desktop\Fan_Files\Codes\vibe_template\sc
 | `POST /api/v1/agent/plan` | 意图规划（Ollama） |
 | `POST /api/v1/generate/txt2img` | 文生图 |
 | `POST /api/v1/generate/inpaint` | 局部重绘（multipart：image + mask + prompt） |
+| `POST /api/v1/generate/decompose` | 元素拆解 |
+| `POST /api/v1/generate/text-edit` | 文字编辑 |
+| `GET /api/v1/system/capabilities` | 环境能力探测 |
 
-### 当前限制（Stage 6 剩余）
+### 阶段一剩余工作
 
 | 已完成 | 待做 |
 |--------|------|
-| 画布绘制 / 缩放 / 平移 | 画布内刷选 → 自动导出 mask |
-| 侧边栏 txt2img / inpaint（文件上传） | 生成图自动贴回 tldraw 画布 |
-| WebSocket 进度 + 结果预览 | Lovart 式录屏 demo 脚本 |
+| 四模式侧栏 + 右键生图 + Mask 刷选 + 回贴画布 | 录屏 demo 脚本与成片 |
+| WebSocket 进度 + 断线重连 | Stage 7 自动 intent（可选） |
+| `dev.ps1` 一键启动 + README | 阶段二云部署 / 高质量模型（P2） |
 
 ---
 
@@ -591,11 +613,13 @@ NEXT_PUBLIC_API_BASE=http://127.0.0.1:8001
 ### InfDrawing 全栈（frontend + backend + ComfyUI）
 
 - [ ] `backend/.venv` 已创建，`pip install -r requirements.txt` 完成
-- [ ] `uvicorn app.main:app --port 8000` 启动，`/health` 返回 ok
+- [ ] `python -m uvicorn app.main:app --port 8000` 启动，`/health` 返回 ok
 - [ ] `frontend/` 下 `npm install` + `npm run dev` 可访问 `http://127.0.0.1:3000`
+- [ ] `.\scripts\dev.ps1 status` 四项服务均为 OK（或手动等价验证）
 - [ ] tldraw 画布可绘制、缩放、平移
-- [ ] 右侧 **txt2img** 发送后状态 `complete` 并显示生成图
-- [ ] 右侧 **inpaint** 上传 `test.png` + `test_mask.png` 后状态 `complete` 并显示重绘图
+- [ ] 侧栏 **生图** 发送后结果回贴画布
+- [ ] 侧栏 **局部重绘**：选中图片 → 刷选 Mask → 发送后结果回贴
+- [ ] （可选）**元素拆解** / **文字编辑** 流程可跑通
 - [ ] ComfyUI 与 backend 串行运行时 8GB 显存无 OOM
 
 ---

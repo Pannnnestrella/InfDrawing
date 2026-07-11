@@ -17,7 +17,7 @@ import { useTxt2ImgFlow } from "@/agent-panel/hooks/useTxt2ImgFlow";
 import { MessageList } from "@/agent-panel/MessageList";
 import type { ChatMode } from "@/agent-panel/types";
 import { MaskTool } from "@/canvas/MaskTool";
-import { theme } from "@/lib/theme";
+import { CapabilityStatus } from "@/components/CapabilityStatus";
 
 export function ChatPanel() {
   const [message, setMessage] = useState("");
@@ -102,18 +102,20 @@ export function ChatPanel() {
         />
       ) : null}
 
-      <div className="flex h-full flex-col" style={{ color: theme.textPrimary }}>
-        <header className="shrink-0 border-b px-4 py-3" style={{ borderColor: theme.border }}>
-          <h1 className="text-base font-semibold">InfDrawing</h1>
-          <p className="text-xs" style={{ color: theme.textMuted }}>
-            画布
-            {canvasReady ? "已连接" : "加载中…"}
-            {canvasHasSelection ? " · 已选图" : ""}
-            {canvasHasMask ? " · Mask 就绪" : ""}
-          </p>
+      <div className="flex h-full flex-col text-ink">
+        <header className="flex shrink-0 items-start justify-between gap-2 border-b border-line px-4 py-3">
+          <div>
+            <h1 className="text-sm font-semibold tracking-wide">InfDrawing</h1>
+            <p className="mt-0.5 text-[11px] text-muted">
+              画布{canvasReady ? "已连接" : "加载中…"}
+              {canvasHasSelection ? " · 已选图" : ""}
+              {canvasHasMask ? " · Mask 就绪" : ""}
+            </p>
+          </div>
+          <CapabilityStatus />
         </header>
 
-        <MessageList messages={messages} />
+        <MessageList messages={messages} busy={busy} />
 
         <ChatComposer
           message={message}

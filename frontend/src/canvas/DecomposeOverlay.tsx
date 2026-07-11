@@ -3,35 +3,28 @@
 import { useEffect, useRef, useState } from "react";
 
 import {
-  consumeDecomposeRequest,
-  closeDecomposeRequest,
-  subscribeDecompose,
-  type DecomposeRequest,
-} from "@/lib/decompose-store";
-import {
-  exportSelectedImageFile,
-  pasteLayersToCanvas,
-} from "@/lib/canvas-bridge";
+  closeCanvasRequest,
+  consumeCanvasRequest,
+  subscribeCanvasRequests,
+  type CanvasRequest,
+} from "@/lib/canvas-request-store";
 import { featureReason, fetchCapabilities } from "@/lib/capabilities";
-import { submitDecompose } from "@/lib/api";
-import { runGenerateTask } from "@/lib/generate-task";
-import { theme } from "@/lib/theme";
-
-const STEP_LABELS: Record<string, string> = {
-  segmenting: "分割主体…",
-  extracting: "提取前景层…",
-  inpainting: "补全背景…",
-};
+import {
+  pasteDecomposeResult,
+  runPipeline,
+  submitDecomposeFromSelection,
+} from "@/lib/run-pipeline";
+import { PipelineToast } from "@/components/PipelineToast";
 
 export function DecomposeOverlay() {
-  const [request, setRequest] = useState<DecomposeRequest | null>(null);
+  const [request, setRequest] = useState<CanvasRequest | null>(null);
   const [status, setStatus] = useState<string>("idle");
   const [error, setError] = useState<string | null>(null);
   const runningRef = useRef(false);
 
   useEffect(() => {
     const sync = () => {
-      const next = consumeDecomposeRequest();
+      const next = consumeCanvasRequest("decompose");
       if (next) {
         setRequest(next);
         setStatus("idle");
@@ -39,7 +32,7 @@ export function DecomposeOverlay() {
       }
     };
     sync();
-    return subscribeDecompose(sync);
+    return subscribeCanvasRequests(sync);
   }, []);
 
   useEffect(() => {
@@ -56,73 +49,58 @@ export function DecomposeOverlay() {
         if (reason) {
           setError(reason);
           setStatus("error");
+          runningRef.current = false;
           return;
         }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "能力探测失败");
+        setStatus("error");
+        runningRef.current = false;
+        return;
+      }
 
-        const imageFile = await exportSelectedImageFile();
-        if (!imageFile) {
-          setError("请先在画布上选中一张图片");
-          setStatus("error");
-          return;
-        }
-
-        setStatus("提交任务…");
-        const { task_id } = await submitDecompose(imageFile);
-        runGenerateTask(task_id, {
-          onProgress: (step) => setStatus(STEP_LABELS[step ?? ""] ?? "处理中…"),
-          onComplete: async (_imageUrl, layers) => {
-            try {
-              if (!layers?.length) {
-                setError("未收到图层数据");
-                setStatus("error");
-                return;
-              }
-              const pasted = await pasteLayersToCanvas(layers, request!.anchor);
-              if (!pasted) {
-                setError("拆解成功，但回贴画布失败");
-                setStatus("error");
-                return;
-              }
-              closeDecomposeRequest();
-              setRequest(null);
-              setStatus("complete");
-            } catch (err) {
-              setError(err instanceof Error ? err.message : "回贴失败");
-              setStatus("error");
-            }
+      await runPipeline(
+        {
+          submittedStatus: "提交任务…",
+          runningStatus: "处理中…",
+          submit: () => submitDecomposeFromSelection(),
+          complete: async (result) => {
+            await pasteDecomposeResult(result, request!.anchor);
+            closeCanvasRequest("decompose");
+            setRequest(null);
+            setStatus("complete");
           },
+        },
+        {
+          onStatus: setStatus,
           onError: (msg) => {
             setError(msg);
             setStatus("error");
           },
-        });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "元素拆解失败");
-        setStatus("error");
-      } finally {
-        runningRef.current = false;
-      }
+          onSettled: () => {
+            runningRef.current = false;
+          },
+        },
+      );
     }
 
     void run();
   }, [request]);
 
-  if (!request && status === "idle") return null;
+  // Auto-dismiss the success toast.
+  useEffect(() => {
+    if (status !== "complete") return;
+    const timer = window.setTimeout(() => setStatus("idle"), 2500);
+    return () => window.clearTimeout(timer);
+  }, [status]);
 
   const visible = request !== null || status === "complete" || status === "error";
-
-  if (!visible) return null;
+  if (!visible || (status === "idle" && !request)) return null;
 
   return (
-    <div
-      className="pointer-events-none fixed bottom-6 left-6 z-[10001] rounded-md border px-3 py-2 text-xs shadow-lg"
-      style={{
-        background: theme.surface,
-        borderColor: theme.border,
-        color: error ? "#f87171" : theme.textMuted,
-      }}
-    >
-      {error ?? (status === "complete" ? "元素拆解完成" : status)}
-    </div>
+    <PipelineToast
+      variant={error ? "error" : status === "complete" ? "success" : "pending"}
+      text={error ?? (status === "complete" ? "元素拆解完成" : status)}
+    />
   );
 }

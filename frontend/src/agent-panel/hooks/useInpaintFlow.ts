@@ -1,11 +1,9 @@
-import { useCallback } from "react";
-
-import { getCanvasMaskPair } from "@/lib/canvas-bridge";
 import { submitInpaint } from "@/lib/api";
-import { runGenerateTask } from "@/lib/generate-task";
+import { getCanvasMaskPair } from "@/lib/canvas-bridge";
 
 import { completeWithCanvasPaste } from "./complete-generation";
 import type { FlowCallbacks } from "./flow-types";
+import { useGenerateFlow } from "./useGenerateFlow";
 
 export interface InpaintFlowInput {
   imageFile: File | null;
@@ -13,41 +11,18 @@ export interface InpaintFlowInput {
 }
 
 export function useInpaintFlow(callbacks: FlowCallbacks) {
-  const { appendStatus, appendError, notifyReconnect, setBusy } = callbacks;
-
-  const execute = useCallback(
-    async (refinedPrompt: string, files: InpaintFlowInput) => {
+  return useGenerateFlow<InpaintFlowInput>(callbacks, {
+    submittedStatus: "局部重绘任务已提交…",
+    runningStatus: "局部重绘进行中…",
+    submit: (prompt, files) => {
       const canvasPair = getCanvasMaskPair();
-      const resolvedImage = canvasPair?.image ?? files.imageFile;
-      const resolvedMask = canvasPair?.mask ?? files.maskFile;
-
-      if (!resolvedImage || !resolvedMask) {
-        appendError("局部重绘需要原图和 Mask：选中图片后刷选 Mask");
-        setBusy(false);
-        return;
+      const image = canvasPair?.image ?? files.imageFile;
+      const mask = canvasPair?.mask ?? files.maskFile;
+      if (!image || !mask) {
+        throw new Error("局部重绘需要原图和 Mask：选中图片后刷选 Mask");
       }
-
-      appendStatus("局部重绘任务已提交…");
-      const { task_id } = await submitInpaint({
-        image: resolvedImage,
-        mask: resolvedMask,
-        prompt: refinedPrompt,
-      });
-      runGenerateTask(task_id, {
-        onProgress: () => appendStatus("局部重绘进行中…"),
-        onReconnect: notifyReconnect,
-        onComplete: async (url) => {
-          await completeWithCanvasPaste(url, callbacks);
-          setBusy(false);
-        },
-        onError: (msg) => {
-          appendError(msg);
-          setBusy(false);
-        },
-      });
+      return submitInpaint({ image, mask, prompt });
     },
-    [callbacks, appendStatus, appendError, notifyReconnect, setBusy],
-  );
-
-  return { execute };
+    complete: (result, _input, cb) => completeWithCanvasPaste(result.imageUrl, cb),
+  });
 }

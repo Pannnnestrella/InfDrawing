@@ -8,9 +8,8 @@ import {
   type TLUiContextMenuProps,
 } from "@tldraw/tldraw";
 
-import { openAiGeneratePopover } from "@/lib/ai-generate-store";
 import { getCanvasEditor } from "@/lib/canvas-bridge";
-import { openDecomposeRequest } from "@/lib/decompose-store";
+import { openCanvasRequest } from "@/lib/canvas-request-store";
 
 function resolveGenerateAnchor(): { pageX: number; pageY: number } | null {
   const editor = getCanvasEditor();
@@ -36,7 +35,7 @@ export function AiContextMenu(props: TLUiContextMenuProps) {
           readonlyOk
           onSelect={() => {
             const anchor = resolveGenerateAnchor();
-            if (anchor) openAiGeneratePopover(anchor);
+            if (anchor) openCanvasRequest("generate", anchor);
           }}
         />
         <TldrawUiMenuItem
@@ -46,7 +45,7 @@ export function AiContextMenu(props: TLUiContextMenuProps) {
           readonlyOk
           onSelect={() => {
             const anchor = resolveGenerateAnchor();
-            if (anchor) openDecomposeRequest(anchor);
+            if (anchor) openCanvasRequest("decompose", anchor);
           }}
         />
       </TldrawUiMenuGroup>

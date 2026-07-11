@@ -1,19 +1,8 @@
-import { WS_BASE } from "./theme";
-
-export interface DecomposeLayer {
-  label: string;
-  image_url: string;
-}
-
-export interface TextEditOverlay {
-  text: string;
-  bbox: [number, number, number, number];
-  image_width: number;
-  image_height: number;
-}
+import type { DecomposeLayer, TextEditOverlay } from "./api-types";
+import { WS_BASE } from "./config";
 
 export type TaskEvent =
-  | { type: "progress"; task_id: string; status?: string; step?: string }
+  | { type: "progress"; task_id: string; step?: string }
   | {
       type: "complete";
       task_id: string;

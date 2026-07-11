@@ -1,13 +1,19 @@
+"""Map agent tool names (IntentPlan.target_tool) to pipeline workflows.
+
+``workflow`` values are keys of :data:`app.pipeline.workflow_registry.WORKFLOWS`;
+``None`` marks multi-step pipelines that orchestrate their own workflows.
+"""
+
 from app.agent.schemas import IntentType
 
 TOOL_REGISTRY = {
     "comfyui_txt2img_v1": {
         "intent": IntentType.TXT2IMG,
-        "workflow": "sd15_txt2img_api.json",
+        "workflow": "sd15_txt2img",
     },
     "comfyui_inpaint_v1": {
         "intent": IntentType.INPAINT,
-        "workflow": "sd15_inpaint_api.json",
+        "workflow": "sd15_inpaint",
     },
     "comfyui_decompose_v1": {
         "intent": IntentType.DECOMPOSE,

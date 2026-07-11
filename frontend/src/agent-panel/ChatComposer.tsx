@@ -1,8 +1,9 @@
 "use client";
 
+import { AlertIcon, BrushIcon, CheckIcon, SendIcon } from "@/components/icons";
+import { Spinner } from "@/components/Spinner";
 import type { TextRegion } from "@/lib/api";
 import type { CapabilitiesResponse } from "@/lib/capabilities";
-import { theme } from "@/lib/theme";
 
 import { ModeChips } from "./ModeChips";
 import { TextRegionPicker } from "./TextRegionPicker";
@@ -68,34 +69,41 @@ export function ChatComposer({
   }
 
   return (
-    <div
-      className="shrink-0 space-y-3 border-t px-4 py-3"
-      style={{ borderColor: theme.border, background: "var(--bg-panel)" }}
-    >
+    <div className="shrink-0 space-y-2.5 border-t border-line px-3 pb-3 pt-2.5">
       <ModeChips mode={mode} capabilities={capabilities} onModeChange={onModeChange} />
 
       {modeDisabledReason ? (
-        <p className="text-xs text-amber-400/90">{modeDisabledReason}</p>
+        <p className="flex items-start gap-1.5 text-[11px] text-warning">
+          <AlertIcon size={13} className="mt-px shrink-0" />
+          {modeDisabledReason}
+        </p>
       ) : null}
 
       {mode === "inpaint" ? (
-        <div className="space-y-2 text-xs" style={{ color: theme.textMuted }}>
-          {selectionHint ? <p>{selectionHint}</p> : null}
+        <div className="space-y-1.5">
+          {selectionHint ? (
+            <p className="text-[11px] text-muted">{selectionHint}</p>
+          ) : null}
           <button
             type="button"
-            className="w-full rounded-md px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
-            style={{ background: theme.accent }}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-medium text-ink transition-colors hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={!canvasReady || !canvasHasSelection || busy}
             onClick={onOpenMaskEditor}
           >
+            <BrushIcon size={14} className="text-accent-hover" />
             刷选 Mask（画布）
           </button>
-          {canvasHasMask ? <p className="text-emerald-400/90">Mask 已就绪</p> : null}
+          {canvasHasMask ? (
+            <p className="flex items-center gap-1.5 text-[11px] text-success">
+              <CheckIcon size={13} />
+              Mask 已就绪
+            </p>
+          ) : null}
         </div>
       ) : null}
 
       {mode === "decompose" || mode === "text_edit" ? (
-        <p className="text-xs" style={{ color: theme.textMuted }}>
+        <p className="text-[11px] text-muted">
           {selectionHint ?? "请在画布上选中一张图片"}
         </p>
       ) : null}
@@ -111,29 +119,28 @@ export function ChatComposer({
         />
       ) : null}
 
-      <textarea
-        className="min-h-[72px] w-full resize-none rounded-md border px-3 py-2 text-sm"
-        style={{
-          background: theme.surface,
-          borderColor: theme.border,
-          color: theme.textPrimary,
-        }}
-        placeholder={PLACEHOLDERS[mode]}
-        value={message}
-        disabled={busy}
-        onChange={(e) => onMessageChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-      />
-
-      <button
-        type="button"
-        className="w-full rounded-md px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-        style={{ background: theme.accent }}
-        disabled={busy || !modeEnabled}
-        onClick={onSubmit}
-      >
-        发送
-      </button>
+      <div className="rounded-xl border border-line bg-surface-2 transition-colors focus-within:border-accent">
+        <textarea
+          className="min-h-[60px] w-full resize-none bg-transparent px-3 pt-2.5 text-sm text-ink placeholder:text-faint focus:outline-none disabled:opacity-50"
+          placeholder={PLACEHOLDERS[mode]}
+          value={message}
+          disabled={busy}
+          onChange={(e) => onMessageChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+        />
+        <div className="flex items-center justify-between px-2 pb-2 pl-3">
+          <span className="text-[10px] text-faint">Enter 发送 · Shift+Enter 换行</span>
+          <button
+            type="button"
+            aria-label="发送"
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={busy || !modeEnabled}
+            onClick={onSubmit}
+          >
+            {busy ? <Spinner size={14} className="border-white/30 border-t-white" /> : <SendIcon size={15} />}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

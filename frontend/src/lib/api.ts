@@ -1,43 +1,43 @@
-import { API_BASE } from "./theme";
-
 import type { CanvasContextSnapshot } from "@/canvas/types";
 
-export type IntentType = "txt2img" | "inpaint" | "decompose" | "text_edit";
+import type { DetectTextResponse, IntentPlan, IntentType } from "./api-types";
+import { API_BASE } from "./config";
 
-export interface TextRegion {
-  text: string;
-  bbox: [number, number, number, number];
-  confidence: number;
+export type {
+  DecomposeLayer,
+  DetectTextResponse,
+  IntentPlan,
+  IntentType,
+  TextEditOverlay,
+  TextRegion,
+} from "./api-types";
+
+interface TaskResponse {
+  task_id: string;
 }
 
-export interface DetectTextResponse {
-  regions: TextRegion[];
-  image_width: number;
-  image_height: number;
-}
-
-export interface TextEditOverlay {
-  text: string;
-  bbox: [number, number, number, number];
-  image_width: number;
-  image_height: number;
-}
-
-export interface IntentPlan {
-  intent: IntentType;
-  refined_prompt: string;
-  negative_prompt: string;
-  target_tool: string;
-  params: Record<string, unknown>;
-  confidence: number;
-  reasoning?: string | null;
+/** POST multipart form data; undefined fields are omitted. */
+async function postForm<T>(
+  path: string,
+  fields: Record<string, string | File | undefined>,
+): Promise<T> {
+  const body = new FormData();
+  for (const [key, value] of Object.entries(fields)) {
+    if (value !== undefined) body.set(key, value);
+  }
+  const response = await fetch(`${API_BASE}${path}`, { method: "POST", body });
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(detail || `${path} failed: ${response.status}`);
+  }
+  return (await response.json()) as T;
 }
 
 export async function requestPlan(input: {
   user_message: string;
   intent_override?: IntentType;
   context?: CanvasContextSnapshot;
-}) {
+}): Promise<IntentPlan> {
   const response = await fetch(`${API_BASE}/api/v1/agent/plan`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -51,67 +51,26 @@ export async function requestPlan(input: {
 }
 
 export async function submitTxt2Img(prompt: string, backend: string = "auto") {
-  const body = new FormData();
-  body.set("prompt", prompt);
-  body.set("backend", backend);
-  const response = await fetch(`${API_BASE}/api/v1/generate/txt2img`, {
-    method: "POST",
-    body,
-  });
-  if (!response.ok) {
-    throw new Error(`txt2img failed: ${response.status}`);
-  }
-  return (await response.json()) as { task_id: string };
+  return postForm<TaskResponse>("/api/v1/generate/txt2img", { prompt, backend });
 }
 
-export async function submitInpaint(input: {
-  image: File;
-  mask: File;
-  prompt: string;
-}) {
-  const body = new FormData();
-  body.set("image", input.image);
-  body.set("mask", input.mask);
-  body.set("prompt", input.prompt);
-  const response = await fetch(`${API_BASE}/api/v1/generate/inpaint`, {
-    method: "POST",
-    body,
+export async function submitInpaint(input: { image: File; mask: File; prompt: string }) {
+  return postForm<TaskResponse>("/api/v1/generate/inpaint", {
+    image: input.image,
+    mask: input.mask,
+    prompt: input.prompt,
   });
-  if (!response.ok) {
-    throw new Error(`inpaint failed: ${response.status}`);
-  }
-  return (await response.json()) as { task_id: string };
 }
 
 export async function submitDecompose(image: File, backgroundPrompt?: string) {
-  const body = new FormData();
-  body.set("image", image);
-  if (backgroundPrompt) {
-    body.set("background_prompt", backgroundPrompt);
-  }
-  const response = await fetch(`${API_BASE}/api/v1/generate/decompose`, {
-    method: "POST",
-    body,
+  return postForm<TaskResponse>("/api/v1/generate/decompose", {
+    image,
+    background_prompt: backgroundPrompt || undefined,
   });
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(detail || `decompose failed: ${response.status}`);
-  }
-  return (await response.json()) as { task_id: string };
 }
 
 export async function detectTextRegions(image: File): Promise<DetectTextResponse> {
-  const body = new FormData();
-  body.set("image", image);
-  const response = await fetch(`${API_BASE}/api/v1/vision/detect-text`, {
-    method: "POST",
-    body,
-  });
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(detail || `detect-text failed: ${response.status}`);
-  }
-  return (await response.json()) as DetectTextResponse;
+  return postForm<DetectTextResponse>("/api/v1/vision/detect-text", { image });
 }
 
 export async function submitTextEdit(input: {
@@ -119,17 +78,9 @@ export async function submitTextEdit(input: {
   bbox: [number, number, number, number];
   newText: string;
 }) {
-  const body = new FormData();
-  body.set("image", input.image);
-  body.set("bbox", JSON.stringify(input.bbox));
-  body.set("new_text", input.newText);
-  const response = await fetch(`${API_BASE}/api/v1/generate/text-edit`, {
-    method: "POST",
-    body,
+  return postForm<TaskResponse>("/api/v1/generate/text-edit", {
+    image: input.image,
+    bbox: JSON.stringify(input.bbox),
+    new_text: input.newText,
   });
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(detail || `text-edit failed: ${response.status}`);
-  }
-  return (await response.json()) as { task_id: string };
 }

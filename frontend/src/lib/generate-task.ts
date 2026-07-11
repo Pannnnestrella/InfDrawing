@@ -1,5 +1,6 @@
-import { API_BASE } from "./theme";
-import { connectTaskWebSocket, type DecomposeLayer, type TextEditOverlay } from "./ws";
+import type { DecomposeLayer, TextEditOverlay } from "./api-types";
+import { API_BASE } from "./config";
+import { connectTaskWebSocket } from "./ws";
 
 export function runGenerateTask(
   taskId: string,
@@ -24,7 +25,7 @@ export function runGenerateTask(
       }
 
       if (event.type === "progress") {
-        handlers.onProgress?.(event.step ?? event.status);
+        handlers.onProgress?.(event.step);
         return;
       }
 

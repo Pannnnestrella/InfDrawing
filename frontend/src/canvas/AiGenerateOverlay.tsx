@@ -3,26 +3,26 @@
 import { useEffect, useState } from "react";
 
 import { PromptPopover } from "@/canvas/PromptPopover";
-import {
-  consumeAiGenerateRequest,
-  subscribeAiGenerate,
-  type AiGenerateRequest,
-} from "@/lib/ai-generate-store";
-import { pasteImageUrlToCanvasAt } from "@/lib/canvas-bridge";
-import { fetchCapabilities, tierLabel } from "@/lib/capabilities";
 import { requestPlan, submitTxt2Img } from "@/lib/api";
-import { runGenerateTask } from "@/lib/generate-task";
-import { theme } from "@/lib/theme";
+import { pasteImageUrlToCanvasAt } from "@/lib/canvas-bridge";
+import {
+  consumeCanvasRequest,
+  subscribeCanvasRequests,
+  type CanvasRequest,
+} from "@/lib/canvas-request-store";
+import { fetchCapabilities, tierLabel } from "@/lib/capabilities";
+import { runPipeline } from "@/lib/run-pipeline";
+import { PipelineToast } from "@/components/PipelineToast";
 
 export function AiGenerateOverlay() {
-  const [request, setRequest] = useState<AiGenerateRequest | null>(null);
+  const [request, setRequest] = useState<CanvasRequest | null>(null);
   const [status, setStatus] = useState<string>("idle");
   const [error, setError] = useState<string | null>(null);
   const [backendLabel, setBackendLabel] = useState("SD 1.5");
 
   useEffect(() => {
     const sync = () => {
-      const next = consumeAiGenerateRequest();
+      const next = consumeCanvasRequest("generate");
       if (next) {
         setRequest(next);
         setStatus("idle");
@@ -30,7 +30,7 @@ export function AiGenerateOverlay() {
       }
     };
     sync();
-    return subscribeAiGenerate(sync);
+    return subscribeCanvasRequests(sync);
   }, []);
 
   useEffect(() => {
@@ -57,44 +57,48 @@ export function AiGenerateOverlay() {
 
   async function handleSubmit(message: string) {
     if (!request) return;
+    const anchor = request.anchor;
     setError(null);
-    setStatus("planning");
+    setStatus("理解意图中…");
 
+    let refinedPrompt: string;
     try {
       const plan = await requestPlan({
         user_message: message,
         intent_override: "txt2img",
       });
-      setStatus("generating");
-      const { task_id } = await submitTxt2Img(plan.refined_prompt, "auto");
-      runGenerateTask(task_id, {
-        onProgress: () => setStatus("generating…"),
-        onComplete: async (imageUrl) => {
-          try {
-            const pasted = await pasteImageUrlToCanvasAt(
-              imageUrl,
-              request.anchor.pageX,
-              request.anchor.pageY,
-            );
-            if (!pasted) {
-              setError("生成成功，但回贴画布失败");
-            } else {
-              handleClose();
-            }
-          } catch (err) {
-            setError(err instanceof Error ? err.message : "回贴失败");
+      refinedPrompt = plan.refined_prompt;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "生成失败");
+      setStatus("error");
+      return;
+    }
+
+    await runPipeline(
+      {
+        submittedStatus: "生成中…",
+        runningStatus: "生成中…",
+        submit: () => submitTxt2Img(refinedPrompt, "auto"),
+        complete: async (result) => {
+          const pasted = await pasteImageUrlToCanvasAt(
+            result.imageUrl,
+            anchor.pageX,
+            anchor.pageY,
+          );
+          if (!pasted) {
+            throw new Error("生成成功，但回贴画布失败");
           }
-          setStatus("complete");
+          handleClose();
         },
+      },
+      {
+        onStatus: setStatus,
         onError: (msg) => {
           setError(msg);
           setStatus("error");
         },
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "生成失败");
-      setStatus("error");
-    }
+      },
+    );
   }
 
   if (!request) return null;
@@ -107,16 +111,10 @@ export function AiGenerateOverlay() {
         onCancel={handleClose}
       />
       {status !== "idle" || error ? (
-        <div
-          className="pointer-events-none fixed bottom-6 left-6 z-[10001] rounded-md border px-3 py-2 text-xs shadow-lg"
-          style={{
-            background: theme.surface,
-            borderColor: theme.border,
-            color: error ? "#f87171" : theme.textMuted,
-          }}
-        >
-          {error ?? status}
-        </div>
+        <PipelineToast
+          variant={error ? "error" : "pending"}
+          text={error ?? status}
+        />
       ) : null}
     </>
   );

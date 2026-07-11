@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { INPAINT_CANVAS_SIZE } from "@/canvas/types";
-import { theme } from "@/lib/theme";
+import { BrushIcon } from "@/components/icons";
 
 interface MaskToolProps {
   imageUrl: string;
@@ -131,30 +131,24 @@ export function MaskTool({ imageUrl, onComplete, onCancel }: MaskToolProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 p-4 backdrop-blur-[2px]"
       role="dialog"
       aria-modal="true"
       aria-label="Mask 刷选"
     >
-      <div
-        className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-lg border p-4 shadow-xl"
-        style={{ background: theme.surface, borderColor: theme.border }}
-      >
-        <h2
-          className="mb-2 text-base font-semibold"
-          style={{ color: theme.textPrimary }}
-        >
-          刷选重绘区域
-        </h2>
-        <p className="mb-3 text-xs" style={{ color: theme.textMuted }}>
-          在图片上刷涂白色区域（{INPAINT_CANVAS_SIZE}×{INPAINT_CANVAS_SIZE}）。
-          黑色=保留，白色=重绘。
+      <div className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-2xl border border-line bg-surface-1 p-4 shadow-2xl">
+        <div className="mb-2 flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-2 text-accent">
+            <BrushIcon size={16} />
+          </span>
+          <h2 className="text-sm font-semibold text-ink">刷选重绘区域</h2>
+        </div>
+        <p className="mb-3 text-[11px] text-muted">
+          在图片上刷涂需要重绘的区域（{INPAINT_CANVAS_SIZE}×{INPAINT_CANVAS_SIZE}）。
+          未涂=保留，涂白=重绘。
         </p>
 
-        <div
-          className="relative mx-auto mb-3 aspect-square w-full max-w-[512px] overflow-hidden rounded border"
-          style={{ borderColor: theme.border }}
-        >
+        <div className="relative mx-auto mb-3 aspect-square w-full max-w-[512px] overflow-hidden rounded-xl border border-line">
           <canvas
             ref={displayRef}
             className="h-full w-full cursor-crosshair touch-none"
@@ -166,10 +160,7 @@ export function MaskTool({ imageUrl, onComplete, onCancel }: MaskToolProps) {
           <canvas ref={maskRef} className="hidden" aria-hidden />
         </div>
 
-        <label
-          className="mb-3 flex items-center gap-2 text-xs"
-          style={{ color: theme.textMuted }}
-        >
+        <label className="mb-3 flex items-center gap-2 text-[11px] text-muted">
           笔刷大小
           <input
             type="range"
@@ -177,24 +168,22 @@ export function MaskTool({ imageUrl, onComplete, onCancel }: MaskToolProps) {
             max={48}
             value={brushSize}
             onChange={(e) => setBrushSize(Number(e.target.value))}
-            className="flex-1"
+            className="flex-1 accent-accent"
           />
-          <span>{brushSize}px</span>
+          <span className="w-9 text-right tabular-nums">{brushSize}px</span>
         </label>
 
         <div className="flex justify-end gap-2">
           <button
             type="button"
-            className="rounded px-3 py-1.5 text-sm"
-            style={{ color: theme.textMuted }}
+            className="rounded-lg px-3 py-1.5 text-sm text-muted transition-colors hover:bg-surface-2 hover:text-ink"
             onClick={onCancel}
           >
             取消
           </button>
           <button
             type="button"
-            className="rounded px-3 py-1.5 text-sm"
-            style={{ color: theme.textPrimary, background: theme.surface }}
+            className="rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-sm text-ink transition-colors hover:bg-surface-3 disabled:opacity-40"
             onClick={handleClear}
             disabled={!ready}
           >
@@ -202,8 +191,7 @@ export function MaskTool({ imageUrl, onComplete, onCancel }: MaskToolProps) {
           </button>
           <button
             type="button"
-            className="rounded px-3 py-1.5 text-sm font-medium text-white"
-            style={{ background: theme.accent }}
+            className="rounded-lg bg-accent px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-40"
             onClick={() => void handleExport()}
             disabled={!ready}
           >

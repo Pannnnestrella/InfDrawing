@@ -1,4 +1,8 @@
-import { API_BASE } from "./theme";
+import type { IntentType } from "./api-types";
+import { API_BASE } from "./config";
+
+/** Feature keys shared with the backend; chat modes map onto them 1:1. */
+export type FeatureKey = IntentType;
 
 export interface GpuInfo {
   available: boolean;
@@ -61,26 +65,10 @@ export async function fetchCapabilities(): Promise<CapabilitiesResponse> {
 
 export function isModeEnabled(
   capabilities: CapabilitiesResponse | null,
-  mode: "txt2img" | "inpaint" | "decompose" | "text_edit",
+  mode: FeatureKey,
 ): boolean {
   if (!capabilities) return true;
-  const key =
-    mode === "txt2img"
-      ? "txt2img"
-      : mode === "inpaint"
-        ? "inpaint"
-        : mode === "decompose"
-          ? "decompose"
-          : "text_edit";
-  return capabilities.features[key]?.enabled ?? false;
-}
-
-/** @deprecated Use isModeEnabled */
-export function isIntentEnabled(
-  capabilities: CapabilitiesResponse | null,
-  intent: "txt2img" | "inpaint",
-): boolean {
-  return isModeEnabled(capabilities, intent);
+  return capabilities.features[mode]?.enabled ?? false;
 }
 
 export function featureReason(

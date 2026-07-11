@@ -7,6 +7,7 @@ from pathlib import Path
 import httpx
 
 from app.config import settings
+from app.pipeline.workflow_registry import get_workflow_spec
 
 
 class ComfyUIClient:
@@ -17,6 +18,26 @@ class ComfyUIClient:
     def load_workflow(self, name: str) -> dict:
         path = self.workflows_dir / name
         return json.loads(path.read_text(encoding="utf-8"))
+
+    def has_workflow_template(self, workflow_name: str) -> bool:
+        """Return True when the registered workflow's template file exists."""
+        spec = get_workflow_spec(workflow_name)
+        return (self.workflows_dir / spec.template).exists()
+
+    def build_workflow(self, workflow_name: str, **params: object) -> dict:
+        """Instantiate a registered workflow template with named parameters."""
+        spec = get_workflow_spec(workflow_name)
+        values = {**spec.defaults, **params}
+        unknown = set(values) - set(spec.inputs)
+        if unknown:
+            raise KeyError(
+                f"unknown parameter(s) {sorted(unknown)} for workflow {workflow_name!r}"
+            )
+        workflow = deepcopy(self.load_workflow(spec.template))
+        for name, value in values.items():
+            node_id, input_key = spec.inputs[name]
+            workflow[node_id]["inputs"][input_key] = value
+        return workflow
 
     async def upload_image(self, file_path: Path) -> str:
         async with httpx.AsyncClient(timeout=60.0) as client:
@@ -43,62 +64,19 @@ class ComfyUIClient:
             response.raise_for_status()
             return response.json()
 
-    def build_txt2img_workflow(
-        self,
-        *,
-        prompt: str,
-        negative_prompt: str,
-        seed: int = 42,
-        steps: int = 20,
-        cfg: float = 7.0,
-    ) -> dict:
-        workflow = deepcopy(self.load_workflow("sd15_txt2img_api.json"))
-        workflow["2"]["inputs"]["text"] = prompt
-        workflow["3"]["inputs"]["text"] = negative_prompt
-        workflow["5"]["inputs"].update({"seed": seed, "steps": steps, "cfg": cfg})
-        return workflow
+    def build_txt2img_workflow(self, **params: object) -> dict:
+        return self.build_workflow("sd15_txt2img", **params)
 
     def has_flux_txt2img_workflow(self) -> bool:
         """Return True when a Flux txt2img workflow template is present."""
-        return (self.workflows_dir / "flux_schnell_txt2img_api.json").exists()
+        return self.has_workflow_template("flux_txt2img")
 
-    def build_flux_txt2img_workflow(
-        self,
-        *,
-        prompt: str,
-        negative_prompt: str,
-        seed: int = 42,
-        steps: int = 4,
-        cfg: float = 1.0,
-    ) -> dict:
+    def build_flux_txt2img_workflow(self, **params: object) -> dict:
         """Build Flux Schnell workflow (requires flux_schnell_txt2img_api.json)."""
-        workflow = deepcopy(self.load_workflow("flux_schnell_txt2img_api.json"))
-        workflow["2"]["inputs"]["text"] = prompt
-        workflow["3"]["inputs"]["text"] = negative_prompt
-        workflow["5"]["inputs"].update({"seed": seed, "steps": steps, "cfg": cfg})
-        return workflow
+        return self.build_workflow("flux_txt2img", **params)
 
-    def build_inpaint_workflow(
-        self,
-        *,
-        image_name: str,
-        mask_name: str,
-        prompt: str,
-        negative_prompt: str,
-        seed: int = 42,
-        steps: int = 20,
-        cfg: float = 7.0,
-        denoise: float = 1.0,
-    ) -> dict:
-        workflow = deepcopy(self.load_workflow("sd15_inpaint_api.json"))
-        workflow["2"]["inputs"]["image"] = image_name
-        workflow["3"]["inputs"]["image"] = mask_name
-        workflow["5"]["inputs"]["text"] = prompt
-        workflow["6"]["inputs"]["text"] = negative_prompt
-        workflow["8"]["inputs"].update(
-            {"seed": seed, "steps": steps, "cfg": cfg, "denoise": denoise}
-        )
-        return workflow
+    def build_inpaint_workflow(self, **params: object) -> dict:
+        return self.build_workflow("sd15_inpaint", **params)
 
     async def copy_output_image(self, prompt_id: str, dest_dir: Path) -> Path | None:
         history = await self.get_history(prompt_id)

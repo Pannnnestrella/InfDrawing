@@ -94,7 +94,7 @@ Completes InfDrawing Phase 1 Lovart-style feature line (Phase 0–4), closing th
 ## 上传命令
 
 ```powershell
-cd D:\Desktop\Fan_Files\Codes\vibe_template
+cd D:\Desktop\Fan_Files\Codes\infDrawing
 
 # 暂存（已排除 data/ 与 __pycache__）
 git add .planning/20250610_*.md docs/git_update_20250611.md 进度.md

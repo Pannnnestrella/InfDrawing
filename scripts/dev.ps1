@@ -205,7 +205,8 @@ function Start-DevServices {
     }
 
     if (-not (Test-HttpOk -Url "http://127.0.0.1:$FrontendPort")) {
-        $frontendCmd = "npm run dev -- --port $FrontendPort"
+        # Next.js 16 treats bare "3000" as a directory; use -p or PORT env instead.
+        $frontendCmd = "npx next dev -p $FrontendPort"
         $newProcesses += Start-ManagedProcess -Name "frontend" -WorkingDirectory $FrontendDir -Command $frontendCmd
     }
     else {

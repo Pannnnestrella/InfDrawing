@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { Editor, Tldraw as TldrawComponent, TLComponents } from "@tldraw/tldraw";
+import {
+  Tldraw,
+  type Editor,
+  type TLComponents,
+} from "@tldraw/tldraw";
+import "@tldraw/tldraw/tldraw.css";
 
 import { AiContextMenu } from "@/canvas/AiContextMenu";
 import { AiGenerateOverlay } from "@/canvas/AiGenerateOverlay";
@@ -15,7 +20,7 @@ import {
 } from "@/lib/canvas-bridge";
 
 export function InfDrawingCanvas() {
-  const [Tldraw, setTldraw] = useState<typeof TldrawComponent | null>(null);
+  const [mounted, setMounted] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const components = useMemo<TLComponents>(
@@ -26,27 +31,11 @@ export function InfDrawingCanvas() {
   );
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadCanvas() {
-      try {
-        await import("@tldraw/tldraw/tldraw.css");
-        const mod = await import("@tldraw/tldraw");
-        if (!cancelled) {
-          setTldraw(() => mod.Tldraw);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setLoadError(error instanceof Error ? error.message : "tldraw 加载失败");
-        }
-      }
+    try {
+      setMounted(true);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "tldraw 加载失败");
     }
-
-    void loadCanvas();
-
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   const handleMount = useCallback((editor: Editor) => {
@@ -65,7 +54,7 @@ export function InfDrawingCanvas() {
     );
   }
 
-  if (!Tldraw) {
+  if (!mounted) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 bg-[var(--canvas-bg)]">
         <Spinner size={22} />
@@ -78,7 +67,7 @@ export function InfDrawingCanvas() {
     <div className="absolute inset-0 bg-[var(--canvas-bg)]">
       <Tldraw
         persistenceKey="infdrawing-canvas-v1"
-        colorScheme="dark"
+        colorScheme="light"
         onMount={handleMount}
         components={components}
       />

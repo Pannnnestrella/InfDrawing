@@ -14,16 +14,21 @@ if TYPE_CHECKING:
 
 
 _reader: easyocr.Reader | None = None
+_EASYOCR_AVAILABLE: bool | None = None
 
 
 def easyocr_available() -> bool:
     """Return True when easyocr is importable."""
+    global _EASYOCR_AVAILABLE
+    if _EASYOCR_AVAILABLE is not None:
+        return _EASYOCR_AVAILABLE
     try:
         import easyocr  # noqa: F401
 
-        return True
+        _EASYOCR_AVAILABLE = True
     except ImportError:
-        return False
+        _EASYOCR_AVAILABLE = False
+    return _EASYOCR_AVAILABLE
 
 
 def _get_reader() -> easyocr.Reader:

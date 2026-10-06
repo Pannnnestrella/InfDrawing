@@ -12,7 +12,7 @@ import "@tldraw/tldraw/tldraw.css";
 import { AiContextMenu } from "@/canvas/AiContextMenu";
 import { AiGenerateOverlay } from "@/canvas/AiGenerateOverlay";
 import { DecomposeOverlay } from "@/canvas/DecomposeOverlay";
-import { AlertIcon } from "@/components/icons";
+import { LibraryIngestDialog } from "@/library/LibraryIngestDialog";
 import { Spinner } from "@/components/Spinner";
 import {
   registerCanvasEditor,
@@ -20,8 +20,11 @@ import {
 } from "@/lib/canvas-bridge";
 
 export function InfDrawingCanvas() {
+  // Mount tldraw only after client hydration to avoid SSR/client tree mismatch.
   const [mounted, setMounted] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const components = useMemo<TLComponents>(
     () => ({
@@ -30,29 +33,10 @@ export function InfDrawingCanvas() {
     [],
   );
 
-  useEffect(() => {
-    try {
-      setMounted(true);
-    } catch (error) {
-      setLoadError(error instanceof Error ? error.message : "tldraw 加载失败");
-    }
-  }, []);
-
   const handleMount = useCallback((editor: Editor) => {
     registerCanvasEditor(editor);
     return () => unregisterCanvasEditor();
   }, []);
-
-  if (loadError) {
-    return (
-      <div className="flex h-full items-center justify-center bg-[var(--canvas-bg)] px-6">
-        <p className="flex items-center gap-2 text-center text-sm text-danger">
-          <AlertIcon size={16} />
-          画布加载失败：{loadError}
-        </p>
-      </div>
-    );
-  }
 
   if (!mounted) {
     return (
@@ -73,6 +57,7 @@ export function InfDrawingCanvas() {
       />
       <AiGenerateOverlay />
       <DecomposeOverlay />
+      <LibraryIngestDialog />
     </div>
   );
 }

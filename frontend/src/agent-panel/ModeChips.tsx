@@ -1,14 +1,23 @@
 "use client";
 
-import { BrushIcon, ImageIcon, LayersIcon, TypeIcon } from "@/components/icons";
+import {
+  BrushIcon,
+  ImageIcon,
+  LayersIcon,
+  SparklesIcon,
+  TypeIcon,
+  WandIcon,
+} from "@/components/icons";
 import type { CapabilitiesResponse } from "@/lib/capabilities";
 import { featureReason, isModeEnabled } from "@/lib/capabilities";
 
 import { MODE_LABELS, MODE_ORDER, type ChatMode } from "./types";
 
 const MODE_ICONS: Record<ChatMode, typeof ImageIcon> = {
+  auto: SparklesIcon,
   txt2img: ImageIcon,
   inpaint: BrushIcon,
+  image_edit: WandIcon,
   decompose: LayersIcon,
   text_edit: TypeIcon,
 };
@@ -21,10 +30,10 @@ interface ModeChipsProps {
 
 export function ModeChips({ mode, capabilities, onModeChange }: ModeChipsProps) {
   return (
-    <div className="grid grid-cols-4 gap-1 rounded-xl bg-surface-2 p-1">
+    <div className="grid grid-cols-3 gap-1 rounded-xl bg-surface-2 p-1 sm:grid-cols-6">
       {MODE_ORDER.map((item) => {
-        const enabled = isModeEnabled(capabilities, item);
-        const reason = featureReason(capabilities, item);
+        const enabled = item === "auto" || isModeEnabled(capabilities, item);
+        const reason = item === "auto" ? null : featureReason(capabilities, item);
         const active = mode === item;
         const Icon = MODE_ICONS[item];
 

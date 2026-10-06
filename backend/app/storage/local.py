@@ -6,7 +6,12 @@ from app.config import settings
 
 
 def ensure_data_dirs() -> None:
-    for path in (settings.uploads_dir, settings.outputs_dir, settings.logs_dir):
+    for path in (
+        settings.uploads_dir,
+        settings.outputs_dir,
+        settings.artifacts_dir,
+        settings.logs_dir,
+    ):
         path.mkdir(parents=True, exist_ok=True)
 
 

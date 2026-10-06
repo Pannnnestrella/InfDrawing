@@ -1,6 +1,8 @@
 import asyncio
 
-from app.pipeline.executor import TaskState, task_manager
+import pytest
+
+from app.pipeline.executor import TaskManager, TaskState, task_manager
 
 
 def test_task_emit_stores_last_event() -> None:
@@ -51,3 +53,13 @@ def test_task_events_queue_still_delivers() -> None:
         assert received["type"] == "progress"
 
     asyncio.run(_run())
+
+
+def test_task_owner_binding_cannot_be_reassigned() -> None:
+    manager = TaskManager()
+    task = manager.create("prompt")
+    manager.bind_owner(task.task_id, "owner-a")
+    assert task.owner_key_id == "owner-a"
+    manager.bind_owner(task.task_id, "owner-a")
+    with pytest.raises(ValueError, match="already bound"):
+        manager.bind_owner(task.task_id, "owner-b")

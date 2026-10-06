@@ -1,7 +1,10 @@
-import type { CanvasContextSnapshot } from "@/canvas/types";
-
-import type { DetectTextResponse, IntentPlan, IntentType } from "./api-types";
-import { API_BASE } from "./config";
+import { apiFetch } from "./api-client";
+import type {
+  AgentRoutingContext,
+  DetectTextResponse,
+  IntentPlan,
+  IntentType,
+} from "./api-types";
 
 export type {
   DecomposeLayer,
@@ -25,7 +28,7 @@ async function postForm<T>(
   for (const [key, value] of Object.entries(fields)) {
     if (value !== undefined) body.set(key, value);
   }
-  const response = await fetch(`${API_BASE}${path}`, { method: "POST", body });
+  const response = await apiFetch(path, { method: "POST", body });
   if (!response.ok) {
     const detail = await response.text();
     throw new Error(detail || `${path} failed: ${response.status}`);
@@ -36,9 +39,9 @@ async function postForm<T>(
 export async function requestPlan(input: {
   user_message: string;
   intent_override?: IntentType;
-  context?: CanvasContextSnapshot;
+  context?: AgentRoutingContext;
 }): Promise<IntentPlan> {
-  const response = await fetch(`${API_BASE}/api/v1/agent/plan`, {
+  const response = await apiFetch("/api/v1/agent/plan", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
@@ -54,10 +57,23 @@ export async function submitTxt2Img(prompt: string, backend: string = "auto") {
   return postForm<TaskResponse>("/api/v1/generate/txt2img", { prompt, backend });
 }
 
-export async function submitInpaint(input: { image: File; mask: File; prompt: string }) {
+export async function submitInpaint(input: {
+  image: File;
+  mask: File;
+  prompt: string;
+  backend?: string;
+}) {
   return postForm<TaskResponse>("/api/v1/generate/inpaint", {
     image: input.image,
     mask: input.mask,
+    prompt: input.prompt,
+    backend: input.backend ?? "auto",
+  });
+}
+
+export async function submitImageEdit(input: { image: File; prompt: string }) {
+  return postForm<TaskResponse>("/api/v1/generate/image-edit", {
+    image: input.image,
     prompt: input.prompt,
   });
 }

@@ -12,6 +12,7 @@ import {
   type CanvasContextSnapshot,
   type CanvasMaskPair,
 } from "@/canvas/types";
+import { toTldrawCompatibleSrc } from "@/lib/tldraw-asset-src";
 
 type BridgeListener = () => void;
 
@@ -62,13 +63,29 @@ export function getCanvasMaskPair(): CanvasMaskPair | null {
   return maskPair;
 }
 
+/** Image shapes in the current selection, in selection order. */
+export function getSelectedImageShapes(): TLImageShape[] {
+  if (!editor) return [];
+  const shapes: TLImageShape[] = [];
+  for (const id of editor.getSelectedShapeIds()) {
+    const shape = editor.getShape(id);
+    if (shape?.type === "image") shapes.push(shape as TLImageShape);
+  }
+  return shapes;
+}
+
+/**
+ * Prefer a single selected image. After decompose both layers may stay selected;
+ * fall back to the topmost by z-index so library ingest targets the foreground.
+ */
 export function getSelectedImageShape(): TLImageShape | null {
-  if (!editor) return null;
-  const selectedIds = editor.getSelectedShapeIds();
-  if (selectedIds.length !== 1) return null;
-  const shape = editor.getShape(selectedIds[0]);
-  if (!shape || shape.type !== "image") return null;
-  return shape as TLImageShape;
+  const images = getSelectedImageShapes();
+  if (images.length === 0) return null;
+  if (images.length === 1) return images[0] ?? null;
+  return (
+    [...images].sort((a, b) => (a.index < b.index ? -1 : a.index > b.index ? 1 : 0)).at(-1) ??
+    null
+  );
 }
 
 export function getCanvasContextSnapshot(): CanvasContextSnapshot {
@@ -182,6 +199,31 @@ async function blobToFile(blob: Blob, name: string): Promise<File> {
   return new File([blob], name, { type: blob.type || "image/png" });
 }
 
+/** Re-encode as PNG so multipart always declares a MIME the backend accepts. */
+async function ensurePngFile(file: File, name = "canvas_image.png"): Promise<File> {
+  if (file.type === "image/png" && file.size > 0) {
+    return file.name === name ? file : new File([file], name, { type: "image/png" });
+  }
+  const bitmap = await createImageBitmap(file);
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("canvas 2d unavailable");
+    ctx.drawImage(bitmap, 0, 0);
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
+        "image/png",
+      );
+    });
+    return new File([blob], name, { type: "image/png" });
+  } finally {
+    bitmap.close();
+  }
+}
+
 async function resizeToSquarePng(file: File, size: number): Promise<File> {
   const bitmap = await createImageBitmap(file);
   const canvas = document.createElement("canvas");
@@ -208,16 +250,45 @@ async function fetchAssetAsFile(
   return fetchAssetAsFileWithRetry(src, name, assetId);
 }
 
-/** Export the selected image shape as original-resolution PNG. */
-export async function exportSelectedImageFile(): Promise<File | null> {
-  const shape = getSelectedImageShape();
-  if (!shape || !editor) return null;
+/** Why the current selection cannot be exported for library ingest. */
+export function getLibraryExportHint(): string | null {
+  if (!editor) return "画布加载中…";
+  const selectedIds = editor.getSelectedShapeIds();
+  if (selectedIds.length === 0) return "请在画布上选中一张图片";
+  const images = getSelectedImageShapes();
+  if (images.length === 0) return "当前选中的不是图片图层";
+  return null;
+}
+
+async function exportImageShapeFile(
+  shape: TLImageShape,
+  name = "canvas_image.png",
+): Promise<File | null> {
+  if (!editor) return null;
   const assetId = shape.props.assetId;
   if (!assetId) return null;
   const asset = editor.getAsset(assetId);
   const src = asset?.props.src;
   if (!src || typeof src !== "string") return null;
-  return fetchAssetAsFile(src, "canvas_image.png", assetId);
+  const file = await fetchAssetAsFile(src, name, assetId);
+  return ensurePngFile(file, name);
+}
+
+/** Export the selected image shape as original-resolution PNG. */
+export async function exportSelectedImageFile(): Promise<File | null> {
+  const shape = getSelectedImageShape();
+  if (!shape) return null;
+  return exportImageShapeFile(shape);
+}
+
+/** Export every selected image layer (background + foreground after decompose). */
+export async function exportSelectedImageFiles(): Promise<File[]> {
+  const files: File[] = [];
+  for (const [index, shape] of getSelectedImageShapes().entries()) {
+    const file = await exportImageShapeFile(shape, `canvas_image_${index + 1}.png`);
+    if (file) files.push(file);
+  }
+  return files;
 }
 
 /** Export the selected image shape as 512×512 PNG for inpaint. */
@@ -247,7 +318,8 @@ export async function pasteImageUrlToCanvasAt(
 ): Promise<boolean> {
   if (!editor) return false;
 
-  const { w, h } = await loadImageSize(imageUrl);
+  const assetSrc = await toTldrawCompatibleSrc(imageUrl);
+  const { w, h } = await loadImageSize(assetSrc);
   const maxEdge = 512;
   const scale = Math.min(1, maxEdge / Math.max(w, h));
   const displayW = Math.round(w * scale);
@@ -263,7 +335,7 @@ export async function pasteImageUrlToCanvasAt(
       typeName: "asset",
       props: {
         name: "generated.png",
-        src: imageUrl,
+        src: assetSrc,
         w: displayW,
         h: displayH,
         mimeType: "image/png",
@@ -307,7 +379,8 @@ export async function pasteLayersToCanvas(
   const shapeIds: ReturnType<typeof createShapeId>[] = [];
 
   for (const layer of layers) {
-    const { w, h } = await loadImageSize(layer.image_url);
+    const assetSrc = await toTldrawCompatibleSrc(layer.image_url);
+    const { w, h } = await loadImageSize(assetSrc);
     const scale = Math.min(displayW / w, displayH / h);
     const layerW = Math.round(w * scale);
     const layerH = Math.round(h * scale);
@@ -322,7 +395,7 @@ export async function pasteLayersToCanvas(
         typeName: "asset",
         props: {
           name: `${layer.label}.png`,
-          src: layer.image_url,
+          src: assetSrc,
           w: layerW,
           h: layerH,
           mimeType: "image/png",
@@ -347,7 +420,10 @@ export async function pasteLayersToCanvas(
     shapeIds.push(shapeId);
   }
 
-  editor.select(...shapeIds);
+  // Select only the topmost (usually foreground) layer so follow-up actions
+  // like「加入素材库」are not blocked by multi-select after decompose.
+  const top = shapeIds[shapeIds.length - 1];
+  if (top) editor.select(top);
   return true;
 }
 
@@ -395,12 +471,13 @@ export async function replaceSelectedImageSrc(imageUrl: string): Promise<boolean
   const asset = editor.getAsset(assetId);
   if (!asset || asset.type !== "image") return false;
 
+  const assetSrc = await toTldrawCompatibleSrc(imageUrl);
   editor.updateAssets([
     {
       ...asset,
       props: {
         ...asset.props,
-        src: imageUrl,
+        src: assetSrc,
       },
     },
   ]);

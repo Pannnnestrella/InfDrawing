@@ -26,11 +26,11 @@ export function MessageList({ messages, busy }: MessageListProps) {
           <SparklesIcon size={22} />
         </div>
         <div>
-          <p className="text-sm font-medium text-ink">AI 创作面板</p>
+          <p className="text-sm font-medium text-ink">新对话</p>
           <p className="mt-1 text-xs leading-relaxed text-muted">
-            选择下方功能并输入提示词，
+            每次发送会单独记为一条会话，可在上方切换回看。
             <br />
-            或在画布上右键唤起 AI 生图 / 元素拆解
+            也可右键画布唤起 AI 生图 / 元素拆解
           </p>
         </div>
       </div>
@@ -60,6 +60,15 @@ export function MessageList({ messages, busy }: MessageListProps) {
             <div key={msg.id} className="flex items-start gap-2 pr-6">
               <AlertIcon size={14} className="mt-0.5 shrink-0 text-danger" />
               <p className="text-xs leading-relaxed text-danger">{msg.text}</p>
+            </div>
+          );
+        }
+
+        if (msg.kind === "clarification") {
+          return (
+            <div key={msg.id} className="flex items-start gap-2 pr-6">
+              <SparklesIcon size={14} className="mt-0.5 shrink-0 text-accent" />
+              <p className="text-xs leading-relaxed text-ink">{msg.text}</p>
             </div>
           );
         }

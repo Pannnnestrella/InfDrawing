@@ -1,5 +1,5 @@
 import type { IntentType } from "./api-types";
-import { API_BASE } from "./config";
+import { apiFetch } from "./api-client";
 
 /** Feature keys shared with the backend; chat modes map onto them 1:1. */
 export type FeatureKey = IntentType;
@@ -30,6 +30,8 @@ export interface FeatureCapability {
   enabled: boolean;
   backend?: string | null;
   reason?: string | null;
+  available_backends?: string[];
+  models?: Record<string, string>;
 }
 
 export interface CapabilitiesResponse {
@@ -37,7 +39,10 @@ export interface CapabilitiesResponse {
   gpu: GpuInfo;
   services: {
     ollama: ServiceStatus;
+    deepseek?: ServiceStatus;
     comfyui: ServiceStatus;
+    openai_images?: ServiceStatus;
+    dashscope?: ServiceStatus;
   };
   models: ModelsCapability;
   features: Record<string, FeatureCapability>;
@@ -56,7 +61,7 @@ export function tierLabel(tier: string): string {
 }
 
 export async function fetchCapabilities(): Promise<CapabilitiesResponse> {
-  const response = await fetch(`${API_BASE}/api/v1/system/capabilities`);
+  const response = await apiFetch("/api/v1/system/capabilities");
   if (!response.ok) {
     throw new Error(`capabilities failed: ${response.status}`);
   }

@@ -393,6 +393,50 @@ curl.exe -s http://127.0.0.1:8188/ -o NUL -w "%{http_code}\n"   # 200
 curl.exe -s http://127.0.0.1:3000/ -o NUL -w "%{http_code}\n"   # 200
 ```
 
+### 意图 LLM：DeepSeek（推荐，无需 Ollama）
+
+在 `backend/.env` 配置后重启后端即可；本地可不启动 Ollama：
+
+```env
+INFD_LLM_PROVIDER=deepseek
+INFD_DEEPSEEK_API_KEY=sk-...
+# 可选
+INFD_DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+INFD_DEEPSEEK_MODEL=deepseek-chat
+```
+
+仍可用 `INFD_LLM_PROVIDER=ollama` 或 `openai`。`GET /api/v1/system/capabilities` 的 `services.deepseek.ok` 为 true 表示 Key 可用且 API 可达。
+
+### 指令改图（OpenAI，无需 Mask）
+
+侧栏模式 **指令改图**：选中画布图片 → 描述修改需求 → 后端调用 OpenAI `/v1/images/edits`（只传图+prompt）。
+
+依赖：`INFD_OPENAI_API_KEY`。与「局部重绘」（需 Mask，可本地/云端）不同。
+
+### 云端出图 / 改图（可选）
+
+侧栏在「生图 / 局部重绘 / 自动」模式下提供引擎切换：**自动 / 本地 / 云端**；选「云端」后再选 **OpenAI** 或 **万相**。
+
+在 `backend/.env`（或进程环境变量）中配置：
+
+```env
+INFD_OPENAI_API_KEY=sk-...
+INFD_OPENAI_IMAGE_MODEL=gpt-image-1
+
+INFD_DASHSCOPE_API_KEY=sk-...
+INFD_DASHSCOPE_T2I_MODEL=wanx2.1-t2i-turbo
+INFD_DASHSCOPE_EDIT_MODEL=wanx2.1-imageedit
+```
+
+| `backend` 请求值 | 含义 |
+|------------------|------|
+| `auto` | 优先本地 ComfyUI，否则 OpenAI，再否则 DashScope |
+| `local` / `sd15` / `flux` | 本地 ComfyUI |
+| `openai` | OpenAI Images（generations + edits） |
+| `dashscope` | 万相文生图 + `wanx2.1-imageedit` 局部重绘 |
+
+配置 Key 后重启后端，调用 `GET /api/v1/system/capabilities` 应看到 `services.openai_images` / `services.dashscope` 为 ok，且 `features.txt2img.available_backends` 含对应项。元素拆解与文字编辑仍走本地链路。
+
 > 建议用 **Chrome / Edge** 打开 `http://127.0.0.1:3000`。Cursor 内置浏览器偶发 HMR WebSocket 报错，不影响功能，但系统浏览器更稳。
 
 **ComfyUI 启动命令（每次）：**

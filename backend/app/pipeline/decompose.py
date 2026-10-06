@@ -6,25 +6,24 @@ import io
 
 from PIL import Image, ImageOps
 
-_REMBG_AVAILABLE: bool | None = None
-
 
 def rembg_available() -> bool:
-    """Return True when rembg and its onnxruntime backend are importable."""
-    global _REMBG_AVAILABLE
-    if _REMBG_AVAILABLE is not None:
-        return _REMBG_AVAILABLE
+    """Return whether rembg and its runtime are importable.
+
+    The probe intentionally does not cache its result. Import availability can
+    be changed by test isolation, optional dependency installation, or process
+    startup ordering, and a module-global cache makes those states leak.
+    """
     try:
         import onnxruntime  # noqa: F401
         import rembg  # noqa: F401
 
-        _REMBG_AVAILABLE = True
+        return True
     except ImportError:
-        _REMBG_AVAILABLE = False
+        return False
     except SystemExit:
         # rembg calls sys.exit(1) when onnxruntime is missing at import time
-        _REMBG_AVAILABLE = False
-    return _REMBG_AVAILABLE
+        return False
 
 
 def extract_foreground_rgba(image_bytes: bytes) -> Image.Image:

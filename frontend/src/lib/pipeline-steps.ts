@@ -5,4 +5,7 @@ export const STEP_LABELS: Record<string, string> = {
   extracting: "提取前景…",
   inpainting: "补全背景…",
   masking: "准备文字区域…",
+  cloud_submit: "提交云端任务…",
+  cloud_poll: "等待云端结果…",
+  cloud_download: "下载云端结果…",
 };

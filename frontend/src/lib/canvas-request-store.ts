@@ -1,6 +1,6 @@
 /** Pending canvas AI requests (context menu → overlay), one slot per kind. */
 
-export type CanvasRequestKind = "generate" | "decompose";
+export type CanvasRequestKind = "generate" | "decompose" | "library-ingest";
 
 export interface CanvasAnchor {
   pageX: number;

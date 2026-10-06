@@ -8,6 +8,7 @@ from typing import Any
 import httpx
 
 from app.config import settings
+from app.controlled_edit.vision import scene_model_name, uses_dedicated_scene_model
 from app.pipeline.decompose import rembg_available
 from app.pipeline.text_detect import easyocr_available
 from app.system.schemas import (
@@ -69,6 +70,23 @@ async def probe_ollama() -> ServiceStatus:
         return ServiceStatus(ok=True, url=url, remote=False)
     except httpx.HTTPError:
         return ServiceStatus(ok=False, url=url, remote=False)
+
+
+async def probe_deepseek() -> ServiceStatus:
+    """Check DeepSeek API reachability when a key is configured."""
+    url = settings.deepseek_base_url.rstrip("/")
+    if not settings.deepseek_api_key.strip():
+        return ServiceStatus(ok=False, url=url, remote=True)
+    try:
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            response = await client.get(
+                f"{url}/models",
+                headers={"Authorization": f"Bearer {settings.deepseek_api_key}"},
+            )
+            response.raise_for_status()
+        return ServiceStatus(ok=True, url=url, remote=True)
+    except httpx.HTTPError:
+        return ServiceStatus(ok=False, url=url, remote=True)
 
 
 async def probe_comfyui() -> ServiceStatus:
@@ -149,9 +167,10 @@ def infer_tier(
     models: ModelsCapability,
     *,
     dashscope_configured: bool,
+    openai_configured: bool = False,
 ) -> str:
     """Map hardware + services to a coarse capability tier."""
-    if dashscope_configured and not comfyui.ok:
+    if (dashscope_configured or openai_configured) and not comfyui.ok:
         return "api_fallback"
     if not comfyui.ok:
         return "cpu_only"
@@ -174,24 +193,33 @@ def build_features(
     models: ModelsCapability,
     *,
     dashscope_configured: bool,
+    openai_configured: bool = False,
 ) -> dict[str, FeatureCapability]:
-    """Derive user-facing feature flags from tier and models."""
-    txt2img_backend: str | None = None
-    if models.flux_txt2img and tier in {"gpu_24gb", "gpu_48gb"}:
-        txt2img_backend = "flux"
-    elif models.sd15_txt2img:
-        txt2img_backend = "sd15"
-    elif dashscope_configured:
-        txt2img_backend = "dashscope_api"
+    """Derive user-facing feature flags from tier, models, and cloud keys."""
+    local_txt2img: list[str] = []
+    if comfyui.ok and models.flux_txt2img and tier in {"gpu_24gb", "gpu_48gb"}:
+        local_txt2img.append("flux")
+    if comfyui.ok and models.sd15_txt2img:
+        local_txt2img.append("sd15")
 
-    inpaint_backend: str | None = None
-    if models.flux_fill and tier in {"gpu_24gb", "gpu_48gb"}:
-        inpaint_backend = "flux_fill"
-    elif models.sd15_inpaint:
-        inpaint_backend = "sd15"
+    local_inpaint: list[str] = []
+    if comfyui.ok and models.flux_fill and tier in {"gpu_24gb", "gpu_48gb"}:
+        local_inpaint.append("flux")
+    if comfyui.ok and models.sd15_inpaint:
+        local_inpaint.append("sd15")
 
-    txt2img_enabled = comfyui.ok and txt2img_backend is not None
-    inpaint_enabled = comfyui.ok and inpaint_backend is not None
+    cloud_backends: list[str] = []
+    if openai_configured:
+        cloud_backends.append("openai")
+    if dashscope_configured:
+        cloud_backends.append("dashscope")
+
+    txt2img_available = [*local_txt2img, *cloud_backends]
+    inpaint_available = [*local_inpaint, *cloud_backends]
+    txt2img_backend = txt2img_available[0] if txt2img_available else None
+    inpaint_backend = inpaint_available[0] if inpaint_available else None
+    txt2img_enabled = bool(txt2img_available)
+    inpaint_enabled = bool(inpaint_available)
 
     decompose_sam = (
         comfyui.ok
@@ -199,10 +227,13 @@ def build_features(
         and models.sam2_segment
         and tier in {"gpu_24gb", "gpu_48gb"}
     )
+    decompose_cloud = dashscope_configured
     decompose_local = comfyui.ok and models.sd15_inpaint and rembg_available()
-    decompose_enabled = decompose_sam or decompose_local
+    decompose_enabled = decompose_sam or decompose_cloud or decompose_local
     decompose_backend = (
-        "flux_sam"
+        "dashscope_seg"
+        if decompose_cloud
+        else "flux_sam"
         if decompose_sam
         else "rembg_sd15"
         if decompose_local
@@ -222,76 +253,194 @@ def build_features(
         else None
     )
 
+    image_edit_enabled = openai_configured
+    image_edit_backend = "openai" if image_edit_enabled else None
+
     features: dict[str, FeatureCapability] = {
         "txt2img": FeatureCapability(
             enabled=txt2img_enabled,
             backend=txt2img_backend,
+            available_backends=txt2img_available,
             reason=None
             if txt2img_enabled
-            else _txt2img_reason(comfyui, txt2img_backend, dashscope_configured),
+            else _txt2img_reason(comfyui, local_txt2img, cloud_backends),
         ),
         "inpaint": FeatureCapability(
             enabled=inpaint_enabled,
             backend=inpaint_backend,
+            available_backends=inpaint_available,
             reason=None
             if inpaint_enabled
-            else _inpaint_reason(comfyui, inpaint_backend),
+            else _inpaint_reason(comfyui, local_inpaint, cloud_backends),
+        ),
+        "image_edit": FeatureCapability(
+            enabled=image_edit_enabled,
+            backend=image_edit_backend,
+            available_backends=["openai"] if image_edit_enabled else [],
+            reason=None
+            if image_edit_enabled
+            else "未配置 INFD_OPENAI_API_KEY（指令改图仅支持 OpenAI）",
+        ),
+        "controlled_edit": FeatureCapability(
+            enabled=openai_configured,
+            backend="openai" if openai_configured else None,
+            available_backends=_controlled_edit_backends() if openai_configured else [],
+            reason=None
+            if openai_configured
+            else "未配置 INFD_OPENAI_API_KEY（多轮可控编辑依赖 OpenAI 视觉与图像模型）",
+            models=_controlled_edit_models(
+                openai_configured=openai_configured,
+                dashscope_configured=dashscope_configured,
+            )
+            if openai_configured
+            else {},
         ),
         "plugin_t2i": FeatureCapability(
             enabled=txt2img_enabled,
             backend=txt2img_backend,
+            available_backends=txt2img_available,
             reason=None if txt2img_enabled else "依赖 txt2img 能力",
         ),
         "decompose": FeatureCapability(
             enabled=decompose_enabled,
             backend=decompose_backend,
+            available_backends=[decompose_backend] if decompose_backend else [],
             reason=None
             if decompose_enabled
-            else _decompose_reason(comfyui, models, tier),
+            else _decompose_reason(comfyui, models, tier, dashscope_configured),
         ),
         "tab_inpaint": FeatureCapability(
             enabled=inpaint_enabled,
             backend=inpaint_backend,
+            available_backends=inpaint_available,
             reason=None if inpaint_enabled else "依赖 inpaint 能力",
         ),
         "text_edit": FeatureCapability(
             enabled=text_edit_enabled,
             backend=text_edit_backend,
+            available_backends=[text_edit_backend] if text_edit_backend else [],
             reason=None
             if text_edit_enabled
             else _text_edit_reason(comfyui, models),
+        ),
+        "asset_library": FeatureCapability(
+            enabled=dashscope_configured or openai_configured,
+            backend=(
+                "dashscope"
+                if dashscope_configured
+                else "openai"
+                if openai_configured
+                else None
+            ),
+            available_backends=_asset_library_backends(
+                dashscope_configured=dashscope_configured,
+                openai_configured=openai_configured,
+            ),
+            reason=None
+            if dashscope_configured or openai_configured
+            else "未配置 DashScope 或 OpenAI API Key（素材标注需要视觉模型）",
+            models={"scene": scene_model_name(settings)}
+            if dashscope_configured or openai_configured
+            else {},
         ),
     }
     return features
 
 
+def _asset_library_backends(
+    *,
+    dashscope_configured: bool,
+    openai_configured: bool,
+) -> list[str]:
+    backends: list[str] = []
+    if dashscope_configured:
+        backends.append("dashscope")
+    if openai_configured:
+        backends.append("openai")
+    return backends
+
+
+def _controlled_edit_backends() -> list[str]:
+    if uses_dedicated_scene_model(settings):
+        return ["openai", "dashscope"]
+    return ["openai"]
+
+
+def _controlled_edit_models(
+    *,
+    openai_configured: bool,
+    dashscope_configured: bool,
+) -> dict[str, str]:
+    """Models and Studio pickers for controlled edit."""
+    default_provider = settings.cedit_image_provider
+    if default_provider == "dashscope" and not dashscope_configured:
+        default_provider = "openai"
+    if default_provider == "openai" and not openai_configured and dashscope_configured:
+        default_provider = "dashscope"
+    image_options: list[str] = []
+    if dashscope_configured:
+        image_options.append(f"dashscope|{settings.cedit_image_model}")
+    if openai_configured:
+        image_options.append(f"openai|{settings.openai_image_model}")
+    return {
+        "scene": scene_model_name(settings),
+        "vision": settings.cedit_vision_model,
+        "image": (
+            settings.cedit_image_model
+            if default_provider == "dashscope"
+            else settings.openai_image_model
+        ),
+        "image_provider": default_provider,
+        "image_options": ";".join(image_options),
+        "lock_paste": "on" if settings.cedit_lock_paste else "off",
+        "prompt_style": settings.cedit_prompt_style,
+    }
+
+
 def _txt2img_reason(
     comfyui: ServiceStatus,
-    backend: str | None,
-    dashscope_configured: bool,
+    local_backends: list[str],
+    cloud_backends: list[str],
 ) -> str:
-    if not comfyui.ok:
-        return f"ComfyUI 不可达（{comfyui.url}）"
-    if backend is None:
-        if dashscope_configured:
-            return "未检测到本地生图模型，可配置 DashScope fallback"
-        return "未安装 SD1.5 或 Flux checkpoint"
+    if local_backends or cloud_backends:
+        return "生图能力不可用"
+    if not comfyui.ok and not cloud_backends:
+        return (
+            f"ComfyUI 不可达（{comfyui.url}），且未配置 OpenAI/DashScope 图像 API Key"
+        )
+    if comfyui.ok and not local_backends:
+        return "未安装 SD1.5/Flux checkpoint，且未配置云端图像 API Key"
     return "生图能力不可用"
 
 
-def _inpaint_reason(comfyui: ServiceStatus, backend: str | None) -> str:
-    if not comfyui.ok:
-        return f"ComfyUI 不可达（{comfyui.url}）"
-    if backend is None:
-        return "未安装 SD1.5 inpaint 或 Flux Fill 模型"
+def _inpaint_reason(
+    comfyui: ServiceStatus,
+    local_backends: list[str],
+    cloud_backends: list[str],
+) -> str:
+    if local_backends or cloud_backends:
+        return "inpaint 不可用"
+    if not comfyui.ok and not cloud_backends:
+        return (
+            f"ComfyUI 不可达（{comfyui.url}），且未配置 OpenAI/DashScope 图像 API Key"
+        )
+    if comfyui.ok and not local_backends:
+        return "未安装 SD1.5 inpaint/Flux Fill，且未配置云端图像 API Key"
     return "inpaint 不可用"
 
 
-def _decompose_reason(comfyui: ServiceStatus, models: ModelsCapability, tier: str) -> str:
-    if not comfyui.ok:
-        return f"ComfyUI 不可达（{comfyui.url}）"
+def _decompose_reason(
+    comfyui: ServiceStatus,
+    models: ModelsCapability,
+    tier: str,
+    dashscope_configured: bool,
+) -> str:
+    if dashscope_configured:
+        return "元素拆解不可用"
+    if not comfyui.ok and not dashscope_configured:
+        return "未配置阿里云 API Key，且 ComfyUI/rembg 不可用"
     if not rembg_available():
-        return "缺少 rembg 依赖（pip install rembg onnxruntime）"
+        return "缺少 rembg，且未配置 INFD_DASHSCOPE_API_KEY"
     if not models.sd15_inpaint:
         return "未安装 SD1.5 inpaint 模型"
     if tier in {"gpu_24gb", "gpu_48gb"} and not models.sam2_segment:
@@ -313,21 +462,25 @@ async def gather_capabilities() -> CapabilitiesResponse:
     """Collect a full capability snapshot for API and CLI."""
     gpu = probe_gpu()
     ollama = await probe_ollama()
+    deepseek = await probe_deepseek()
     comfyui = await probe_comfyui()
     models = await probe_comfyui_models(comfyui.ok)
     dashscope_configured = bool(settings.dashscope_api_key.strip())
+    openai_configured = bool(settings.openai_api_key.strip())
 
     tier = infer_tier(
         gpu,
         comfyui,
         models,
         dashscope_configured=dashscope_configured,
+        openai_configured=openai_configured,
     )
     features = build_features(
         tier,
         comfyui,
         models,
         dashscope_configured=dashscope_configured,
+        openai_configured=openai_configured,
     )
 
     return CapabilitiesResponse(
@@ -335,7 +488,18 @@ async def gather_capabilities() -> CapabilitiesResponse:
         gpu=gpu,
         services={
             "ollama": ollama,
+            "deepseek": deepseek,
             "comfyui": comfyui,
+            "openai_images": ServiceStatus(
+                ok=openai_configured,
+                url=settings.openai_base_url,
+                remote=True,
+            ),
+            "dashscope": ServiceStatus(
+                ok=dashscope_configured,
+                url=settings.dashscope_base_url,
+                remote=True,
+            ),
         },
         models=models,
         features=features,

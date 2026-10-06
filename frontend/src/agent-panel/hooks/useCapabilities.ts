@@ -17,8 +17,9 @@ export function useCapabilities(mode: ChatMode) {
       .catch(() => setCapabilities(null));
   }, []);
 
-  const modeEnabled = isModeEnabled(capabilities, mode);
-  const modeDisabledReason = featureReason(capabilities, mode);
+  const modeEnabled = mode === "auto" || isModeEnabled(capabilities, mode);
+  const modeDisabledReason =
+    mode === "auto" ? null : featureReason(capabilities, mode);
 
   return { capabilities, modeEnabled, modeDisabledReason };
 }

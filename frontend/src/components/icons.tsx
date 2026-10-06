@@ -37,6 +37,19 @@ export function BrushIcon({ size, className }: IconProps) {
   );
 }
 
+export function WandIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} aria-hidden>
+      <path d="M15 4v2" />
+      <path d="M15 10v2" />
+      <path d="M12 7h2" />
+      <path d="M16 7h2" />
+      <path d="m4.5 19.5 9-9" />
+      <path d="m13.5 10.5 2 2" />
+    </svg>
+  );
+}
+
 export function LayersIcon({ size, className }: IconProps) {
   return (
     <svg {...base(size)} className={className} aria-hidden>
@@ -105,6 +118,27 @@ export function RefreshIcon({ size, className }: IconProps) {
     <svg {...base(size)} className={className} aria-hidden>
       <path d="M20 12a8 8 0 1 1-2.34-5.66" />
       <path d="M20 4v4.5h-4.5" />
+    </svg>
+  );
+}
+
+export function CloseIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} aria-hidden>
+      <path d="M6 6 18 18" />
+      <path d="M18 6 6 18" />
+    </svg>
+  );
+}
+
+export function GitBranchIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} aria-hidden>
+      <circle cx="6" cy="6" r="2.2" />
+      <circle cx="6" cy="18" r="2.2" />
+      <circle cx="18" cy="12" r="2.2" />
+      <path d="M6 8.2v7.6" />
+      <path d="M8.2 6h3.3c2.5 0 4.5 2 4.5 4.5V12" />
     </svg>
   );
 }

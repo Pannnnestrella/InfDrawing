@@ -25,6 +25,7 @@ MAX_RETAINED_TASKS = 100
 class TaskState:
     task_id: str
     prompt_id: str
+    owner_key_id: str | None = None
     status: str = "queued"
     image_path: Path | None = None
     error: str | None = None
@@ -62,13 +63,28 @@ class TaskManager:
         self._tasks: dict[str, TaskState] = {}
         self._max_retained = max_retained
 
-    def create(self, prompt_id: str) -> TaskState:
-        task = TaskState(task_id=str(uuid.uuid4()), prompt_id=prompt_id)
+    def create(self, prompt_id: str, owner_key_id: str | None = None) -> TaskState:
+        """Create and register a process-local task."""
+        task = TaskState(
+            task_id=str(uuid.uuid4()),
+            prompt_id=prompt_id,
+            owner_key_id=owner_key_id,
+        )
         self.register(task)
         return task
 
     def get(self, task_id: str) -> TaskState | None:
         return self._tasks.get(task_id)
+
+    def bind_owner(self, task_id: str, owner_key_id: str) -> TaskState:
+        """Bind a task to one API principal without allowing reassignment."""
+        task = self._tasks.get(task_id)
+        if task is None:
+            raise KeyError(task_id)
+        if task.owner_key_id not in {None, owner_key_id}:
+            raise ValueError("task owner is already bound")
+        task.owner_key_id = owner_key_id
+        return task
 
     def register(self, task: TaskState) -> None:
         self._evict_terminal()

@@ -15,6 +15,10 @@ TOOL_REGISTRY = {
         "intent": IntentType.INPAINT,
         "workflow": "sd15_inpaint",
     },
+    "openai_image_edit_v1": {
+        "intent": IntentType.IMAGE_EDIT,
+        "workflow": None,
+    },
     "comfyui_decompose_v1": {
         "intent": IntentType.DECOMPOSE,
         "workflow": None,

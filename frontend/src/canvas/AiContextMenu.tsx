@@ -8,7 +8,7 @@ import {
   type TLUiContextMenuProps,
 } from "@tldraw/tldraw";
 
-import { getCanvasEditor } from "@/lib/canvas-bridge";
+import { getCanvasEditor, getSelectedImageShapes } from "@/lib/canvas-bridge";
 import { openCanvasRequest } from "@/lib/canvas-request-store";
 
 function resolveGenerateAnchor(): { pageX: number; pageY: number } | null {
@@ -25,6 +25,7 @@ function resolveGenerateAnchor(): { pageX: number; pageY: number } | null {
 }
 
 export function AiContextMenu(props: TLUiContextMenuProps) {
+  const hasSelectedImage = getSelectedImageShapes().length > 0;
   return (
     <DefaultContextMenu {...props}>
       <TldrawUiMenuGroup id="infdrawing-ai">
@@ -48,6 +49,18 @@ export function AiContextMenu(props: TLUiContextMenuProps) {
             if (anchor) openCanvasRequest("decompose", anchor);
           }}
         />
+        {hasSelectedImage ? (
+          <TldrawUiMenuItem
+            id="infdrawing-library-ingest"
+            label="加入素材库"
+            icon="image"
+            readonlyOk
+            onSelect={() => {
+              const anchor = resolveGenerateAnchor();
+              if (anchor) openCanvasRequest("library-ingest", anchor);
+            }}
+          />
+        ) : null}
       </TldrawUiMenuGroup>
       <DefaultContextMenuContent />
     </DefaultContextMenu>

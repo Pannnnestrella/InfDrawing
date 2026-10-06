@@ -1,18 +1,28 @@
 "use client";
 
-import { AlertIcon, BrushIcon, CheckIcon, SendIcon } from "@/components/icons";
+import {
+  AlertIcon,
+  BrushIcon,
+  CheckIcon,
+  GitBranchIcon,
+  ImageIcon,
+  SendIcon,
+} from "@/components/icons";
 import { Spinner } from "@/components/Spinner";
 import type { TextRegion } from "@/lib/api";
 import type { CapabilitiesResponse } from "@/lib/capabilities";
 
+import { EngineSelect } from "./EngineSelect";
 import { ModeChips } from "./ModeChips";
 import { TextRegionPicker } from "./TextRegionPicker";
 import type { ChatMode } from "./types";
+import type { EnginePreference } from "@/lib/engine-preference";
 
 interface ChatComposerProps {
   message: string;
   mode: ChatMode;
   capabilities: CapabilitiesResponse | null;
+  enginePreference: EnginePreference;
   busy: boolean;
   modeEnabled: boolean;
   modeDisabledReason: string | null;
@@ -26,15 +36,20 @@ interface ChatComposerProps {
   ocrError: string | null;
   onMessageChange: (value: string) => void;
   onModeChange: (mode: ChatMode) => void;
+  onEngineChange: (value: EnginePreference) => void;
   onSubmit: () => void;
   onOpenMaskEditor: () => void;
   onSelectTextRegion: (index: number) => void;
   onRetryOcr: () => void;
+  onOpenStudio?: () => void;
+  onOpenLibrary?: () => void;
 }
 
 const PLACEHOLDERS: Record<ChatMode, string> = {
+  auto: "描述你想对画布执行的操作…",
   txt2img: "描述你想生成的内容…",
   inpaint: "描述重绘区域要变成什么，例如：一颗鲜红的苹果",
+  image_edit: "描述要如何修改选中图片，例如：把天空改成晚霞",
   decompose: "可选：描述期望的背景风格，留空则使用默认",
   text_edit: "输入替换后的新文字…",
 };
@@ -43,6 +58,7 @@ export function ChatComposer({
   message,
   mode,
   capabilities,
+  enginePreference,
   busy,
   modeEnabled,
   modeDisabledReason,
@@ -56,10 +72,13 @@ export function ChatComposer({
   ocrError,
   onMessageChange,
   onModeChange,
+  onEngineChange,
   onSubmit,
   onOpenMaskEditor,
   onSelectTextRegion,
   onRetryOcr,
+  onOpenStudio,
+  onOpenLibrary,
 }: ChatComposerProps) {
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
@@ -71,6 +90,38 @@ export function ChatComposer({
   return (
     <div className="shrink-0 space-y-2.5 border-t border-line px-3 pb-3 pt-2.5">
       <ModeChips mode={mode} capabilities={capabilities} onModeChange={onModeChange} />
+      {onOpenStudio || onOpenLibrary ? (
+        <div className="flex gap-2">
+          {onOpenStudio ? (
+            <button
+              type="button"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-medium text-ink transition-colors hover:bg-surface-3"
+              onClick={onOpenStudio}
+            >
+              <GitBranchIcon size={14} className="text-accent-hover" />
+              多轮编辑
+            </button>
+          ) : null}
+          {onOpenLibrary ? (
+            <button
+              type="button"
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-medium text-ink transition-colors hover:bg-surface-3"
+              onClick={onOpenLibrary}
+            >
+              <ImageIcon size={14} className="text-accent-hover" />
+              素材库
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+      {(mode === "auto" || mode === "txt2img" || mode === "inpaint") ? (
+        <EngineSelect
+          preference={enginePreference}
+          capabilities={capabilities}
+          disabled={busy}
+          onChange={onEngineChange}
+        />
+      ) : null}
 
       {modeDisabledReason ? (
         <p className="flex items-start gap-1.5 text-[11px] text-warning">
@@ -79,9 +130,9 @@ export function ChatComposer({
         </p>
       ) : null}
 
-      {mode === "inpaint" ? (
+      {mode === "inpaint" || (mode === "auto" && canvasHasSelection) ? (
         <div className="space-y-1.5">
-          {selectionHint ? (
+          {mode === "inpaint" && selectionHint ? (
             <p className="text-[11px] text-muted">{selectionHint}</p>
           ) : null}
           <button
@@ -91,7 +142,7 @@ export function ChatComposer({
             onClick={onOpenMaskEditor}
           >
             <BrushIcon size={14} className="text-accent-hover" />
-            刷选 Mask（画布）
+            {mode === "auto" ? "准备局部重绘 Mask（可选）" : "刷选 Mask（画布）"}
           </button>
           {canvasHasMask ? (
             <p className="flex items-center gap-1.5 text-[11px] text-success">
@@ -102,13 +153,18 @@ export function ChatComposer({
         </div>
       ) : null}
 
-      {mode === "decompose" || mode === "text_edit" ? (
+      {mode === "image_edit" || mode === "decompose" || mode === "text_edit" ? (
         <p className="text-[11px] text-muted">
-          {selectionHint ?? "请在画布上选中一张图片"}
+          {mode === "image_edit"
+            ? selectionHint ?? "请选中一张图片，然后用文字描述修改需求（OpenAI）"
+            : (selectionHint ?? "请在画布上选中一张图片")}
         </p>
       ) : null}
 
-      {mode === "text_edit" ? (
+      {mode === "text_edit" ||
+      (mode === "auto" &&
+        canvasHasSelection &&
+        (ocrLoading || Boolean(ocrError) || textRegions.length > 0)) ? (
         <TextRegionPicker
           regions={textRegions}
           selectedIndex={selectedTextIndex}

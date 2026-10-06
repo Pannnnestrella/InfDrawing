@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+backend/.venv/
+
+# Node.js / Next.js
+frontend/node_modules/
+frontend/.next/
+
+# Runtime data
+data/uploads/
+data/outputs/
+data/logs/
+data/cedit/
+data/assets/
+data/artifacts/
+.cursor/dev-services.json
+
+# Local configuration and deployment secrets
+.env
+.env.*
+!.env.production.example
+deploy/secrets/*.txt
+deploy/bootstrap/*
+!deploy/bootstrap/.gitignore
+
+# OS and editor files
+.DS_Store
+Thumbs.db

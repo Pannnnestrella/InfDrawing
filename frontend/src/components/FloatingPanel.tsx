@@ -5,6 +5,9 @@ import { usePersistentFlag } from "@/lib/use-persistent-flag";
 
 const STORAGE_KEY = "infdrawing-sidebar-open";
 
+/** Above tldraw panels (300) and menus (400); below tldraw canvas blocker (10000). */
+const PANEL_Z = "z-[500]";
+
 interface FloatingPanelProps {
   children: React.ReactNode;
 }
@@ -14,21 +17,23 @@ export function FloatingPanel({ children }: FloatingPanelProps) {
   const [open, setOpen] = usePersistentFlag(STORAGE_KEY, true);
 
   if (!open) {
+    // Mid-right: avoid tldraw's top-right StylePanel collision.
     return (
       <button
         type="button"
         aria-label="展开 AI 面板"
         title="展开 AI 面板"
-        className="fixed right-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface-1/90 text-accent shadow-xl backdrop-blur-md transition-colors hover:bg-surface-2 hover:text-accent-hover"
+        className={`fixed right-3 top-1/2 ${PANEL_Z} flex -translate-y-1/2 items-center gap-1.5 rounded-full border border-line bg-surface-1/95 px-3 py-2.5 text-accent shadow-xl backdrop-blur-md transition-colors hover:bg-surface-2 hover:text-accent-hover`}
         onClick={() => setOpen(true)}
       >
-        <SparklesIcon size={20} />
+        <SparklesIcon size={18} />
+        <span className="text-xs font-semibold tracking-wide text-ink">AI</span>
       </button>
     );
   }
 
   return (
-    <div className="fixed bottom-3 right-3 top-3 z-40 w-[368px]">
+    <div className={`fixed bottom-3 right-3 top-3 ${PANEL_Z} w-[368px]`}>
       <button
         type="button"
         aria-label="收起 AI 面板"

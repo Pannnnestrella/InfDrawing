@@ -1,5 +1,6 @@
 import { submitInpaint } from "@/lib/api";
 import { getCanvasMaskPair } from "@/lib/canvas-bridge";
+import type { ImageBackend } from "@/lib/engine-preference";
 
 import { completeWithCanvasPaste } from "./complete-generation";
 import type { FlowCallbacks } from "./flow-types";
@@ -10,7 +11,10 @@ export interface InpaintFlowInput {
   maskFile: File | null;
 }
 
-export function useInpaintFlow(callbacks: FlowCallbacks) {
+export function useInpaintFlow(
+  callbacks: FlowCallbacks,
+  getBackend: () => ImageBackend,
+) {
   return useGenerateFlow<InpaintFlowInput>(callbacks, {
     submittedStatus: "局部重绘任务已提交…",
     runningStatus: "局部重绘进行中…",
@@ -21,7 +25,7 @@ export function useInpaintFlow(callbacks: FlowCallbacks) {
       if (!image || !mask) {
         throw new Error("局部重绘需要原图和 Mask：选中图片后刷选 Mask");
       }
-      return submitInpaint({ image, mask, prompt });
+      return submitInpaint({ image, mask, prompt, backend: getBackend() });
     },
     complete: (result, _input, cb) => completeWithCanvasPaste(result.imageUrl, cb),
   });

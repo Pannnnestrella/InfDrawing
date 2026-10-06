@@ -11,6 +11,11 @@ import {
   type CanvasRequest,
 } from "@/lib/canvas-request-store";
 import { fetchCapabilities, tierLabel } from "@/lib/capabilities";
+import {
+  backendDisplayLabel,
+  loadEnginePreference,
+  resolveImageBackend,
+} from "@/lib/engine-preference";
 import { runPipeline } from "@/lib/run-pipeline";
 import { PipelineToast } from "@/components/PipelineToast";
 
@@ -18,7 +23,8 @@ export function AiGenerateOverlay() {
   const [request, setRequest] = useState<CanvasRequest | null>(null);
   const [status, setStatus] = useState<string>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [backendLabel, setBackendLabel] = useState("SD 1.5");
+  const [backendLabel, setBackendLabel] = useState("自动");
+  const [resolvedBackend, setResolvedBackend] = useState("auto");
 
   useEffect(() => {
     const sync = () => {
@@ -35,18 +41,23 @@ export function AiGenerateOverlay() {
 
   useEffect(() => {
     if (!request) return;
+    const preference = loadEnginePreference();
     void fetchCapabilities()
       .then((caps) => {
-        const backend = caps.features.txt2img?.backend ?? "sd15";
-        const label =
-          backend === "flux"
-            ? "Flux"
-            : backend === "dashscope_api"
-              ? "DashScope API"
-              : "SD 1.5";
-        setBackendLabel(`${label} · ${tierLabel(caps.tier)}`);
+        const backend = resolveImageBackend(preference, caps);
+        setResolvedBackend(backend);
+        const preferred =
+          backend === "auto"
+            ? (caps.features.txt2img?.backend ?? "auto")
+            : backend;
+        setBackendLabel(
+          `${backendDisplayLabel(preferred)} · ${tierLabel(caps.tier)}`,
+        );
       })
-      .catch(() => setBackendLabel("SD 1.5"));
+      .catch(() => {
+        setResolvedBackend("auto");
+        setBackendLabel("自动");
+      });
   }, [request]);
 
   function handleClose() {
@@ -78,7 +89,7 @@ export function AiGenerateOverlay() {
       {
         submittedStatus: "生成中…",
         runningStatus: "生成中…",
-        submit: () => submitTxt2Img(refinedPrompt, "auto"),
+        submit: () => submitTxt2Img(refinedPrompt, resolvedBackend),
         complete: async (result) => {
           const pasted = await pasteImageUrlToCanvasAt(
             result.imageUrl,

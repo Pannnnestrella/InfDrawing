@@ -1,6 +1,7 @@
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
+from app.pipeline.image_validation import validate_upload_image
 from app.pipeline.text_detect import detect_text_regions, easyocr_available
 
 router = APIRouter(prefix="/vision", tags=["vision"])
@@ -24,6 +25,7 @@ async def detect_text(image: UploadFile = File(...)) -> DetectTextResponse:
     if not easyocr_available():
         raise HTTPException(status_code=503, detail="easyocr not installed")
     image_bytes = await image.read()
+    validate_upload_image(image_bytes, image.content_type)
     try:
         regions, width, height = detect_text_regions(image_bytes)
     except Exception as exc:

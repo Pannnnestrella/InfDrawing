@@ -35,6 +35,22 @@ def test_infer_tier_cpu_only_without_comfyui() -> None:
     assert infer_tier(gpu, comfyui, models, dashscope_configured=False) == "cpu_only"
 
 
+def test_infer_tier_api_fallback_with_openai() -> None:
+    gpu = GpuInfo(available=False)
+    comfyui = ServiceStatus(ok=False, url="http://127.0.0.1:8188")
+    models = ModelsCapability()
+    assert (
+        infer_tier(
+            gpu,
+            comfyui,
+            models,
+            dashscope_configured=False,
+            openai_configured=True,
+        )
+        == "api_fallback"
+    )
+
+
 def test_build_features_enables_sd15_on_local_tier() -> None:
     comfyui = ServiceStatus(ok=True, url="http://127.0.0.1:8188")
     models = ModelsCapability(sd15_txt2img=True, sd15_inpaint=True)
@@ -42,8 +58,26 @@ def test_build_features_enables_sd15_on_local_tier() -> None:
         features = build_features("local_8gb", comfyui, models, dashscope_configured=False)
     assert features["txt2img"].enabled is True
     assert features["txt2img"].backend == "sd15"
+    assert features["txt2img"].available_backends == ["sd15"]
     assert features["inpaint"].enabled is True
     assert features["decompose"].enabled is False
+
+
+def test_build_features_includes_cloud_backends() -> None:
+    comfyui = ServiceStatus(ok=False, url="http://127.0.0.1:8188")
+    models = ModelsCapability()
+    features = build_features(
+        "api_fallback",
+        comfyui,
+        models,
+        dashscope_configured=True,
+        openai_configured=True,
+    )
+    assert features["txt2img"].enabled is True
+    assert features["txt2img"].available_backends == ["openai", "dashscope"]
+    assert features["inpaint"].available_backends == ["openai", "dashscope"]
+    assert features["decompose"].enabled is True
+    assert features["decompose"].backend == "dashscope_seg"
 
 
 def test_build_features_enables_decompose_with_rembg() -> None:

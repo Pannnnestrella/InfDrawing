@@ -1,0 +1,16 @@
+.git
+.cursor
+.planning
+.env*
+deploy/secrets
+deploy/bootstrap
+deploy/certs
+deploy/models
+data
+**/.venv
+**/node_modules
+**/.next
+**/__pycache__
+**/.pytest_cache
+**/*.pyc
+**/*.log

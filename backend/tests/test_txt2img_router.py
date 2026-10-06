@@ -6,8 +6,17 @@ import pytest
 from fastapi import HTTPException
 
 from app.pipeline.comfyui_client import ComfyUIClient
-from app.pipeline.txt2img_router import build_txt2img_workflow_for_backend, resolve_txt2img_backend
-from app.system.schemas import CapabilitiesResponse, FeatureCapability, GpuInfo, ModelsCapability, ServiceStatus
+from app.pipeline.txt2img_router import (
+    build_txt2img_workflow_for_backend,
+    resolve_txt2img_backend,
+)
+from app.system.schemas import (
+    CapabilitiesResponse,
+    FeatureCapability,
+    GpuInfo,
+    ModelsCapability,
+    ServiceStatus,
+)
 
 
 def _caps(backend: str, enabled: bool = True) -> CapabilitiesResponse:
@@ -20,7 +29,11 @@ def _caps(backend: str, enabled: bool = True) -> CapabilitiesResponse:
         },
         models=ModelsCapability(sd15_txt2img=True),
         features={
-            "txt2img": FeatureCapability(enabled=enabled, backend=backend),
+            "txt2img": FeatureCapability(
+                enabled=enabled,
+                backend=backend,
+                available_backends=[backend] if enabled else [],
+            ),
         },
     )
 

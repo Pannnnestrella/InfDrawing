@@ -1,0 +1,349 @@
+name: infdrawing
+
+x-app-env: &app-env
+  INFD_ENVIRONMENT: production
+  INFD_DEBUG: "false"
+  INFD_PERSISTENCE_BACKEND: postgres
+  INFD_DATABASE_HOST: postgres
+  INFD_DATABASE_PORT: "5432"
+  INFD_DATABASE_NAME: ${POSTGRES_DB:-infdrawing}
+  INFD_DATABASE_USER: ${POSTGRES_USER:-infdrawing}
+  INFD_DATABASE_PASSWORD_FILE: /run/secrets/postgres_password
+  INFD_REDIS_URL: redis://redis:6379/0
+  INFD_STORAGE_BACKEND: s3
+  INFD_S3_ENDPOINT_URL: http://minio:9000
+  INFD_S3_BUCKET: ${MINIO_BUCKET:-infdrawing}
+  INFD_S3_ACCESS_KEY: ${MINIO_ROOT_USER:-infdrawing}
+  INFD_S3_SECRET_KEY_FILE: /run/secrets/minio_root_password
+  INFD_COMFYUI_BASE_URL: ${COMFYUI_BASE_URL:-http://host.docker.internal:8188}
+  INFD_API_KEY_PEPPER_FILE: /run/secrets/api_key_pepper
+  INFD_AUTH_REQUIRED: "true"
+  INFD_CORS_ORIGINS: '${CORS_ORIGINS:-["https://localhost"]}'
+  INFD_LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+  INFD_OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+  INFD_OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+  INFD_OPENAI_API_KEY_FILE: /run/secrets/provider_api_key
+  INFD_PROVIDER_ALLOWED_HOSTS: '${PROVIDER_ALLOWED_HOSTS:-["api.openai.com"]}'
+
+x-app-service: &app-service
+  image: infdrawing-api:${INFDRAWING_VERSION:-local}
+  build:
+    context: .
+    dockerfile: deploy/api.Dockerfile
+  restart: unless-stopped
+  init: true
+  environment: *app-env
+  secrets:
+    - postgres_password
+    - minio_root_password
+    - api_key_pepper
+    - provider_api_key
+  volumes:
+    - app-data:/app/data
+  networks:
+    - private
+    - egress
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+    minio:
+      condition: service_healthy
+    minio-init:
+      condition: service_completed_successfully
+
+services:
+  reverse-proxy:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deploy/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./deploy/certs:/etc/nginx/certs:ro
+    networks:
+      - edge
+      - private
+    depends_on:
+      frontend:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    image: infdrawing-frontend:${INFDRAWING_VERSION:-local}
+    build:
+      context: .
+      dockerfile: deploy/frontend.Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE: ""
+        NEXT_PUBLIC_WS_BASE: ${PUBLIC_BASE_URL:-http://localhost}
+    restart: unless-stopped
+    init: true
+    environment:
+      BACKEND_URL: http://api:8000
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+      NODE_ENV: production
+    networks:
+      - private
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  api:
+    <<: *app-service
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  worker-gpu:
+    <<: *app-service
+    command: ["arq", "app.worker.WorkerSettings"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      <<: *app-env
+      INFD_WORKER_QUEUE: jobs:gpu
+      NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-all}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  worker-cpu:
+    <<: *app-service
+    command: ["arq", "app.worker.WorkerSettings"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      <<: *app-env
+      INFD_WORKER_QUEUE: jobs:cpu
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  worker-api:
+    <<: *app-service
+    command: ["arq", "app.worker.WorkerSettings"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      <<: *app-env
+      INFD_WORKER_QUEUE: jobs:api
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  migrate:
+    <<: *app-service
+    restart: "no"
+    command: ["alembic", "upgrade", "head"]
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-infdrawing}
+      POSTGRES_USER: ${POSTGRES_USER:-infdrawing}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis-data:/data
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-infdrawing}
+      MINIO_ROOT_PASSWORD_FILE: /run/secrets/minio_root_password
+    secrets:
+      - minio_root_password
+    volumes:
+      - minio-data:/data
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  minio-init:
+    image: minio/mc:RELEASE.2025-04-16T18-13-26Z
+    restart: "no"
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - >
+        mc alias set infd http://minio:9000 "${MINIO_ROOT_USER:-infdrawing}"
+        "$$(cat /run/secrets/minio_root_password)";
+        mc mb --ignore-existing "infd/${MINIO_BUCKET:-infdrawing}";
+        mc anonymous set none "infd/${MINIO_BUCKET:-infdrawing}"
+    secrets:
+      - minio_root_password
+    networks:
+      - private
+    depends_on:
+      minio:
+        condition: service_healthy
+
+  comfyui-gpu:
+    profiles: ["managed-comfyui"]
+    image: ${COMFYUI_IMAGE:-infdrawing/comfyui-unconfigured:local}
+    restart: unless-stopped
+    command: ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188", "--lowvram"]
+    volumes:
+      - ${COMFYUI_MODELS_DIR:-./deploy/models}:/opt/ComfyUI/models:ro
+      - comfyui-output:/opt/ComfyUI/output
+    networks:
+      - private
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8188', timeout=3)"
+      interval: 20s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
+
+  prometheus:
+    profiles: ["observability"]
+    image: prom/prometheus:v3.4.1
+    restart: unless-stopped
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=15d"]
+    volumes:
+      - ./deploy/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9090/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  grafana:
+    profiles: ["observability"]
+    image: grafana/grafana:12.0.1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3001}:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
+      GF_SERVER_ROOT_URL: ${PUBLIC_BASE_URL:-https://localhost}/grafana/
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+    secrets:
+      - grafana_admin_password
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./deploy/observability/grafana-datasources.yml:/etc/grafana/provisioning/datasources/default.yml:ro
+    networks:
+      - private
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+secrets:
+  postgres_password:
+    file: ./deploy/secrets/postgres_password.txt
+  minio_root_password:
+    file: ./deploy/secrets/minio_root_password.txt
+  api_key_pepper:
+    file: ./deploy/secrets/api_key_pepper.txt
+  provider_api_key:
+    file: ./deploy/secrets/provider_api_key.txt
+  grafana_admin_password:
+    file: ./deploy/secrets/grafana_admin_password.txt
+
+volumes:
+  app-data:
+  postgres-data:
+  redis-data:
+  minio-data:
+  comfyui-output:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  edge:
+  egress:
+  private:
+    internal: true

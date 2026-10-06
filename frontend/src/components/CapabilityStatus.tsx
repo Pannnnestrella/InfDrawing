@@ -93,7 +93,18 @@ export function CapabilityStatus() {
                   ? `正常${caps.services.comfyui.remote ? "（远程）" : "（本地）"}`
                   : `不可达 ${caps.services.comfyui.url}`}
               </li>
-              <li>Ollama：{caps.services.ollama.ok ? "正常" : "不可达"}</li>
+              <li>
+                DeepSeek：
+                {caps.services.deepseek?.ok
+                  ? "正常"
+                  : caps.services.deepseek
+                    ? "不可达 / 未配置"
+                    : "未探测"}
+              </li>
+              <li>
+                Ollama（可选）：
+                {caps.services.ollama.ok ? "正常" : "未运行"}
+              </li>
             </ul>
           ) : null}
 

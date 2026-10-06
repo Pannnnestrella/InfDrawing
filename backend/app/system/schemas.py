@@ -37,6 +37,8 @@ class FeatureCapability(BaseModel):
     enabled: bool
     backend: str | None = None
     reason: str | None = None
+    available_backends: list[str] = Field(default_factory=list)
+    models: dict[str, str] = Field(default_factory=dict)
 
 
 class CapabilitiesResponse(BaseModel):

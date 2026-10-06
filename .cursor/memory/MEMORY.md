@@ -5,14 +5,10 @@
      Memory content goes in individual .md files, NOT here. -->
 
 ## Feedback
-<!-- Example:
-- [规划文件位置规则](feedback_planning_location.md) — 规划文件放项目 `.planning/`，不用全局路径
--->
+- [开发端口与报告对照图](feedback_ports_and_compare_sheets.md) — 页面 :3000；API :8000；实验优先出并排对照图
 
 ## Project
-<!-- Example:
-- [项目虚拟环境](project_venv.md) — `.venv/`（Python 3.11），所有 python/pytest/pip 必须用 `.venv/bin/` 前缀
--->
+- [可控编辑阿里改图与区域约束](project_cedit_dashscope_regions.md) — 默认 `qwen-image-edit-plus`；点选目标 + 锁定贴回 + 局部 crop-edit
 
 ## User
 <!-- Example:

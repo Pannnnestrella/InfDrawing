@@ -35,7 +35,7 @@ export function useTextEditOcr(mode: ChatMode, selectedShapeId: string | null) {
   }, []);
 
   useEffect(() => {
-    if (mode !== "text_edit") {
+    if (mode !== "text_edit" && mode !== "auto") {
       lastOcrShapeRef.current = null;
       return;
     }

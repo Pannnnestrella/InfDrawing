@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ChatComposer } from "@/agent-panel/ChatComposer";
 import { useCanvasSync } from "@/agent-panel/hooks/useCanvasSync";
@@ -9,23 +9,57 @@ import { useChatMessages } from "@/agent-panel/hooks/useChatMessages";
 import { useChatSubmit } from "@/agent-panel/hooks/useChatSubmit";
 import { useDecomposeFlow } from "@/agent-panel/hooks/useDecomposeFlow";
 import type { FlowCallbacks } from "@/agent-panel/hooks/flow-types";
+import { useImageEditFlow } from "@/agent-panel/hooks/useImageEditFlow";
 import { useInpaintFlow } from "@/agent-panel/hooks/useInpaintFlow";
 import { useMaskEditor } from "@/agent-panel/hooks/useMaskEditor";
 import { useTextEditFlow } from "@/agent-panel/hooks/useTextEditFlow";
 import { useTextEditOcr } from "@/agent-panel/hooks/useTextEditOcr";
 import { useTxt2ImgFlow } from "@/agent-panel/hooks/useTxt2ImgFlow";
 import { MessageList } from "@/agent-panel/MessageList";
+import { SessionSwitcher } from "@/agent-panel/SessionSwitcher";
 import type { ChatMode } from "@/agent-panel/types";
 import { MaskTool } from "@/canvas/MaskTool";
+import { ApiKeyControl } from "@/components/ApiKeyControl";
 import { CapabilityStatus } from "@/components/CapabilityStatus";
+import {
+  loadEnginePreference,
+  resolveImageBackend,
+  saveEnginePreference,
+  type EnginePreference,
+} from "@/lib/engine-preference";
 
-export function ChatPanel() {
+export function ChatPanel({
+  onOpenStudio,
+  onOpenLibrary,
+}: {
+  onOpenStudio?: () => void;
+  onOpenLibrary?: () => void;
+}) {
   const [message, setMessage] = useState("");
-  const [mode, setMode] = useState<ChatMode>("txt2img");
+  const [mode, setMode] = useState<ChatMode>("auto");
   const [busy, setBusy] = useState(false);
+  const [enginePreference, setEnginePreference] = useState<EnginePreference>({
+    mode: "auto",
+    cloudProvider: "openai",
+  });
 
-  const { messages, appendMessage, appendStatus, appendError, notifyReconnect } =
-    useChatMessages();
+  useEffect(() => {
+    setEnginePreference(loadEnginePreference());
+  }, []);
+
+  const {
+    sessions,
+    activeSessionId,
+    messages,
+    beginSession,
+    selectSession,
+    startNewChat,
+    clearAllSessions,
+    appendMessage,
+    appendStatus,
+    appendError,
+    notifyReconnect,
+  } = useChatMessages();
 
   const flowCallbacks: FlowCallbacks = useMemo(
     () => ({
@@ -38,8 +72,16 @@ export function ChatPanel() {
     [appendMessage, appendStatus, appendError, notifyReconnect],
   );
 
-  const txt2imgFlow = useTxt2ImgFlow(flowCallbacks);
-  const inpaintFlow = useInpaintFlow(flowCallbacks);
+  const { capabilities, modeEnabled, modeDisabledReason } = useCapabilities(mode);
+
+  const getBackend = useCallback(
+    () => resolveImageBackend(enginePreference, capabilities),
+    [enginePreference, capabilities],
+  );
+
+  const txt2imgFlow = useTxt2ImgFlow(flowCallbacks, getBackend);
+  const inpaintFlow = useInpaintFlow(flowCallbacks, getBackend);
+  const imageEditFlow = useImageEditFlow(flowCallbacks);
   const decomposeFlow = useDecomposeFlow(flowCallbacks);
   const textEditFlow = useTextEditFlow(flowCallbacks);
 
@@ -50,8 +92,6 @@ export function ChatPanel() {
     selectionHint,
     selectedShapeId,
   } = useCanvasSync();
-
-  const { capabilities, modeEnabled, modeDisabledReason } = useCapabilities(mode);
 
   const {
     imageFile,
@@ -80,17 +120,27 @@ export function ChatPanel() {
     setBusy,
     modeEnabled,
     modeDisabledReason,
+    capabilities,
     selectedTextIndex,
     textRegions,
+    ocrLoading,
+    ocrError,
     inpaintFiles: { imageFile, maskFile },
     flows: {
       txt2img: txt2imgFlow,
       inpaint: inpaintFlow,
+      image_edit: imageEditFlow,
       decompose: decomposeFlow,
       text_edit: textEditFlow,
     },
+    beginSession,
     callbacks: { appendMessage, appendStatus, appendError },
   });
+
+  function handleEngineChange(next: EnginePreference) {
+    setEnginePreference(next);
+    saveEnginePreference(next);
+  }
 
   return (
     <>
@@ -112,8 +162,20 @@ export function ChatPanel() {
               {canvasHasMask ? " · Mask 就绪" : ""}
             </p>
           </div>
-          <CapabilityStatus />
+          <div className="flex items-center gap-1.5">
+            <ApiKeyControl />
+            <CapabilityStatus />
+          </div>
         </header>
+
+        <SessionSwitcher
+          sessions={sessions}
+          activeSessionId={activeSessionId}
+          busy={busy}
+          onSelect={selectSession}
+          onNewChat={startNewChat}
+          onClearAll={clearAllSessions}
+        />
 
         <MessageList messages={messages} busy={busy} />
 
@@ -121,6 +183,7 @@ export function ChatPanel() {
           message={message}
           mode={mode}
           capabilities={capabilities}
+          enginePreference={enginePreference}
           busy={busy}
           modeEnabled={modeEnabled}
           modeDisabledReason={modeDisabledReason}
@@ -134,10 +197,13 @@ export function ChatPanel() {
           ocrError={ocrError}
           onMessageChange={setMessage}
           onModeChange={setMode}
+          onEngineChange={handleEngineChange}
           onSubmit={() => void handleSubmit()}
           onOpenMaskEditor={() => void openMaskEditor()}
           onSelectTextRegion={setSelectedTextIndex}
           onRetryOcr={retryOcr}
+          onOpenStudio={onOpenStudio}
+          onOpenLibrary={onOpenLibrary}
         />
       </div>
     </>

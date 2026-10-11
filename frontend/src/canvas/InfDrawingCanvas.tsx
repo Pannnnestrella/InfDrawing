@@ -18,6 +18,7 @@ import {
   registerCanvasEditor,
   unregisterCanvasEditor,
 } from "@/lib/canvas-bridge";
+import { shapeVisibilityFromMeta } from "@/lib/layer-model";
 
 export function InfDrawingCanvas() {
   // Mount tldraw only after client hydration to avoid SSR/client tree mismatch.
@@ -54,6 +55,9 @@ export function InfDrawingCanvas() {
         colorScheme="light"
         onMount={handleMount}
         components={components}
+        getShapeVisibility={(shape) =>
+          shapeVisibilityFromMeta(shape.meta as Record<string, unknown>)
+        }
       />
       <AiGenerateOverlay />
       <DecomposeOverlay />

@@ -59,6 +59,44 @@ export function LayersIcon({ size, className }: IconProps) {
   );
 }
 
+export function EyeIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} aria-hidden>
+      <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+      <circle cx="12" cy="12" r="2.5" />
+    </svg>
+  );
+}
+
+export function EyeOffIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} aria-hidden>
+      <path d="M3 3 21 21" />
+      <path d="M10.6 6.3A10 10 0 0 1 12 6c6 0 9.5 6 9.5 6a16 16 0 0 1-3.2 3.7" />
+      <path d="M6.2 6.2A16 16 0 0 0 2.5 12s3.5 6 9.5 6c1.3 0 2.5-.2 3.6-.6" />
+      <path d="M9.9 9.9a2.5 2.5 0 0 0 3.2 3.2" />
+    </svg>
+  );
+}
+
+export function LockIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} aria-hidden>
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
+  );
+}
+
+export function UnlockIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} aria-hidden>
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 7.5-2" />
+    </svg>
+  );
+}
+
 export function TypeIcon({ size, className }: IconProps) {
   return (
     <svg {...base(size)} className={className} aria-hidden>

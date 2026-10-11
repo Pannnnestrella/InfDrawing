@@ -31,9 +31,11 @@ import {
 export function ChatPanel({
   onOpenStudio,
   onOpenLibrary,
+  onOpenLayers,
 }: {
   onOpenStudio?: () => void;
   onOpenLibrary?: () => void;
+  onOpenLayers?: () => void;
 }) {
   const [message, setMessage] = useState("");
   const [mode, setMode] = useState<ChatMode>("auto");
@@ -204,6 +206,7 @@ export function ChatPanel({
           onRetryOcr={retryOcr}
           onOpenStudio={onOpenStudio}
           onOpenLibrary={onOpenLibrary}
+          onOpenLayers={onOpenLayers}
         />
       </div>
     </>

@@ -15,6 +15,9 @@ interface DraggableWindowProps {
   onClose: () => void;
   initialWidth?: number;
   initialHeight?: number;
+  /** Floor for corner resize; defaults suit large workspace windows. */
+  minWidth?: number;
+  minHeight?: number;
 }
 
 interface DragState {
@@ -36,6 +39,8 @@ export function DraggableWindow({
   onClose,
   initialWidth = 980,
   initialHeight = 700,
+  minWidth = MIN_W,
+  minHeight = MIN_H,
 }: DraggableWindowProps) {
   const [box, setBox] = useState(() => ({
     x: 56,
@@ -45,6 +50,10 @@ export function DraggableWindow({
   }));
   const dragRef = useRef<DragState | null>(null);
   const stopDragRef = useRef<(() => void) | null>(null);
+  const minWRef = useRef(minWidth);
+  const minHRef = useRef(minHeight);
+  minWRef.current = minWidth;
+  minHRef.current = minHeight;
 
   useEffect(
     () => () => {
@@ -78,8 +87,8 @@ export function DraggableWindow({
       }
       setBox((prev) => ({
         ...prev,
-        w: Math.max(MIN_W, drag.startW + pointer.clientX - drag.originX),
-        h: Math.max(MIN_H, drag.startH + pointer.clientY - drag.originY),
+        w: Math.max(minWRef.current, drag.startW + pointer.clientX - drag.originX),
+        h: Math.max(minHRef.current, drag.startH + pointer.clientY - drag.originY),
       }));
     };
     const onUp = () => {

@@ -21,7 +21,7 @@ MAX_INPUT_IMAGES = 3
 
 
 class DashScopeQwenEditProvider(ImageProvider):
-    """Call ``qwen-image-edit-plus`` with one current image and optional references.
+    """Call DashScope Qwen image-edit (default ``qwen-image-2.0``) with optional references.
 
     The Qwen API uses the last image's aspect ratio for the output, so references are
     sent first and the image being edited is sent last.

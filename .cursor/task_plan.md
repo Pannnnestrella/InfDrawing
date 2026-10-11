@@ -1,5 +1,16 @@
 # InfDrawing 任务状态
 
+## 2026-10-10 图层基础操作
+
+- `done`：新建透明层、应用内复制/粘贴/创建副本、多选合并（删原层）
+- 规划：`.planning/20261010_layer_ops.md`
+
+## 2026-10-10 画布图层面板
+
+- `done`：image 图层列表浮窗；显隐 / 锁定 / 重命名 / 四向重排；侧栏入口
+- `done`：可扩展 `LayerMeta`（预留 blendMode / groupId；opacity 已进快照）
+- 规划：`.planning/20261010_layer_panel.md`
+
 ## 2026-10-06 多轮编辑分栏与本轮详情
 
 - `done`：内部四处分栏可拖；浮动窗恢复 VersionDetails（指令/参考图/实际提示词）

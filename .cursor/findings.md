@@ -1,5 +1,13 @@
 # 关键发现
 
+## 2026-10-10 图层面板
+
+- 不自研图层仓：图层 = tldraw image shape；业务字段进 `shape.meta`（`layerName` / `hidden`，预留 `blendMode` / `groupId`）。
+- 显隐用官方 `getShapeVisibility` + `meta.hidden`；锁定后仍可用 `editor.run(..., { ignoreShapeLock: true })` 改 meta。
+- **坑**：tldraw `updateShape({ meta })` 是浅合并，从 meta 里 `delete hidden` 无法取消隐藏；必须写 `hidden: false`。
+- `CanvasLayerInfo.opacity` 已暴露，下一轮滑条无需再改列表 API 形状。
+- 窄浮窗需 `DraggableWindow` 的 `minWidth` / `minHeight`（默认 640 对图层列表过宽）。
+
 ## 2026-10-06 素材库
 
 - 去重按 **owner 全局 SHA-256**（存储字节，与 Artifact `sha256` 一致），换文件名仍算重复；不感知压缩/裁切。409 `duplicate_asset` 带回 `existing_id`；`force=true` 才再存一份。旧条目缺 `content_sha256` 不会被命中。

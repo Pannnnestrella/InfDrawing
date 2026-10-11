@@ -204,7 +204,7 @@ def test_qwen_edit_sends_references_then_primary() -> None:
         dashscope_api_key="sk-ali",
         dashscope_base_url="https://dashscope.aliyuncs.com/api/v1",
         provider_allowed_hosts=["dashscope.aliyuncs.com"],
-        cedit_image_model="qwen-image-edit-plus",
+        cedit_image_model="qwen-image-2.0",
     )
     client = AsyncMock(spec=httpx.AsyncClient)
     response = MagicMock()

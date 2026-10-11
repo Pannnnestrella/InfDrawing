@@ -6,6 +6,7 @@ import {
   CheckIcon,
   GitBranchIcon,
   ImageIcon,
+  LayersIcon,
   SendIcon,
 } from "@/components/icons";
 import { Spinner } from "@/components/Spinner";
@@ -43,6 +44,7 @@ interface ChatComposerProps {
   onRetryOcr: () => void;
   onOpenStudio?: () => void;
   onOpenLibrary?: () => void;
+  onOpenLayers?: () => void;
 }
 
 const PLACEHOLDERS: Record<ChatMode, string> = {
@@ -79,6 +81,7 @@ export function ChatComposer({
   onRetryOcr,
   onOpenStudio,
   onOpenLibrary,
+  onOpenLayers,
 }: ChatComposerProps) {
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
@@ -90,12 +93,12 @@ export function ChatComposer({
   return (
     <div className="shrink-0 space-y-2.5 border-t border-line px-3 pb-3 pt-2.5">
       <ModeChips mode={mode} capabilities={capabilities} onModeChange={onModeChange} />
-      {onOpenStudio || onOpenLibrary ? (
-        <div className="flex gap-2">
+      {onOpenStudio || onOpenLibrary || onOpenLayers ? (
+        <div className="flex flex-wrap gap-2">
           {onOpenStudio ? (
             <button
               type="button"
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-medium text-ink transition-colors hover:bg-surface-3"
+              className="flex min-w-[30%] flex-1 items-center justify-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-medium text-ink transition-colors hover:bg-surface-3"
               onClick={onOpenStudio}
             >
               <GitBranchIcon size={14} className="text-accent-hover" />
@@ -105,11 +108,21 @@ export function ChatComposer({
           {onOpenLibrary ? (
             <button
               type="button"
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-medium text-ink transition-colors hover:bg-surface-3"
+              className="flex min-w-[30%] flex-1 items-center justify-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-medium text-ink transition-colors hover:bg-surface-3"
               onClick={onOpenLibrary}
             >
               <ImageIcon size={14} className="text-accent-hover" />
               素材库
+            </button>
+          ) : null}
+          {onOpenLayers ? (
+            <button
+              type="button"
+              className="flex min-w-[30%] flex-1 items-center justify-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-2 text-xs font-medium text-ink transition-colors hover:bg-surface-3"
+              onClick={onOpenLayers}
+            >
+              <LayersIcon size={14} className="text-accent-hover" />
+              图层
             </button>
           ) : null}
         </div>

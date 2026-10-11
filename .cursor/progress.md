@@ -1,5 +1,11 @@
 # 会话进展
 
+## 2026-10-10
+
+- 图层基础操作：新建透明层、复制/粘贴/创建副本、多选合并；`layer-composite` + bridge + 面板工具栏。`tsc` 与 vitest 通过。规划 `.planning/20261010_layer_ops.md`。
+- 拆解修复：默认模型改 `qwen-image-2.0`；ComfyUI 不可达时 rembg 用原图作背景。
+- 图层面板落地（按推荐项）：`layer-model` + bridge API + `layers/LayerPanel` 浮窗；侧栏「图层」入口；显隐走 `meta.hidden` + `getShapeVisibility`。`tsc` 与相关 vitest 通过。规划 `.planning/20261010_layer_panel.md`。
+
 ## 2026-10-06
 
 - 多轮编辑：内部区域可拖条调节；浮动窗恢复本轮指令、参考图、实际发送提示词。SplitPane + studio-split vitest 通过。

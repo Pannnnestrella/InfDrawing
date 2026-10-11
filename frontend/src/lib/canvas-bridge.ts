@@ -5,6 +5,7 @@ import {
   type Editor,
   type TLAssetId,
   type TLImageShape,
+  type TLShapeId,
 } from "@tldraw/tldraw";
 
 import {
@@ -12,7 +13,41 @@ import {
   type CanvasContextSnapshot,
   type CanvasMaskPair,
 } from "@/canvas/types";
+import {
+  compositeLayersToDataUrl,
+  computeCompositeBounds,
+  createTransparentPngDataUrl,
+  duplicateLayerName,
+  nextBlankLayerName,
+} from "@/lib/layer-composite";
+import {
+  mergeLayerMeta,
+  readLayerMeta,
+  resolveLayerName,
+  sortByIndexBottomFirst,
+  sortByIndexTopFirst,
+  type CanvasLayerInfo,
+  type LayerReorderDirection,
+} from "@/lib/layer-model";
 import { toTldrawCompatibleSrc } from "@/lib/tldraw-asset-src";
+
+export type { CanvasLayerInfo, LayerReorderDirection } from "@/lib/layer-model";
+
+const PASTE_OFFSET_PX = 24;
+const DEFAULT_BLANK_SIZE = 512;
+
+interface LayerClipboardEntry {
+  dataUrl: string;
+  w: number;
+  h: number;
+  name: string;
+  opacity: number;
+  /** Page position of the source when copied (paste offsets from here). */
+  pageX: number;
+  pageY: number;
+}
+
+let layerClipboard: LayerClipboardEntry | null = null;
 
 type BridgeListener = () => void;
 
@@ -109,6 +144,372 @@ export function getCanvasSelectionHint(): string | null {
     return `当前选中的是「${shape.type}」，请选择图片图层`;
   }
   return null;
+}
+
+function imageThumbSrc(shape: TLImageShape): string | null {
+  if (!editor) return null;
+  const assetId = shape.props.assetId;
+  if (!assetId) return null;
+  const asset = editor.getAsset(assetId);
+  const src = asset?.props.src;
+  if (!src || typeof src !== "string") return null;
+  if (isDirectFetchableUrl(src)) return src;
+  return null;
+}
+
+function imageAssetName(shape: TLImageShape): string | null {
+  if (!editor) return null;
+  const assetId = shape.props.assetId;
+  if (!assetId) return null;
+  const asset = editor.getAsset(assetId);
+  if (!asset || asset.type !== "image") return null;
+  const name = asset.props.name;
+  return typeof name === "string" && name ? name : null;
+}
+
+function getImageShapeById(id: string): TLImageShape | null {
+  if (!editor) return null;
+  const shape = editor.getShape(id as TLShapeId);
+  if (!shape || shape.type !== "image") return null;
+  return shape as TLImageShape;
+}
+
+/**
+ * Current-page image layers, top-first (Photoshop-style).
+ * Non-image shapes are ignored so the panel stays aligned with gen/decompose/ingest.
+ */
+export function listImageLayers(): CanvasLayerInfo[] {
+  if (!editor) return [];
+  const selected = new Set(editor.getSelectedShapeIds());
+  const images = editor
+    .getCurrentPageShapes()
+    .filter((s): s is TLImageShape => s.type === "image");
+  const ordered = sortByIndexTopFirst(images);
+  const total = ordered.length;
+  return ordered.map((shape, topFirstIndex) => {
+    const meta = readLayerMeta(shape.meta as Record<string, unknown>);
+    const assetName = imageAssetName(shape);
+    return {
+      id: shape.id,
+      name: resolveLayerName(meta, assetName, total - topFirstIndex),
+      index: shape.index,
+      hidden: meta.hidden === true,
+      locked: shape.isLocked,
+      opacity: shape.opacity,
+      selected: selected.has(shape.id),
+      thumbSrc: imageThumbSrc(shape),
+      assetName,
+      meta,
+    };
+  });
+}
+
+export function selectLayer(id: string, opts?: { additive?: boolean }): boolean {
+  const shape = getImageShapeById(id);
+  if (!editor || !shape) return false;
+  if (opts?.additive) {
+    const current = [...editor.getSelectedShapeIds()];
+    if (current.includes(shape.id)) {
+      editor.setSelectedShapes(current.filter((sid) => sid !== shape.id));
+    } else {
+      editor.setSelectedShapes([...current, shape.id]);
+    }
+  } else {
+    editor.select(shape.id);
+  }
+  return true;
+}
+
+export function hasLayerClipboard(): boolean {
+  return layerClipboard !== null;
+}
+
+export function setLayerHidden(id: string, hidden: boolean): boolean {
+  const shape = getImageShapeById(id);
+  if (!editor || !shape) return false;
+  const meta = mergeLayerMeta(shape.meta as Record<string, unknown>, { hidden });
+  // Allow hide/show even when the shape is locked (lock means transform-lock).
+  editor.run(
+    () => {
+      editor!.updateShape({ id: shape.id, type: "image", meta });
+    },
+    { ignoreShapeLock: true },
+  );
+  return true;
+}
+
+export function setLayerLocked(id: string, locked: boolean): boolean {
+  const shape = getImageShapeById(id);
+  if (!editor || !shape) return false;
+  if (shape.isLocked === locked) return true;
+  editor.toggleLock([shape.id]);
+  return true;
+}
+
+export function renameLayer(id: string, name: string): boolean {
+  const shape = getImageShapeById(id);
+  if (!editor || !shape) return false;
+  const trimmed = name.trim();
+  if (!trimmed) return false;
+  const meta = mergeLayerMeta(shape.meta as Record<string, unknown>, {
+    layerName: trimmed,
+  });
+  editor.run(
+    () => {
+      editor!.updateShape({ id: shape.id, type: "image", meta });
+    },
+    { ignoreShapeLock: true },
+  );
+  return true;
+}
+
+export function reorderLayer(id: string, direction: LayerReorderDirection): boolean {
+  const shape = getImageShapeById(id);
+  if (!editor || !shape) return false;
+  switch (direction) {
+    case "up":
+      editor.bringForward([shape.id]);
+      break;
+    case "down":
+      editor.sendBackward([shape.id]);
+      break;
+    case "front":
+      editor.bringToFront([shape.id]);
+      break;
+    case "back":
+      editor.sendToBack([shape.id]);
+      break;
+    default:
+      return false;
+  }
+  return true;
+}
+
+async function resolveShapeDataUrl(shape: TLImageShape): Promise<string | null> {
+  if (!editor) return null;
+  const assetId = shape.props.assetId;
+  if (!assetId) return null;
+  const asset = editor.getAsset(assetId);
+  const src = asset?.props.src;
+  if (!src || typeof src !== "string") return null;
+  if (src.startsWith("data:")) return src;
+  try {
+    const file = await fetchAssetAsFile(src, "layer.png", assetId);
+    const buffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i += 1) {
+      binary += String.fromCharCode(bytes[i] ?? 0);
+    }
+    return `data:image/png;base64,${btoa(binary)}`;
+  } catch {
+    return null;
+  }
+}
+
+function loadHtmlImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("failed to decode layer image"));
+    img.src = src;
+  });
+}
+
+async function createImageLayerAt(opts: {
+  dataUrl: string;
+  pageX: number;
+  pageY: number;
+  w: number;
+  h: number;
+  name: string;
+  opacity?: number;
+}): Promise<TLShapeId | null> {
+  if (!editor) return null;
+  const assetSrc = await toTldrawCompatibleSrc(opts.dataUrl);
+  const assetId = AssetRecordType.createId();
+  const shapeId = createShapeId();
+  editor.createAssets([
+    {
+      id: assetId,
+      type: "image",
+      typeName: "asset",
+      props: {
+        name: `${opts.name}.png`,
+        src: assetSrc,
+        w: opts.w,
+        h: opts.h,
+        mimeType: "image/png",
+        isAnimated: false,
+      },
+      meta: {},
+    },
+  ]);
+  editor.createShape({
+    id: shapeId,
+    type: "image",
+    x: opts.pageX,
+    y: opts.pageY,
+    opacity: opts.opacity ?? 1,
+    props: {
+      assetId,
+      w: opts.w,
+      h: opts.h,
+    },
+    meta: mergeLayerMeta({}, { layerName: opts.name }),
+  });
+  return shapeId;
+}
+
+/** Create a transparent image layer (size from selection or 512²). */
+export async function createBlankLayer(): Promise<boolean> {
+  if (!editor) return false;
+  const selected = getSelectedImageShape();
+  const w = selected ? Math.round(selected.props.w) : DEFAULT_BLANK_SIZE;
+  const h = selected ? Math.round(selected.props.h) : DEFAULT_BLANK_SIZE;
+  const name = nextBlankLayerName(listImageLayers().map((layer) => layer.name));
+  let pageX: number;
+  let pageY: number;
+  if (selected) {
+    pageX = selected.x;
+    pageY = selected.y;
+  } else {
+    const center = editor.screenToPage(editor.getViewportScreenCenter());
+    pageX = center.x - w / 2;
+    pageY = center.y - h / 2;
+  }
+  const dataUrl = createTransparentPngDataUrl(w, h);
+  const shapeId = await createImageLayerAt({
+    dataUrl,
+    pageX,
+    pageY,
+    w,
+    h,
+    name,
+  });
+  if (!shapeId) return false;
+  editor.select(shapeId);
+  return true;
+}
+
+/** Copy the preferred selected image layer into the in-app clipboard. */
+export async function copySelectedLayer(): Promise<boolean> {
+  const shape = getSelectedImageShape();
+  if (!editor || !shape) return false;
+  const dataUrl = await resolveShapeDataUrl(shape);
+  if (!dataUrl) return false;
+  const meta = readLayerMeta(shape.meta as Record<string, unknown>);
+  const name = resolveLayerName(meta, imageAssetName(shape), 1);
+  layerClipboard = {
+    dataUrl,
+    w: Math.round(shape.props.w),
+    h: Math.round(shape.props.h),
+    name,
+    opacity: shape.opacity,
+    pageX: shape.x,
+    pageY: shape.y,
+  };
+  notify();
+  return true;
+}
+
+/** Paste the in-app clipboard as a new layer (offset 24px). */
+export async function pasteLayerClipboard(): Promise<boolean> {
+  if (!editor || !layerClipboard) return false;
+  const name = duplicateLayerName(layerClipboard.name);
+  const shapeId = await createImageLayerAt({
+    dataUrl: layerClipboard.dataUrl,
+    pageX: layerClipboard.pageX + PASTE_OFFSET_PX,
+    pageY: layerClipboard.pageY + PASTE_OFFSET_PX,
+    w: layerClipboard.w,
+    h: layerClipboard.h,
+    name,
+    opacity: layerClipboard.opacity,
+  });
+  if (!shapeId) return false;
+  // Next paste keeps stacking from the new position.
+  layerClipboard = {
+    ...layerClipboard,
+    pageX: layerClipboard.pageX + PASTE_OFFSET_PX,
+    pageY: layerClipboard.pageY + PASTE_OFFSET_PX,
+    name,
+  };
+  editor.select(shapeId);
+  notify();
+  return true;
+}
+
+/** Copy then paste the current selection as an independent layer. */
+export async function duplicateSelectedLayer(): Promise<boolean> {
+  const ok = await copySelectedLayer();
+  if (!ok) return false;
+  return pasteLayerClipboard();
+}
+
+/**
+ * Merge currently selected image layers (bottom→top), delete sources, keep result.
+ * Requires at least two selected image shapes.
+ */
+export async function mergeSelectedLayers(): Promise<boolean> {
+  if (!editor) return false;
+  const selected = getSelectedImageShapes().filter((shape) => {
+    const meta = readLayerMeta(shape.meta as Record<string, unknown>);
+    return meta.hidden !== true;
+  });
+  if (selected.length < 2) return false;
+
+  const bottomFirst = sortByIndexBottomFirst(selected);
+  const drawLayers = [];
+  for (const shape of bottomFirst) {
+    const dataUrl = await resolveShapeDataUrl(shape);
+    if (!dataUrl) return false;
+    const source = await loadHtmlImage(dataUrl);
+    drawLayers.push({
+      x: shape.x,
+      y: shape.y,
+      w: Math.round(shape.props.w),
+      h: Math.round(shape.props.h),
+      opacity: shape.opacity,
+      hidden: false,
+      source,
+    });
+  }
+
+  const dataUrl = compositeLayersToDataUrl(drawLayers);
+  if (!dataUrl) return false;
+
+  const box = computeCompositeBounds(drawLayers);
+  if (!box) return false;
+
+  const remainingNames = listImageLayers()
+    .filter((layer) => !selected.some((shape) => shape.id === layer.id))
+    .map((layer) => layer.name);
+  let mergeName = "合并图层";
+  if (remainingNames.includes(mergeName)) {
+    let n = 2;
+    while (remainingNames.includes(`${mergeName} ${n}`)) n += 1;
+    mergeName = `${mergeName} ${n}`;
+  }
+
+  const shapeId = await createImageLayerAt({
+    dataUrl,
+    pageX: box.x,
+    pageY: box.y,
+    w: box.w,
+    h: box.h,
+    name: mergeName,
+  });
+  if (!shapeId) return false;
+
+  const ids = bottomFirst.map((shape) => shape.id);
+  editor.run(
+    () => {
+      editor!.deleteShapes(ids);
+    },
+    { ignoreShapeLock: true },
+  );
+  editor.select(shapeId);
+  return true;
 }
 
 function isDirectFetchableUrl(src: string): boolean {
@@ -415,6 +816,7 @@ export async function pasteLayersToCanvas(
         w: layerW,
         h: layerH,
       },
+      meta: mergeLayerMeta({}, { layerName: layer.label }),
     });
 
     shapeIds.push(shapeId);

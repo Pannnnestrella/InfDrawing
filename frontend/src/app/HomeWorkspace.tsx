@@ -6,6 +6,12 @@ import { ChatPanel } from "@/agent-panel/ChatPanel";
 import { InfDrawingCanvas } from "@/canvas/InfDrawingCanvas";
 import { DraggableWindow } from "@/components/DraggableWindow";
 import { FloatingPanel } from "@/components/FloatingPanel";
+import { LayerPanel } from "@/layers/LayerPanel";
+import {
+  isLayerPanelOpen,
+  setLayerPanelOpen,
+  subscribeLayerPanel,
+} from "@/layers/layer-panel-store";
 import { LibraryPanel } from "@/library/LibraryPanel";
 import {
   isLibraryPanelOpen,
@@ -17,8 +23,10 @@ import { StudioWorkspace } from "@/studio/StudioWorkspace";
 export function HomeWorkspace() {
   const [studioOpen, setStudioOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(isLibraryPanelOpen);
+  const [layersOpen, setLayersOpen] = useState(isLayerPanelOpen);
 
   useEffect(() => subscribeLibraryPanel(() => setLibraryOpen(isLibraryPanelOpen())), []);
+  useEffect(() => subscribeLayerPanel(() => setLayersOpen(isLayerPanelOpen())), []);
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-surface-0">
@@ -29,6 +37,7 @@ export function HomeWorkspace() {
         <ChatPanel
           onOpenStudio={() => setStudioOpen(true)}
           onOpenLibrary={() => setLibraryPanelOpen(true)}
+          onOpenLayers={() => setLayerPanelOpen(true)}
         />
       </FloatingPanel>
       {studioOpen ? (
@@ -44,6 +53,18 @@ export function HomeWorkspace() {
           initialHeight={640}
         >
           <LibraryPanel />
+        </DraggableWindow>
+      ) : null}
+      {layersOpen ? (
+        <DraggableWindow
+          title="图层"
+          onClose={() => setLayerPanelOpen(false)}
+          initialWidth={360}
+          initialHeight={520}
+          minWidth={300}
+          minHeight={360}
+        >
+          <LayerPanel />
         </DraggableWindow>
       ) : null}
     </div>

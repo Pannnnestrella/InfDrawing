@@ -62,7 +62,8 @@ class Settings(BaseSettings):
     cedit_scene_model: str = "qwen3-vl-plus"
     cedit_scene_bbox_format: str = "xyxy_1000"
     cedit_image_provider: str = "dashscope"
-    cedit_image_model: str = "qwen-image-edit-plus"
+    # qwen-image-edit-plus retired / unavailable on many keys; 2.0 is the working edit API.
+    cedit_image_model: str = "qwen-image-2.0"
     cedit_lock_feather: float = 0.12
     cedit_lock_paste: bool = False
     cedit_prompt_style: str = "preserve"

@@ -42,4 +42,11 @@ describe("ChatComposer", () => {
     fireEvent.click(screen.getByRole("button", { name: "素材库" }));
     expect(onOpenLibrary).toHaveBeenCalledTimes(1);
   });
+
+  it("opens the layers panel from the dedicated entry", () => {
+    const onOpenLayers = vi.fn();
+    render(<ChatComposer {...baseProps} onOpenLayers={onOpenLayers} />);
+    fireEvent.click(screen.getByRole("button", { name: "图层" }));
+    expect(onOpenLayers).toHaveBeenCalledTimes(1);
+  });
 });

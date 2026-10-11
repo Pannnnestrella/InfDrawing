@@ -65,15 +65,22 @@ async def run_decompose_task(
             mask_path = save_upload(f"{task.task_id}_mask.png", image_to_png_bytes(mask_image))
 
             await task.emit_progress("inpainting")
-            bg_file = await inpaint_image_files(
-                image_path,
-                mask_path,
-                prompt=background_prompt,
-                negative_prompt=negative_prompt,
-                outputs_dir=outputs_dir,
-            )
             bg_rgba_path = outputs_dir / f"{task.task_id}_layer_bg.png"
-            ensure_rgba_on_disk(bg_file, bg_rgba_path)
+            try:
+                bg_file = await inpaint_image_files(
+                    image_path,
+                    mask_path,
+                    prompt=background_prompt,
+                    negative_prompt=negative_prompt,
+                    outputs_dir=outputs_dir,
+                )
+                ensure_rgba_on_disk(bg_file, bg_rgba_path)
+            except Exception as exc:
+                # ComfyUI may be down; still return rembg FG + source as BG.
+                logger.warning("local inpaint failed, using source as background: %s", exc)
+                bg_file = outputs_dir / f"{task.task_id}_erase.png"
+                bg_file.write_bytes(image_bytes)
+                ensure_rgba_on_disk(bg_file, bg_rgba_path)
 
         layers = [
             {"label": "background", "image_url": f"/api/v1/files/outputs/{bg_rgba_path.name}"},

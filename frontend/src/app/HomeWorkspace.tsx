@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { ChatPanel } from "@/agent-panel/ChatPanel";
 import { InfDrawingCanvas } from "@/canvas/InfDrawingCanvas";
+import { CanvasToastHost } from "@/components/CanvasToastHost";
 import { DraggableWindow } from "@/components/DraggableWindow";
 import { FloatingPanel } from "@/components/FloatingPanel";
 import { LayerPanel } from "@/layers/LayerPanel";
@@ -67,6 +68,7 @@ export function HomeWorkspace() {
           <LayerPanel />
         </DraggableWindow>
       ) : null}
+      <CanvasToastHost />
     </div>
   );
 }

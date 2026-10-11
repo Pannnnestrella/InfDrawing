@@ -9,6 +9,8 @@ import {
   toPersistableMessages,
   type ChatSession,
 } from "@/lib/chat-history";
+import { showCanvasToast } from "@/lib/canvas-toast-store";
+import { isQuotaErrorMessage } from "@/lib/quota-error";
 
 export function useChatMessages() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -143,6 +145,9 @@ export function useChatMessages() {
   const appendError = useCallback(
     (text: string) => {
       appendMessage({ id: createMessageId(), role: "assistant", kind: "error", text });
+      if (isQuotaErrorMessage(text)) {
+        showCanvasToast(text, "error");
+      }
     },
     [appendMessage],
   );

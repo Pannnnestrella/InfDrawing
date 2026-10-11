@@ -7,7 +7,12 @@ import type { FlowCallbacks } from "./flow-types";
 import { useGenerateFlow } from "./useGenerateFlow";
 
 export function useDecomposeFlow(callbacks: FlowCallbacks) {
-  const anchorRef = useRef<{ pageX: number; pageY: number } | null>(null);
+  const anchorRef = useRef<{
+    pageX: number;
+    pageY: number;
+    w: number;
+    h: number;
+  } | null>(null);
 
   return useGenerateFlow(callbacks, {
     submittedStatus: "元素拆解任务已提交…",

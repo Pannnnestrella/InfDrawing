@@ -27,15 +27,20 @@ def rembg_available() -> bool:
 
 
 def extract_foreground_rgba(image_bytes: bytes) -> Image.Image:
-    """Remove background via rembg and return RGBA image."""
+    """Remove background via rembg and return RGBA image (source pixel size)."""
     from rembg import remove
 
     with Image.open(io.BytesIO(image_bytes)) as source:
-        rgb = source.convert("RGB")
+        rgb = ImageOps.exif_transpose(source).convert("RGB")
+        target = rgb.size
     result = remove(rgb)
     if isinstance(result, bytes):
-        return Image.open(io.BytesIO(result)).convert("RGBA")
-    return result.convert("RGBA")
+        rgba = Image.open(io.BytesIO(result)).convert("RGBA")
+    else:
+        rgba = result.convert("RGBA")
+    if rgba.size != target:
+        rgba = rgba.resize(target, Image.Resampling.NEAREST)
+    return rgba
 
 
 def foreground_to_inpaint_mask(foreground_rgba: Image.Image) -> Image.Image:

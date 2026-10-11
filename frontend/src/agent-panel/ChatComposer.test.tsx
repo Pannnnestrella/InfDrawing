@@ -49,4 +49,29 @@ describe("ChatComposer", () => {
     fireEvent.click(screen.getByRole("button", { name: "图层" }));
     expect(onOpenLayers).toHaveBeenCalledTimes(1);
   });
+
+  it("shows ready copy when decompose selection hint is null", () => {
+    render(
+      <ChatComposer
+        {...baseProps}
+        mode="decompose"
+        selectionHint={null}
+        canvasHasSelection
+      />,
+    );
+    expect(screen.getByText(/已选中图片/)).toBeInTheDocument();
+    expect(screen.queryByText("请在画布上选中一张图片")).not.toBeInTheDocument();
+  });
+
+  it("shows the selection problem when decompose hint is set", () => {
+    render(
+      <ChatComposer
+        {...baseProps}
+        mode="decompose"
+        selectionHint="请在画布上选中一张图片"
+        canvasHasSelection={false}
+      />,
+    );
+    expect(screen.getByText("请在画布上选中一张图片")).toBeInTheDocument();
+  });
 });

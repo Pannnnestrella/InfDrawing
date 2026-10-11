@@ -7,9 +7,18 @@
 
 import type { DecomposeLayer, TextEditOverlay } from "./api-types";
 import { exportSelectedImageFile, pasteLayersToCanvas } from "./canvas-bridge";
+import { showCanvasToast } from "./canvas-toast-store";
 import { submitDecompose } from "./api";
 import { runGenerateTask } from "./generate-task";
+import { isQuotaErrorMessage } from "./quota-error";
 import { STEP_LABELS } from "./pipeline-steps";
+
+function surfacePipelineError(message: string, onError: (message: string) => void): void {
+  onError(message);
+  if (isQuotaErrorMessage(message)) {
+    showCanvasToast(message, "error");
+  }
+}
 
 export interface PipelineResult {
   imageUrl: string;
@@ -49,7 +58,7 @@ export async function runPipeline(
     const { task_id } = await spec.submit();
     taskId = task_id;
   } catch (err) {
-    onError(err instanceof Error ? err.message : "任务提交失败");
+    surfacePipelineError(err instanceof Error ? err.message : "任务提交失败", onError);
     onSettled?.();
     return;
   }
@@ -64,12 +73,12 @@ export async function runPipeline(
       try {
         await spec.complete({ imageUrl, layers, overlay });
       } catch (err) {
-        onError(err instanceof Error ? err.message : "结果处理失败");
+        surfacePipelineError(err instanceof Error ? err.message : "结果处理失败", onError);
       }
       onSettled?.();
     },
     onError: (message) => {
-      onError(message);
+      surfacePipelineError(message, onError);
       onSettled?.();
     },
   });
@@ -87,7 +96,7 @@ export async function submitDecomposeFromSelection(backgroundPrompt?: string) {
 /** Paste decompose layers at the anchor; returns the layer count. */
 export async function pasteDecomposeResult(
   result: PipelineResult,
-  anchor: { pageX: number; pageY: number },
+  anchor: { pageX: number; pageY: number; w?: number; h?: number },
 ): Promise<number> {
   if (!result.layers?.length) {
     throw new Error("未收到图层数据");

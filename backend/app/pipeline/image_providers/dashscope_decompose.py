@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 
-from PIL import Image, ImageChops
+from PIL import Image, ImageChops, ImageOps
 
 from app.config import Settings, settings
 from app.pipeline.image_providers.base import (
@@ -82,6 +82,12 @@ def infer_corner_chroma(image: Image.Image, *, inset: int = 8, max_spread: int =
     return (int(means[0]), int(means[1]), int(means[2]))
 
 
+def _open_rgba(image_bytes: bytes) -> Image.Image:
+    """Decode bytes with EXIF orientation applied (matches browser display)."""
+    with Image.open(io.BytesIO(image_bytes)) as image:
+        return ImageOps.exif_transpose(image).convert("RGBA")
+
+
 def apply_edit_difference_alpha(
     source_bytes: bytes,
     edited_bytes: bytes,
@@ -89,11 +95,14 @@ def apply_edit_difference_alpha(
     threshold: int = 28,
 ) -> Image.Image:
     """Keep original RGB; transparent where the edit diverged (treated as background)."""
-    with Image.open(io.BytesIO(source_bytes)) as source:
-        rgba = source.convert("RGBA")
-        source_rgb = source.convert("RGB")
+    rgba = _open_rgba(source_bytes)
+    source_rgb = rgba.convert("RGB")
     with Image.open(io.BytesIO(edited_bytes)) as edited:
-        edited_rgb = edited.convert("RGB").resize(rgba.size, Image.Resampling.BILINEAR)
+        edited_rgb = (
+            ImageOps.exif_transpose(edited)
+            .convert("RGB")
+            .resize(rgba.size, Image.Resampling.BILINEAR)
+        )
     diff = ImageChops.difference(source_rgb, edited_rgb)
     bands = diff.split()
     dist = ImageChops.lighter(ImageChops.lighter(bands[0], bands[1]), bands[2])
@@ -110,10 +119,13 @@ def apply_chroma_alpha(
     tolerance: int = CHROMA_TOLERANCE,
 ) -> Image.Image:
     """Keep original RGB; set alpha from a chroma-key plate."""
-    with Image.open(io.BytesIO(source_bytes)) as source:
-        rgba = source.convert("RGBA")
+    rgba = _open_rgba(source_bytes)
     with Image.open(io.BytesIO(chroma_bytes)) as plate:
-        plate_rgb = plate.convert("RGB").resize(rgba.size, Image.Resampling.BILINEAR)
+        plate_rgb = (
+            ImageOps.exif_transpose(plate)
+            .convert("RGB")
+            .resize(rgba.size, Image.Resampling.BILINEAR)
+        )
     key = Image.new("RGB", rgba.size, chroma)
     diff = ImageChops.difference(plate_rgb, key)
     bands = diff.split()
@@ -126,7 +138,7 @@ def apply_chroma_alpha(
 def _qwen_size(image_bytes: bytes) -> str:
     """Pick a DashScope size near the source, clamped to 512–2048 and multiples of 16."""
     with Image.open(io.BytesIO(image_bytes)) as image:
-        width, height = image.size
+        width, height = ImageOps.exif_transpose(image).size
     width = max(512, min(2048, width))
     height = max(512, min(2048, height))
     width = max(512, (width // 16) * 16)
@@ -190,8 +202,14 @@ class DashScopeDecomposeClient:
             size=size,
             on_progress=on_progress,
         )
-        with Image.open(io.BytesIO(image_bytes)) as source:
-            target = source.size
+        target = _open_rgba(image_bytes).size
+        # Force both layers to identical pixel size so canvas cover-crop matches.
+        if foreground.size != target:
+            foreground = foreground.resize(target, Image.Resampling.NEAREST)
         with Image.open(io.BytesIO(background)) as bg_im:
-            bg_rgb = bg_im.convert("RGB").resize(target, Image.Resampling.LANCZOS)
+            bg_rgb = (
+                ImageOps.exif_transpose(bg_im)
+                .convert("RGB")
+                .resize(target, Image.Resampling.LANCZOS)
+            )
         return foreground, _png_bytes(bg_rgb)

@@ -9,6 +9,7 @@ import httpx
 
 from app.agent.schemas import IntentPlan
 from app.config import Settings, settings
+from app.pipeline.provider_errors import format_provider_error
 
 
 class ProviderError(RuntimeError):
@@ -81,11 +82,22 @@ class OpenAICompatibleProvider(IntentProvider):
                 json=payload,
                 headers=headers,
             )
-            response.raise_for_status()
+            if response.status_code >= 400:
+                detail = (response.text or response.reason_phrase or "")[:300]
+                raise ProviderError(
+                    format_provider_error(
+                        f"{self.model} intent provider failed "
+                        f"({response.status_code}): {detail}"
+                    )
+                )
             content = response.json()["choices"][0]["message"]["content"]
             return IntentPlan.model_validate_json(content)
+        except ProviderError:
+            raise
         except (httpx.HTTPError, KeyError, TypeError, ValueError) as exc:
-            raise ProviderError(f"intent provider failed: {type(exc).__name__}") from exc
+            raise ProviderError(
+                format_provider_error(f"intent provider failed: {type(exc).__name__}")
+            ) from exc
         finally:
             if owns_client:
                 await client.aclose()

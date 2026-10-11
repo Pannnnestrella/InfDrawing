@@ -1,5 +1,17 @@
 # InfDrawing 任务状态
 
+## 2026-10-11 API Key 显示 + 设置页
+
+- `done`：API Key / 环境状态弹层改为 `fixed`（`PopoverPanel`）
+- `done`：`SettingsDrawer` Stage 1–2（凭证 / 引擎 / 可控编辑 / 环境）；Header API Key 并入设置
+- 规划：`.planning/20261011_settings_page.md`
+
+## 2026-10-11 额度失败画布提示 + 选中误报
+
+- `done`：额度/欠费错误规范化并在画布 toast 显示（手动关闭）；DeepSeek 不做预检
+- `done`：修复侧栏选中误报、selection listen、贴图导出重试
+- 规划：`.planning/20261011_quota_error_toast.md`
+
 ## 2026-10-10 图层基础操作
 
 - `done`：新建透明层、应用内复制/粘贴/创建副本、多选合并（删原层）

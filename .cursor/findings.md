@@ -1,5 +1,23 @@
 # 关键发现
 
+## 2026-10-11 API Key 弹层裁切
+
+- 侧栏 `FloatingPanel` 的 `aside` 带 `overflow-hidden`；`ApiKeyControl` / `CapabilityStatus` 用 `absolute right-0` 时，弹层向左超出父级宽度会被裁掉，看起来像被白画布盖住一半。
+- 修复：`PopoverPanel` 用 `position: fixed` + 锚点 `getBoundingClientRect` 贴边，并处理点击外部 / Esc。
+
+## 2026-10-11 拆解图层 offset
+
+- 第一轮：`pasteLayersToCanvas` 曾用 contain 缩放，竖图回贴像上漂。改为按源框 `(w,h)` 设 shape 尺寸后仍偏。
+- 根因：tldraw `.tl-image` 使用 CSS `object-fit: cover`。只改 shape 宽高、asset 仍是图层原生像素时，FG/BG（或与源图）宽高比不一致会被居中裁切，看起来像整层偏移/碎裂。
+- 修复：回贴前用与 cover 相同的算法把每层 bake 进与 shape **同宽高比** 的位图（2× 显示像素），asset/shape 宽高比一致；锚点尺寸以提交时为准，避免粘贴时选中了别的图而混用几何。
+- 后端：decompose 读图做 `exif_transpose`，FG/BG 强制同一 `source.size`。
+
+## 2026-10-11 选中误报与额度 toast
+
+- 侧栏 decompose/image_edit 用 `selectionHint ?? "请选中…"`：选中成功时 hint 为 `null`，反而永远显示「请选中」。应在 hint 为空时显示「已选中…」。
+- tldraw `store.listen` 默认偏 document；选中在 session，需 `{ scope: 'all', source: 'all' }` 才即时同步。
+- 贴图后 `asset.src` 可能短暂不可读，导出需短重试，否则右键拆解报「请先选中」。
+
 ## 2026-10-10 图层面板
 
 - 不自研图层仓：图层 = tldraw image shape；业务字段进 `shape.meta`（`layerName` / `hidden`，预留 `blendMode` / `groupId`）。

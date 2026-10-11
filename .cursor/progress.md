@@ -1,5 +1,12 @@
 # 会话进展
 
+## 2026-10-11
+
+- 拆解偏移再修：根因是 tldraw `object-fit: cover` 对宽高比不一致的图层居中裁切；回贴前 `bakeLayerToShapeBox`，锚点几何不再与错误选中混用；后端 EXIF + 强制同尺寸。相关 vitest / `test_decompose` 通过。
+- API Key 弹层裁切：`PopoverPanel` fixed 定位。设置页 Stage 1–2 落地：`SettingsDrawer`（凭证/引擎/可控编辑/环境）；Header 用「设置」替代 API Key；cedit 偏好 `subscribeCeditOptions` 与 Studio 同步。`tsc` + 相关 vitest 通过。
+- 额度失败画布 toast：后端规范化欠费文案；`CanvasToastHost` 手动关闭；侧栏/管线额度错误同步上画布。规划 `.planning/20261011_quota_error_toast.md`。
+- 修复选中误报：`selectionHint ?? "请选中…"` 在 hint=null 时仍显示未选中；`store.listen({scope:'all'})`；贴图导出重试。
+
 ## 2026-10-10
 
 - 图层基础操作：新建透明层、复制/粘贴/创建副本、多选合并；`layer-composite` + bridge + 面板工具栏。`tsc` 与 vitest 通过。规划 `.planning/20261010_layer_ops.md`。

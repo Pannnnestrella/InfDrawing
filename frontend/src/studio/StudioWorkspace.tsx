@@ -1,11 +1,11 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
-import { ApiKeyControl } from "@/components/ApiKeyControl";
 import { AlertIcon } from "@/components/icons";
 import { SplitPane } from "@/components/SplitPane";
+import { getSessionApiKey, subscribeSessionApiKey } from "@/lib/api-client";
 import { fetchCapabilities, featureReason, type CapabilitiesResponse } from "@/lib/capabilities";
 import { exportSelectedImageFile, pasteImageUrlToCanvas } from "@/lib/canvas-bridge";
 import {
@@ -27,6 +27,12 @@ import {
   type LockConflictEntity,
   type SessionTree,
 } from "@/lib/controlled-edit-api";
+import {
+  loadEnginePreference,
+  saveEnginePreference,
+  type EnginePreference,
+} from "@/lib/engine-preference";
+import { SettingsDrawer, SettingsTrigger } from "@/settings/SettingsDrawer";
 
 import { EditComposer } from "./EditComposer";
 import { EntityPanel } from "./EntityPanel";
@@ -36,6 +42,7 @@ import {
   parseImageOptions,
   saveImageProvider,
   savePromptStyle,
+  subscribeCeditOptions,
   type ImageProviderOption,
   type PromptStyleOption,
 } from "./studio-turn-options";
@@ -70,7 +77,17 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
   const [selectedTargetIds, setSelectedTargetIds] = useState<string[]>([]);
   const [promptStyle, setPromptStyle] = useState<PromptStyleOption>("preserve");
   const [imageProvider, setImageProvider] = useState<ImageProviderOption>("dashscope");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [enginePreference, setEnginePreference] = useState<EnginePreference>({
+    mode: "auto",
+    cloudProvider: "openai",
+  });
   const [importing, setImporting] = useState(false);
+  const apiKeyConfigured = useSyncExternalStore(
+    subscribeSessionApiKey,
+    () => getSessionApiKey() !== null,
+    () => false,
+  );
   const [asideWidth, setAsideWidth] = useSplitSize(
     "aside",
     SPLIT_DEFAULTS.aside,
@@ -101,6 +118,10 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
   }, []);
 
   useEffect(() => {
+    setEnginePreference(loadEnginePreference());
+  }, []);
+
+  useEffect(() => {
     let alive = true;
     fetchCapabilities()
       .then((caps) => {
@@ -127,6 +148,24 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
       alive = false;
     };
   }, []);
+
+  useEffect(() => {
+    function syncFromStorage() {
+      const models = capabilities?.features.controlled_edit?.models ?? {};
+      const options = parseImageOptions(models.image_options);
+      const style =
+        models.prompt_style === "target_only" || models.prompt_style === "preserve"
+          ? models.prompt_style
+          : "preserve";
+      const provider =
+        models.image_provider === "openai" || models.image_provider === "dashscope"
+          ? models.image_provider
+          : "dashscope";
+      setPromptStyle(loadPromptStyle(style));
+      setImageProvider(loadImageProvider(options, provider));
+    }
+    return subscribeCeditOptions(syncFromStorage);
+  }, [capabilities]);
 
   const sessionId = tree?.session.id ?? null;
   const hasBusyVersion = tree?.versions.some(isVersionBusy) ?? false;
@@ -388,7 +427,12 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
               {importing ? "导入中…" : "导入画布"}
             </button>
           ) : null}
-          {floating ? null : <ApiKeyControl />}
+          {floating ? null : (
+            <SettingsTrigger
+              configuredApiKey={apiKeyConfigured}
+              onClick={() => setSettingsOpen(true)}
+            />
+          )}
         </div>
       </header>
 
@@ -559,6 +603,17 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
           </SplitPane>
         </main>
       )}
+
+      <SettingsDrawer
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        enginePreference={enginePreference}
+        onEngineChange={(next) => {
+          setEnginePreference(next);
+          saveEnginePreference(next);
+        }}
+        capabilities={capabilities}
+      />
     </div>
   );
 }

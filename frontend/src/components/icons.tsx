@@ -169,6 +169,15 @@ export function CloseIcon({ size, className }: IconProps) {
   );
 }
 
+export function SettingsIcon({ size, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className} aria-hidden>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M5.6 18.4l1.6-1.6M16.8 7.2l1.6-1.6" />
+    </svg>
+  );
+}
+
 export function GitBranchIcon({ size, className }: IconProps) {
   return (
     <svg {...base(size)} className={className} aria-hidden>

@@ -9,6 +9,7 @@ export interface ImageModelOption {
 
 const PROMPT_KEY = "infd.cedit.prompt-style";
 const IMAGE_KEY = "infd.cedit.image-provider";
+const CHANGE_EVENT = "infd:cedit-options-change";
 
 const PROMPT_LABELS: Record<PromptStyleOption, string> = {
   preserve: "完整约束",
@@ -22,6 +23,18 @@ const PROVIDER_LABELS: Record<ImageProviderOption, string> = {
 
 function storage(): Storage | null {
   return typeof window === "undefined" ? null : window.sessionStorage;
+}
+
+function notifyChange(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(CHANGE_EVENT));
+}
+
+/** Subscribe to prompt_style / image_provider session preference changes. */
+export function subscribeCeditOptions(listener: () => void): () => void {
+  if (typeof window === "undefined") return () => undefined;
+  window.addEventListener(CHANGE_EVENT, listener);
+  return () => window.removeEventListener(CHANGE_EVENT, listener);
 }
 
 export function promptStyleLabel(style: PromptStyleOption): string {
@@ -59,6 +72,7 @@ export function loadPromptStyle(fallback: PromptStyleOption = "preserve"): Promp
 
 export function savePromptStyle(style: PromptStyleOption): void {
   storage()?.setItem(PROMPT_KEY, style);
+  notifyChange();
 }
 
 export function loadImageProvider(
@@ -75,4 +89,5 @@ export function loadImageProvider(
 
 export function saveImageProvider(provider: ImageProviderOption): void {
   storage()?.setItem(IMAGE_KEY, provider);
+  notifyChange();
 }

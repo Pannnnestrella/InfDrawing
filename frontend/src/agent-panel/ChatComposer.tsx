@@ -167,10 +167,14 @@ export function ChatComposer({
       ) : null}
 
       {mode === "image_edit" || mode === "decompose" || mode === "text_edit" ? (
-        <p className="text-[11px] text-muted">
-          {mode === "image_edit"
-            ? selectionHint ?? "请选中一张图片，然后用文字描述修改需求（OpenAI）"
-            : (selectionHint ?? "请在画布上选中一张图片")}
+        <p className={`text-[11px] ${selectionHint ? "text-warning" : "text-muted"}`}>
+          {selectionHint
+            ? selectionHint
+            : mode === "image_edit"
+              ? "已选中图片，用文字描述修改需求（OpenAI）"
+              : mode === "text_edit"
+                ? "已选中图片，可检测并替换文字"
+                : "已选中图片，可描述背景风格后拆解（可留空）"}
         </p>
       ) : null}
 

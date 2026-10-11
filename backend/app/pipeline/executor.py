@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from app.pipeline.comfyui_client import ComfyUIClient
+from app.pipeline.provider_errors import format_provider_error
 
 MAX_RETAINED_TASKS = 100
 
@@ -49,8 +50,10 @@ class TaskState:
 
     async def emit_error(self, message: str) -> None:
         self.status = "error"
-        self.error = message
-        await self.emit({"type": "error", "task_id": self.task_id, "message": message})
+        self.error = format_provider_error(message)
+        await self.emit(
+            {"type": "error", "task_id": self.task_id, "message": self.error}
+        )
 
     @property
     def is_terminal(self) -> bool:

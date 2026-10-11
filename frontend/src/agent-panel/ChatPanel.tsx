@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { ChatComposer } from "@/agent-panel/ChatComposer";
 import { useCanvasSync } from "@/agent-panel/hooks/useCanvasSync";
@@ -19,14 +19,18 @@ import { MessageList } from "@/agent-panel/MessageList";
 import { SessionSwitcher } from "@/agent-panel/SessionSwitcher";
 import type { ChatMode } from "@/agent-panel/types";
 import { MaskTool } from "@/canvas/MaskTool";
-import { ApiKeyControl } from "@/components/ApiKeyControl";
 import { CapabilityStatus } from "@/components/CapabilityStatus";
+import {
+  getSessionApiKey,
+  subscribeSessionApiKey,
+} from "@/lib/api-client";
 import {
   loadEnginePreference,
   resolveImageBackend,
   saveEnginePreference,
   type EnginePreference,
 } from "@/lib/engine-preference";
+import { SettingsDrawer, SettingsTrigger } from "@/settings/SettingsDrawer";
 
 export function ChatPanel({
   onOpenStudio,
@@ -40,10 +44,16 @@ export function ChatPanel({
   const [message, setMessage] = useState("");
   const [mode, setMode] = useState<ChatMode>("auto");
   const [busy, setBusy] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [enginePreference, setEnginePreference] = useState<EnginePreference>({
     mode: "auto",
     cloudProvider: "openai",
   });
+  const apiKeyConfigured = useSyncExternalStore(
+    subscribeSessionApiKey,
+    () => getSessionApiKey() !== null,
+    () => false,
+  );
 
   useEffect(() => {
     setEnginePreference(loadEnginePreference());
@@ -165,7 +175,10 @@ export function ChatPanel({
             </p>
           </div>
           <div className="flex items-center gap-1.5">
-            <ApiKeyControl />
+            <SettingsTrigger
+              configuredApiKey={apiKeyConfigured}
+              onClick={() => setSettingsOpen(true)}
+            />
             <CapabilityStatus />
           </div>
         </header>
@@ -209,6 +222,14 @@ export function ChatPanel({
           onOpenLayers={onOpenLayers}
         />
       </div>
+
+      <SettingsDrawer
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        enginePreference={enginePreference}
+        onEngineChange={handleEngineChange}
+        capabilities={capabilities}
+      />
     </>
   );
 }

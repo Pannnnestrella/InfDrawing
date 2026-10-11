@@ -20,6 +20,8 @@ import {
   duplicateLayerName,
   nextBlankLayerName,
 } from "@/lib/layer-composite";
+import { bakeLayerToShapeBox } from "@/lib/layer-paste-bake";
+import { resolveLayerPasteFrame } from "@/lib/layer-paste-frame";
 import {
   mergeLayerMeta,
   readLayerMeta,
@@ -73,9 +75,14 @@ export function subscribeCanvasBridge(listener: BridgeListener): () => void {
 export function registerCanvasEditor(next: Editor): void {
   detachEditorListeners();
   editor = next;
-  storeUnlisten = editor.store.listen(() => {
-    notify();
-  });
+  // Include session scope so selection changes notify subscribers immediately
+  // (document-only listen misses getSelectedShapeIds updates).
+  storeUnlisten = editor.store.listen(
+    () => {
+      notify();
+    },
+    { scope: "all", source: "all" },
+  );
   notify();
 }
 
@@ -135,15 +142,11 @@ export function getCanvasContextSnapshot(): CanvasContextSnapshot {
 
 export function getCanvasSelectionHint(): string | null {
   if (!editor) return "画布加载中…";
+  // Align with getSelectedImageShape(): multi-image select uses the topmost image.
+  if (getSelectedImageShape()) return null;
   const selectedIds = editor.getSelectedShapeIds();
   if (selectedIds.length === 0) return "请在画布上选中一张图片";
-  if (selectedIds.length > 1) return "请只选中一张图片（当前多选）";
-  const shape = editor.getShape(selectedIds[0]);
-  if (!shape) return "无法读取选中图层";
-  if (shape.type !== "image") {
-    return `当前选中的是「${shape.type}」，请选择图片图层`;
-  }
-  return null;
+  return "当前选中的不是图片图层";
 }
 
 function imageThumbSrc(shape: TLImageShape): string | null {
@@ -677,9 +680,21 @@ async function exportImageShapeFile(
 
 /** Export the selected image shape as original-resolution PNG. */
 export async function exportSelectedImageFile(): Promise<File | null> {
-  const shape = getSelectedImageShape();
-  if (!shape) return null;
-  return exportImageShapeFile(shape);
+  // Fresh pastes may take a moment before asset.src is fetchable.
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const shape = getSelectedImageShape();
+    if (!shape) return null;
+    try {
+      const file = await exportImageShapeFile(shape);
+      if (file) return file;
+    } catch {
+      // Retry below.
+    }
+    if (attempt < 5) {
+      await new Promise((resolve) => setTimeout(resolve, 350));
+    }
+  }
+  return null;
 }
 
 /** Export every selected image layer (background + foreground after decompose). */
@@ -767,24 +782,42 @@ export interface CanvasLayerInput {
   image_url: string;
 }
 
-/** Stack decompose layers at the anchor (background first, foreground on top). */
+/**
+ * Stack decompose layers at the source image frame (background first, foreground on top).
+ *
+ * tldraw renders images with CSS ``object-fit: cover``. If FG/BG natural aspects
+ * differ from the shape box (or each other), cover crops them differently and they
+ * look vertically/horizontally offset. Bake each layer into the exact shape box
+ * first so cover becomes a no-op and layers stay registered to the source.
+ */
 export async function pasteLayersToCanvas(
   layers: CanvasLayerInput[],
-  anchor: { pageX: number; pageY: number },
+  anchor: { pageX: number; pageY: number; w?: number; h?: number },
 ): Promise<boolean> {
   if (!editor || layers.length === 0) return false;
 
   const selected = getSelectedImageShape();
-  const displayW = selected ? Math.round(selected.props.w) : 512;
-  const displayH = selected ? Math.round(selected.props.h) : 512;
+  const frame = resolveLayerPasteFrame(
+    anchor,
+    selected
+      ? {
+          pageX: selected.x,
+          pageY: selected.y,
+          w: Math.round(selected.props.w),
+          h: Math.round(selected.props.h),
+        }
+      : null,
+  );
   const shapeIds: ReturnType<typeof createShapeId>[] = [];
 
+  // Bake at 2× display pixels (same aspect) so cover stays a no-op without
+  // crushing source detail down to the on-canvas box size.
+  const bakeW = Math.max(1, Math.round(frame.w * 2));
+  const bakeH = Math.max(1, Math.round(frame.h * 2));
+
   for (const layer of layers) {
-    const assetSrc = await toTldrawCompatibleSrc(layer.image_url);
-    const { w, h } = await loadImageSize(assetSrc);
-    const scale = Math.min(displayW / w, displayH / h);
-    const layerW = Math.round(w * scale);
-    const layerH = Math.round(h * scale);
+    const rawSrc = await toTldrawCompatibleSrc(layer.image_url);
+    const baked = await bakeLayerToShapeBox(rawSrc, bakeW, bakeH);
 
     const assetId = AssetRecordType.createId();
     const shapeId = createShapeId();
@@ -796,9 +829,10 @@ export async function pasteLayersToCanvas(
         typeName: "asset",
         props: {
           name: `${layer.label}.png`,
-          src: assetSrc,
-          w: layerW,
-          h: layerH,
+          src: baked.src,
+          // Match shape box exactly so object-fit:cover does not re-crop.
+          w: baked.w,
+          h: baked.h,
           mimeType: "image/png",
           isAnimated: false,
         },
@@ -809,12 +843,12 @@ export async function pasteLayersToCanvas(
     editor.createShape({
       id: shapeId,
       type: "image",
-      x: anchor.pageX,
-      y: anchor.pageY,
+      x: frame.pageX,
+      y: frame.pageY,
       props: {
         assetId,
-        w: layerW,
-        h: layerH,
+        w: frame.w,
+        h: frame.h,
       },
       meta: mergeLayerMeta({}, { layerName: layer.label }),
     });
@@ -858,10 +892,21 @@ export async function getSelectedImagePreviewUrl(): Promise<string | null> {
   return editor.resolveAssetUrl(assetId, { shouldResolveToOriginal: true });
 }
 
-export function getSelectedImageAnchor(): { pageX: number; pageY: number } | null {
+/** Page position + display size of the selected image (for aligned layer paste). */
+export function getSelectedImageAnchor(): {
+  pageX: number;
+  pageY: number;
+  w: number;
+  h: number;
+} | null {
   const shape = getSelectedImageShape();
   if (!shape) return null;
-  return { pageX: shape.x, pageY: shape.y };
+  return {
+    pageX: shape.x,
+    pageY: shape.y,
+    w: Math.round(shape.props.w),
+    h: Math.round(shape.props.h),
+  };
 }
 
 /** Replace the selected image shape asset src in place. */

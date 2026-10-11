@@ -5,6 +5,9 @@ export type CanvasRequestKind = "generate" | "decompose" | "library-ingest";
 export interface CanvasAnchor {
   pageX: number;
   pageY: number;
+  /** Source image display size; decompose paste stretches layers to this box. */
+  w?: number;
+  h?: number;
 }
 
 export interface CanvasRequest {

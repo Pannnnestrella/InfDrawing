@@ -8,20 +8,35 @@ import {
   type TLUiContextMenuProps,
 } from "@tldraw/tldraw";
 
-import { getCanvasEditor, getSelectedImageShapes } from "@/lib/canvas-bridge";
-import { openCanvasRequest } from "@/lib/canvas-request-store";
+import {
+  getCanvasEditor,
+  getSelectedImageAnchor,
+  getSelectedImageShapes,
+} from "@/lib/canvas-bridge";
+import {
+  openCanvasRequest,
+  type CanvasAnchor,
+} from "@/lib/canvas-request-store";
 
-function resolveGenerateAnchor(): { pageX: number; pageY: number } | null {
+function resolveGenerateAnchor(): CanvasAnchor | null {
+  const frame = getSelectedImageAnchor();
+  if (frame) return frame;
+
   const editor = getCanvasEditor();
   if (!editor) return null;
 
   const selectionBounds = editor.getSelectionPageBounds();
   if (selectionBounds) {
-    return { pageX: selectionBounds.x, pageY: selectionBounds.y };
+    return {
+      pageX: selectionBounds.x,
+      pageY: selectionBounds.y,
+      w: Math.round(selectionBounds.w),
+      h: Math.round(selectionBounds.h),
+    };
   }
 
   const center = editor.getViewportPageBounds().center;
-  return { pageX: center.x - 256, pageY: center.y - 256 };
+  return { pageX: center.x - 256, pageY: center.y - 256, w: 512, h: 512 };
 }
 
 export function AiContextMenu(props: TLUiContextMenuProps) {

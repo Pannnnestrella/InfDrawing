@@ -1,0 +1,3635 @@
+{
+  "sessions": {
+    "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf": {
+      "id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+      "owner_key_id": "development",
+      "title": "Two-branch knight",
+      "root_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+      "current_version_id": "39aafb6d-273b-4ac8-bef1-cd3326685351",
+      "created_at": "2026-10-05T23:04:55.092637Z",
+      "updated_at": "2026-10-11T18:45:00.407174Z"
+    },
+    "5a2c1db0-9b19-4a6a-892e-9a3e6e885a4f": {
+      "id": "5a2c1db0-9b19-4a6a-892e-9a3e6e885a4f",
+      "owner_key_id": "development",
+      "title": "canvas_image",
+      "root_version_id": "6481e5ad-c868-4e46-9e7d-2a1463a50e42",
+      "current_version_id": "6481e5ad-c868-4e46-9e7d-2a1463a50e42",
+      "created_at": "2026-10-06T13:13:57.453889Z",
+      "updated_at": "2026-10-06T13:13:57.453893Z"
+    },
+    "ccaabf34-bace-4203-ab8d-5f0d8a646f00": {
+      "id": "ccaabf34-bace-4203-ab8d-5f0d8a646f00",
+      "owner_key_id": "development",
+      "title": "canvas_image",
+      "root_version_id": "866dc31c-7336-4470-8ee3-065624209d17",
+      "current_version_id": "866dc31c-7336-4470-8ee3-065624209d17",
+      "created_at": "2026-10-06T13:14:25.047387Z",
+      "updated_at": "2026-10-06T13:14:25.047389Z"
+    }
+  },
+  "versions": {
+    "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf": {
+      "031fc861-f91f-42a8-a029-95cf645f56aa": {
+        "id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": null,
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "56b8e2df-b36a-49c8-8f9c-3c30ce78ef25",
+        "width": 1024,
+        "height": 1024,
+        "instruction": null,
+        "intent": null,
+        "compiled_prompt": null,
+        "prompt_style": null,
+        "image_provider": null,
+        "reference_artifact_ids": [],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a sword and shield.",
+            "bbox": {
+              "x": 0.22,
+              "y": 0.006,
+              "w": 0.5,
+              "h": 0.991
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
+            "bbox": {
+              "x": 0.43,
+              "y": 0.03,
+              "w": 0.11000000000000004,
+              "h": 0.13
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.",
+            "bbox": {
+              "x": 0.38,
+              "y": 0.006,
+              "w": 0.20999999999999996,
+              "h": 0.164
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
+            "bbox": {
+              "x": 0.28,
+              "y": 0.16,
+              "w": 0.39,
+              "h": 0.7899999999999999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.skirt",
+            "name": "Rust-orange skirt",
+            "parent_id": "character",
+            "description": "Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist.",
+            "bbox": {
+              "x": 0.33,
+              "y": 0.45,
+              "w": 0.29,
+              "h": 0.18
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
+            "bbox": {
+              "x": 0.4,
+              "y": 0.38,
+              "w": 0.17999999999999994,
+              "h": 0.07
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.23,
+              "y": 0.43,
+              "w": 0.09,
+              "h": 0.10000000000000003
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.sword",
+            "name": "Longsword",
+            "parent_id": "character",
+            "description": "Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand, blade angled upward.",
+            "bbox": {
+              "x": 0.08,
+              "y": 0.05,
+              "w": 0.22999999999999998,
+              "h": 0.5299999999999999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.shield",
+            "name": "Round blue shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted deep blue with subtle wear marks, held in the left hand, edge facing forward.",
+            "bbox": {
+              "x": 0.59,
+              "y": 0.4,
+              "w": 0.20000000000000007,
+              "h": 0.29499999999999993
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.5
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "bf6a73f4-782b-4f2f-bbd3-f1bdda343df2"
+          },
+          {
+            "id": "environment.castle",
+            "name": "Stone castle",
+            "parent_id": "environment",
+            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
+            "bbox": {
+              "x": 0.695,
+              "y": 0.18,
+              "w": 0.21000000000000008,
+              "h": 0.22000000000000003
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Snow-capped mountain",
+            "parent_id": "environment",
+            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.62,
+              "y": 0.045,
+              "w": 0.38,
+              "h": 0.275
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.42,
+              "w": 1.0,
+              "h": 0.5800000000000001
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "ca558ca9-ece5-4cff-bd04-466aa3e1f885"
+          }
+        ],
+        "verification": null,
+        "attempts": 0,
+        "warnings": [],
+        "error": null,
+        "created_at": "2026-10-05T23:04:55.092667Z",
+        "updated_at": "2026-10-11T18:41:51.074598Z"
+      },
+      "af8aa254-47eb-4274-aabb-829cf20879e9": {
+        "id": "af8aa254-47eb-4274-aabb-829cf20879e9",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "804d801f-6afe-4170-9246-1780475c0fd0",
+        "width": 1024,
+        "height": 1024,
+        "instruction": "把角色手里的剑换成一把弯曲的火焰弯刀，其余部分保持不变",
+        "intent": {
+          "operation": "replace",
+          "target_entity_ids": [
+            "character.sword"
+          ],
+          "new_entity_name": "curved flame scimitar",
+          "location_hint": "in the character's right hand",
+          "change_description": "Replace the straight longsword with a curved flame scimitar in the character's right hand."
+        },
+        "compiled_prompt": "Edit image 1 (the current version of the artwork). Output an edited version of image 1 with the same framing, composition, camera angle and art style.\n\nRequested change: Replace the straight longsword with a curved flame scimitar in the character's right hand.\nWhere: in the character's right hand\nElements to change: Longsword\n\nPreserve exactly — identity, shape, colors, pose and position unchanged:\n- Face (character.face) — Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.. Must match reference image 2.\n\nKeep the exact framing of image 1: same camera distance and crop; every element keeps its position and size in the frame. Do not zoom in, zoom out, crop or re-center.\nDo not add, remove, move or restyle anything that is not part of the requested change. Keep facial expressions unchanged. Keep lighting and color grading consistent with image 1 unless the requested change is about them.\nReference images 2 and later are identity references only: do not paste them into the output and do not add extra copies of them.",
+        "prompt_style": null,
+        "image_provider": null,
+        "reference_artifact_ids": [
+          "dcb2c00c-542f-4cde-9727-7797554e1e33"
+        ],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a sword and shield.",
+            "bbox": {
+              "x": 0.22,
+              "y": 0.01,
+              "w": 0.49,
+              "h": 0.985
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "af8aa254-47eb-4274-aabb-829cf20879e9",
+            "anchor_artifact_id": "cd529e24-5f62-4df1-8657-c1f0bcbb2f00"
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
+            "bbox": {
+              "x": 0.42,
+              "y": 0.03,
+              "w": 0.14000000000000007,
+              "h": 0.15
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "af8aa254-47eb-4274-aabb-829cf20879e9",
+            "anchor_artifact_id": "996e0727-d14e-4dc4-9189-fc8cf818e469"
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.",
+            "bbox": {
+              "x": 0.38,
+              "y": 0.01,
+              "w": 0.21999999999999997,
+              "h": 0.18
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "af8aa254-47eb-4274-aabb-829cf20879e9",
+            "anchor_artifact_id": "1275c1cd-2da3-4e45-98f6-daa6c771561e"
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
+            "bbox": {
+              "x": 0.27,
+              "y": 0.17,
+              "w": 0.41000000000000003,
+              "h": 0.7699999999999999
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "af8aa254-47eb-4274-aabb-829cf20879e9",
+            "anchor_artifact_id": "ee2fba6f-1535-47ee-b5fc-59e282195553"
+          },
+          {
+            "id": "character.skirt",
+            "name": "Rust-orange skirt",
+            "parent_id": "character",
+            "description": "Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist.",
+            "bbox": {
+              "x": 0.33,
+              "y": 0.45,
+              "w": 0.29,
+              "h": 0.18
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "af8aa254-47eb-4274-aabb-829cf20879e9",
+            "anchor_artifact_id": "e1941ae1-d219-4795-9090-8c9782dd7dd7"
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
+            "bbox": {
+              "x": 0.41,
+              "y": 0.39,
+              "w": 0.16999999999999998,
+              "h": 0.06
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "af8aa254-47eb-4274-aabb-829cf20879e9",
+            "anchor_artifact_id": "3e375045-e5a6-4262-88b9-075afec676b9"
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.22,
+              "y": 0.44,
+              "w": 0.1,
+              "h": 0.14999999999999997
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "af8aa254-47eb-4274-aabb-829cf20879e9",
+            "anchor_artifact_id": "a8e3d731-33ff-4ef8-839d-f8cf895facea"
+          },
+          {
+            "id": "character.sword",
+            "name": "Longsword",
+            "parent_id": "character",
+            "description": "Curved, ornate golden-bladed sword with a detailed hilt and pommel, held in the right hand, blade sweeping upward in a graceful arc.",
+            "bbox": {
+              "x": 0.06,
+              "y": 0.04,
+              "w": 0.25,
+              "h": 0.5499999999999999
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "af8aa254-47eb-4274-aabb-829cf20879e9",
+            "anchor_artifact_id": "dcc59a1a-58fd-4135-8c90-beba0e4df3aa"
+          },
+          {
+            "id": "character.shield",
+            "name": "Round blue shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted deep blue with subtle wear marks, held in the left hand, edge facing forward.",
+            "bbox": {
+              "x": 0.59,
+              "y": 0.405,
+              "w": 0.19000000000000006,
+              "h": 0.29999999999999993
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.5
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.castle",
+            "name": "Stone castle",
+            "parent_id": "environment",
+            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
+            "bbox": {
+              "x": 0.68,
+              "y": 0.185,
+              "w": 0.22999999999999998,
+              "h": 0.20500000000000002
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Snow-capped mountain",
+            "parent_id": "environment",
+            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.6,
+              "y": 0.04,
+              "w": 0.4,
+              "h": 0.28
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.4,
+              "w": 1.0,
+              "h": 0.6
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": {
+          "target_applied": true,
+          "target_comment": "The straight longsword has been successfully replaced with a curved flame scimitar.",
+          "composition_score": 1.0,
+          "composition_comment": "The framing, camera distance, and position of the main subject remain consistent between the images.",
+          "preserved": [
+            {
+              "entity_id": "character.face",
+              "score": 1.0,
+              "comment": "The face is identical in both images and matches the reference image perfectly."
+            }
+          ],
+          "passed": true,
+          "warnings": []
+        },
+        "attempts": 1,
+        "warnings": [],
+        "error": null,
+        "created_at": "2026-10-05T23:04:57.819719Z",
+        "updated_at": "2026-10-06T00:06:45.264010Z"
+      },
+      "9217b6d4-ec9a-41cf-a30d-70255784d77b": {
+        "id": "9217b6d4-ec9a-41cf-a30d-70255784d77b",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": "af8aa254-47eb-4274-aabb-829cf20879e9",
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "ce681b9e-cdd7-4027-91a8-567e0cb0ac88",
+        "width": 1024,
+        "height": 1024,
+        "instruction": "把盾牌换成一面带骷髅纹样的黑铁圆盾，其余部分保持不变",
+        "intent": {
+          "operation": "replace",
+          "target_entity_ids": [
+            "character.shield"
+          ],
+          "new_entity_name": "black iron shield with skull pattern",
+          "location_hint": "in the character's left hand",
+          "change_description": "Replace the round blue shield with a black iron round shield featuring a skull pattern."
+        },
+        "compiled_prompt": "Edit image 1 (the current version of the artwork). Output an edited version of image 1 with the same framing, composition, camera angle and art style.\n\nRequested change: Replace the round blue shield with a black iron round shield featuring a skull pattern.\nWhere: in the character's left hand\nElements to change: Round blue shield\n\nPreserve exactly — identity, shape, colors, pose and position unchanged:\n- Face (character.face) — Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.. Must match reference image 2.\n\nKeep the exact framing of image 1: same camera distance and crop; every element keeps its position and size in the frame. Do not zoom in, zoom out, crop or re-center.\nDo not add, remove, move or restyle anything that is not part of the requested change. Keep facial expressions unchanged. Keep lighting and color grading consistent with image 1 unless the requested change is about them.\nReference images 2 and later are identity references only: do not paste them into the output and do not add extra copies of them.",
+        "prompt_style": null,
+        "image_provider": null,
+        "reference_artifact_ids": [
+          "dcb2c00c-542f-4cde-9727-7797554e1e33"
+        ],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a sword and shield.",
+            "bbox": {
+              "x": 0.2,
+              "y": 0.01,
+              "w": 0.51,
+              "h": 0.985
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
+            "bbox": {
+              "x": 0.42,
+              "y": 0.03,
+              "w": 0.12000000000000005,
+              "h": 0.15
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "dcb2c00c-542f-4cde-9727-7797554e1e33"
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.",
+            "bbox": {
+              "x": 0.36,
+              "y": 0.01,
+              "w": 0.24,
+              "h": 0.19
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
+            "bbox": {
+              "x": 0.25,
+              "y": 0.18,
+              "w": 0.43000000000000005,
+              "h": 0.77
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.skirt",
+            "name": "Rust-orange skirt",
+            "parent_id": "character",
+            "description": "Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist.",
+            "bbox": {
+              "x": 0.315,
+              "y": 0.45,
+              "w": 0.315,
+              "h": 0.19
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
+            "bbox": {
+              "x": 0.4,
+              "y": 0.395,
+              "w": 0.17999999999999994,
+              "h": 0.06
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.2,
+              "y": 0.44,
+              "w": 0.10999999999999999,
+              "h": 0.15499999999999997
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.sword",
+            "name": "Longsword",
+            "parent_id": "character",
+            "description": "Curved, ornate golden-bladed sword with a detailed hilt and pommel, held in the right hand, blade sweeping upward in a graceful arc.",
+            "bbox": {
+              "x": 0.06,
+              "y": 0.03,
+              "w": 0.24,
+              "h": 0.565
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.shield",
+            "name": "Round skull-adorned shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted black with a prominent white skull emblem in the center, held in the left hand, edge facing forward.",
+            "bbox": {
+              "x": 0.6,
+              "y": 0.415,
+              "w": 0.21999999999999997,
+              "h": 0.32
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.48
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.castle",
+            "name": "Stone castle",
+            "parent_id": "environment",
+            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
+            "bbox": {
+              "x": 0.68,
+              "y": 0.18,
+              "w": 0.25,
+              "h": 0.21000000000000002
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Snow-capped mountain",
+            "parent_id": "environment",
+            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.6,
+              "y": 0.03,
+              "w": 0.4,
+              "h": 0.31000000000000005
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.45,
+              "w": 1.0,
+              "h": 0.55
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": {
+          "target_applied": true,
+          "target_comment": "The round blue shield has been replaced with a black iron round shield featuring a skull pattern.",
+          "composition_score": 1.0,
+          "composition_comment": "The framing, camera distance, and position of the main subject remain consistent between the images.",
+          "preserved": [
+            {
+              "entity_id": "character.face",
+              "score": 1.0,
+              "comment": "The face is identical in both images and matches the reference image perfectly."
+            }
+          ],
+          "passed": true,
+          "warnings": []
+        },
+        "attempts": 1,
+        "warnings": [],
+        "error": null,
+        "created_at": "2026-10-05T23:06:11.896108Z",
+        "updated_at": "2026-10-05T23:07:21.717311Z"
+      },
+      "4f42fa26-a59f-46e0-a72e-3ffccd83dfaf": {
+        "id": "4f42fa26-a59f-46e0-a72e-3ffccd83dfaf",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": "9217b6d4-ec9a-41cf-a30d-70255784d77b",
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "b1faa28c-d735-40b0-87ee-95169d4a64c2",
+        "width": 1024,
+        "height": 1024,
+        "instruction": "把盔甲换成暗金色哥特板甲，其余部分保持不变",
+        "intent": {
+          "operation": "recolor",
+          "target_entity_ids": [
+            "character.armor"
+          ],
+          "new_entity_name": null,
+          "location_hint": "on the character's body",
+          "change_description": "Change the armor to dark gold Gothic plate armor. Keep the rest of the scene unchanged."
+        },
+        "compiled_prompt": "Edit image 1 (the current version of the artwork). Output an edited version of image 1 with the same framing, composition, camera angle and art style.\n\nRequested change: Change the armor to dark gold Gothic plate armor. Keep the rest of the scene unchanged.\nWhere: on the character's body\nElements to change: Plate armor\n\nPreserve exactly — identity, shape, colors, pose and position unchanged:\n- Face (character.face) — Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.. Must match reference image 2.\n\nKeep the exact framing of image 1: same camera distance and crop; every element keeps its position and size in the frame. Do not zoom in, zoom out, crop or re-center.\nDo not add, remove, move or restyle anything that is not part of the requested change. Keep facial expressions unchanged. Keep lighting and color grading consistent with image 1 unless the requested change is about them.\nReference images 2 and later are identity references only: do not paste them into the output and do not add extra copies of them.",
+        "prompt_style": null,
+        "image_provider": null,
+        "reference_artifact_ids": [
+          "dcb2c00c-542f-4cde-9727-7797554e1e33"
+        ],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing golden-toned plate armor over a red skirt-like garment, brown leather belts and gloves, and holding a sword and shield.",
+            "bbox": {
+              "x": 0.17,
+              "y": 0.01,
+              "w": 0.58,
+              "h": 0.989
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
+            "bbox": {
+              "x": 0.4,
+              "y": 0.03,
+              "w": 0.14,
+              "h": 0.16
+            },
+            "bbox_source": "model",
+            "status": "approved",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.",
+            "bbox": {
+              "x": 0.35,
+              "y": 0.01,
+              "w": 0.24,
+              "h": 0.19
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "4f42fa26-a59f-46e0-a72e-3ffccd83dfaf",
+            "anchor_artifact_id": "bfcf61c6-3efb-46fa-9059-0c4c37ec38d7"
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished golden-bronze steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
+            "bbox": {
+              "x": 0.24,
+              "y": 0.19,
+              "w": 0.44000000000000006,
+              "h": 0.8
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.skirt",
+            "name": "Red skirt",
+            "parent_id": "character",
+            "description": "Layered deep-red fabric skirt with darker trim and leather belt attachments, worn beneath the armor at the waist.",
+            "bbox": {
+              "x": 0.3,
+              "y": 0.47,
+              "w": 0.32,
+              "h": 0.19000000000000006
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
+            "bbox": {
+              "x": 0.39,
+              "y": 0.41,
+              "w": 0.17999999999999994,
+              "h": 0.050000000000000044
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.19,
+              "y": 0.44,
+              "w": 0.12,
+              "h": 0.15999999999999998
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.sword",
+            "name": "Longsword",
+            "parent_id": "character",
+            "description": "Curved, ornate golden-bladed sword with a detailed hilt and pommel, held in the right hand, blade sweeping upward in a graceful arc.",
+            "bbox": {
+              "x": 0.05,
+              "y": 0.025,
+              "w": 0.26,
+              "h": 0.58
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.shield",
+            "name": "Round skull-adorned shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted black with a prominent white skull emblem in the center, held in the left hand, edge facing forward.",
+            "bbox": {
+              "x": 0.59,
+              "y": 0.42,
+              "w": 0.22999999999999998,
+              "h": 0.315
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.5
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.castle",
+            "name": "Stone castle",
+            "parent_id": "environment",
+            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
+            "bbox": {
+              "x": 0.68,
+              "y": 0.18,
+              "w": 0.2599999999999999,
+              "h": 0.21000000000000002
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Snow-capped mountain",
+            "parent_id": "environment",
+            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.59,
+              "y": 0.02,
+              "w": 0.41000000000000003,
+              "h": 0.3
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.4,
+              "w": 1.0,
+              "h": 0.6
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": {
+          "target_applied": true,
+          "target_comment": "The armor has been changed to dark gold Gothic plate armor as requested.",
+          "composition_score": 1.0,
+          "composition_comment": "The composition remains unchanged with the same framing and positioning of the character.",
+          "preserved": [
+            {
+              "entity_id": "character.face",
+              "score": 1.0,
+              "comment": "The face is identical in both images and matches the reference image perfectly."
+            }
+          ],
+          "passed": true,
+          "warnings": []
+        },
+        "attempts": 1,
+        "warnings": [],
+        "error": null,
+        "created_at": "2026-10-05T23:07:25.590326Z",
+        "updated_at": "2026-10-06T11:23:19.516266Z"
+      },
+      "4830613d-627e-4b1a-a3ff-9f6c3329f1a2": {
+        "id": "4830613d-627e-4b1a-a3ff-9f6c3329f1a2",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "10bbdefd-fe88-4358-9b1a-7853018d28ce",
+        "width": 1024,
+        "height": 1024,
+        "instruction": "把发型改成及腰的金色长卷发，其余部分保持不变",
+        "intent": {
+          "operation": "restyle",
+          "target_entity_ids": [
+            "character.hair"
+          ],
+          "new_entity_name": null,
+          "location_hint": "on the character's head",
+          "change_description": "Change the hairstyle to waist-length golden curly hair."
+        },
+        "compiled_prompt": "Edit image 1 (the current version of the artwork). Output an edited version of image 1 with the same framing, composition, camera angle and art style.\n\nRequested change: Change the hairstyle to waist-length golden curly hair.\nWhere: on the character's head\nElements to change: Hair\n\nPreserve exactly — identity, shape, colors, pose and position unchanged:\n- Face (character.face) — Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.. Must match reference image 2.\n\nKeep the exact framing of image 1: same camera distance and crop; every element keeps its position and size in the frame. Do not zoom in, zoom out, crop or re-center.\nDo not add, remove, move or restyle anything that is not part of the requested change. Keep facial expressions unchanged. Keep lighting and color grading consistent with image 1 unless the requested change is about them.\nReference images 2 and later are identity references only: do not paste them into the output and do not add extra copies of them.",
+        "prompt_style": null,
+        "image_provider": null,
+        "reference_artifact_ids": [
+          "dcb2c00c-542f-4cde-9727-7797554e1e33"
+        ],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with long wavy golden hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a sword and shield.",
+            "bbox": {
+              "x": 0.22,
+              "y": 0.006,
+              "w": 0.49,
+              "h": 0.99
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
+            "bbox": {
+              "x": 0.425,
+              "y": 0.03,
+              "w": 0.12000000000000005,
+              "h": 0.15
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "dcb2c00c-542f-4cde-9727-7797554e1e33"
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Very long, voluminous wavy golden hair cascading past the waist, softly lit, framing the face and flowing over the shoulders and chest.",
+            "bbox": {
+              "x": 0.275,
+              "y": 0.006,
+              "w": 0.42999999999999994,
+              "h": 0.514
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
+            "bbox": {
+              "x": 0.26,
+              "y": 0.18,
+              "w": 0.42000000000000004,
+              "h": 0.76
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.skirt",
+            "name": "Rust-orange skirt",
+            "parent_id": "character",
+            "description": "Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist.",
+            "bbox": {
+              "x": 0.325,
+              "y": 0.46,
+              "w": 0.3,
+              "h": 0.16999999999999998
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
+            "bbox": {
+              "x": 0.4,
+              "y": 0.39,
+              "w": 0.18999999999999995,
+              "h": 0.07999999999999996
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.23,
+              "y": 0.435,
+              "w": 0.08499999999999999,
+              "h": 0.09500000000000003
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.sword",
+            "name": "Longsword",
+            "parent_id": "character",
+            "description": "Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand, blade angled upward.",
+            "bbox": {
+              "x": 0.07,
+              "y": 0.05,
+              "w": 0.24,
+              "h": 0.5399999999999999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.shield",
+            "name": "Round blue shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted deep blue with subtle wear marks, held in the left hand, edge facing forward.",
+            "bbox": {
+              "x": 0.595,
+              "y": 0.4,
+              "w": 0.19500000000000006,
+              "h": 0.29999999999999993
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.5
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.castle",
+            "name": "Stone castle",
+            "parent_id": "environment",
+            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
+            "bbox": {
+              "x": 0.71,
+              "y": 0.18,
+              "w": 0.22000000000000008,
+              "h": 0.21000000000000002
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Snow-capped mountain",
+            "parent_id": "environment",
+            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.65,
+              "y": 0.045,
+              "w": 0.35,
+              "h": 0.275
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.42,
+              "w": 1.0,
+              "h": 0.5800000000000001
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": {
+          "target_applied": true,
+          "target_comment": "The hairstyle has been changed to waist-length golden curly hair as requested.",
+          "composition_score": 1.0,
+          "composition_comment": "The framing, camera distance, and position of the main subject remain consistent between the images.",
+          "preserved": [
+            {
+              "entity_id": "character.face",
+              "score": 0.9,
+              "comment": "The face is well-preserved with minor changes in expression and lighting, consistent with the reference image."
+            }
+          ],
+          "passed": true,
+          "warnings": []
+        },
+        "attempts": 1,
+        "warnings": [],
+        "error": null,
+        "created_at": "2026-10-05T23:08:35.868987Z",
+        "updated_at": "2026-10-05T23:09:44.802750Z"
+      },
+      "11a52651-1b64-49ea-8bcf-f0201e166ee6": {
+        "id": "11a52651-1b64-49ea-8bcf-f0201e166ee6",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": "4830613d-627e-4b1a-a3ff-9f6c3329f1a2",
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "c9ff1966-6c46-44bc-896b-2ac4500c6be3",
+        "width": 1024,
+        "height": 1024,
+        "instruction": "给角色戴一顶带红色羽毛的宽檐帽，其余部分保持不变",
+        "intent": {
+          "operation": "add",
+          "target_entity_ids": [],
+          "new_entity_name": "wide-brimmed hat with red feather",
+          "location_hint": "on the character's head",
+          "change_description": "Place a wide-brimmed hat with a red feather on the character's head."
+        },
+        "compiled_prompt": "Edit image 1 (the current version of the artwork). Output an edited version of image 1 with the same framing, composition, camera angle and art style.\n\nRequested change: Place a wide-brimmed hat with a red feather on the character's head.\nWhere: on the character's head\n\nPreserve exactly — identity, shape, colors, pose and position unchanged:\n- Face (character.face) — Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.. Must match reference image 2.\n\nKeep the exact framing of image 1: same camera distance and crop; every element keeps its position and size in the frame. Do not zoom in, zoom out, crop or re-center.\nDo not add, remove, move or restyle anything that is not part of the requested change. Keep facial expressions unchanged. Keep lighting and color grading consistent with image 1 unless the requested change is about them.\nReference images 2 and later are identity references only: do not paste them into the output and do not add extra copies of them.",
+        "prompt_style": null,
+        "image_provider": null,
+        "reference_artifact_ids": [
+          "dcb2c00c-542f-4cde-9727-7797554e1e33"
+        ],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with long wavy golden hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a sword and shield; now also wearing a wide-brimmed hat with a red feather.",
+            "bbox": {
+              "x": 0.21,
+              "y": 0.005,
+              "w": 0.53,
+              "h": 0.99
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression, partially shaded by a hat brim.",
+            "bbox": {
+              "x": 0.41,
+              "y": 0.085,
+              "w": 0.12000000000000005,
+              "h": 0.12499999999999999
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "dcb2c00c-542f-4cde-9727-7797554e1e33"
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Very long, voluminous wavy golden hair cascading past the waist, softly lit, framing the face and flowing over the shoulders and chest, now partially covered by a hat.",
+            "bbox": {
+              "x": 0.27,
+              "y": 0.08,
+              "w": 0.41999999999999993,
+              "h": 0.37
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hat",
+            "name": "Wide-brimmed hat with red feather",
+            "parent_id": "character",
+            "description": "Tan wide-brimmed floppy hat with a bright orange-red plume feather attached to the left side, worn over the hair.",
+            "bbox": {
+              "x": 0.29,
+              "y": 0.003,
+              "w": 0.42,
+              "h": 0.192
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
+            "bbox": {
+              "x": 0.26,
+              "y": 0.215,
+              "w": 0.41000000000000003,
+              "h": 0.735
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.skirt",
+            "name": "Rust-orange skirt",
+            "parent_id": "character",
+            "description": "Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist.",
+            "bbox": {
+              "x": 0.315,
+              "y": 0.48,
+              "w": 0.31,
+              "h": 0.15500000000000003
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
+            "bbox": {
+              "x": 0.35,
+              "y": 0.41,
+              "w": 0.22999999999999998,
+              "h": 0.11000000000000004
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.215,
+              "y": 0.445,
+              "w": 0.08499999999999999,
+              "h": 0.13499999999999995
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.sword",
+            "name": "Longsword",
+            "parent_id": "character",
+            "description": "Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand, blade angled upward.",
+            "bbox": {
+              "x": 0.065,
+              "y": 0.05,
+              "w": 0.235,
+              "h": 0.5349999999999999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.shield",
+            "name": "Round blue shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted deep blue with subtle wear marks, held in the left hand, edge facing forward.",
+            "bbox": {
+              "x": 0.59,
+              "y": 0.395,
+              "w": 0.19500000000000006,
+              "h": 0.30999999999999994
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.42
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.castle",
+            "name": "Stone castle",
+            "parent_id": "environment",
+            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
+            "bbox": {
+              "x": 0.7,
+              "y": 0.17,
+              "w": 0.2300000000000001,
+              "h": 0.215
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Snow-capped mountain",
+            "parent_id": "environment",
+            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.64,
+              "y": 0.045,
+              "w": 0.36,
+              "h": 0.275
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.4,
+              "w": 1.0,
+              "h": 0.6
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": {
+          "target_applied": true,
+          "target_comment": "A wide-brimmed hat with a red feather has been added to the character's head.",
+          "composition_score": 1.0,
+          "composition_comment": "The framing and composition remain consistent between the two images.",
+          "preserved": [
+            {
+              "entity_id": "character.face",
+              "score": 0.8,
+              "comment": "The face is mostly preserved, but the addition of the hat slightly alters the appearance. The expression and features are consistent with the reference."
+            }
+          ],
+          "passed": true,
+          "warnings": []
+        },
+        "attempts": 1,
+        "warnings": [],
+        "error": null,
+        "created_at": "2026-10-05T23:09:46.671748Z",
+        "updated_at": "2026-10-05T23:10:56.825166Z"
+      },
+      "4ec8551a-b661-41ef-827b-6dce930d3037": {
+        "id": "4ec8551a-b661-41ef-827b-6dce930d3037",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": "11a52651-1b64-49ea-8bcf-f0201e166ee6",
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "82416c4d-3b3e-4d0c-b8d2-68afb24594e4",
+        "width": 1024,
+        "height": 1024,
+        "instruction": "把背景换成黄昏时分的海边悬崖，其余部分保持不变",
+        "intent": {
+          "operation": "replace",
+          "target_entity_ids": [
+            "environment"
+          ],
+          "new_entity_name": null,
+          "location_hint": "background",
+          "change_description": "Replace the background with a seaside cliff at dusk, keeping the rest of the image unchanged."
+        },
+        "compiled_prompt": "Edit image 1 (the current version of the artwork). Output an edited version of image 1 with the same framing, composition, camera angle and art style.\n\nRequested change: Replace the background with a seaside cliff at dusk, keeping the rest of the image unchanged.\nWhere: background\nElements to change: Landscape background\n\nPreserve exactly — identity, shape, colors, pose and position unchanged:\n- Face (character.face) — Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression, partially shaded by a hat brim.. Must match reference image 2.\n\nKeep the exact framing of image 1: same camera distance and crop; every element keeps its position and size in the frame. Do not zoom in, zoom out, crop or re-center.\nDo not add, remove, move or restyle anything that is not part of the requested change. Keep facial expressions unchanged. Keep lighting and color grading consistent with image 1 unless the requested change is about them.\nReference images 2 and later are identity references only: do not paste them into the output and do not add extra copies of them.",
+        "prompt_style": null,
+        "image_provider": null,
+        "reference_artifact_ids": [
+          "dcb2c00c-542f-4cde-9727-7797554e1e33"
+        ],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with long wavy golden hair, fair skin, and a serious expression, wearing silver-blue plate armor over a rust-red skirt-like garment, brown leather belt and gloves, and holding a sword and shield; now also wearing a wide-brimmed hat with a red feather, standing on a coastal cliff at sunset.",
+            "bbox": {
+              "x": 0.17,
+              "y": 0.01,
+              "w": 0.59,
+              "h": 0.989
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression, partially shaded by a hat brim, lit by warm sunset glow.",
+            "bbox": {
+              "x": 0.385,
+              "y": 0.085,
+              "w": 0.135,
+              "h": 0.15499999999999997
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "dcb2c00c-542f-4cde-9727-7797554e1e33"
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Very long, voluminous wavy golden hair cascading past the waist, softly lit by sunset, framing the face and flowing over the shoulders and chest, partially covered by a hat.",
+            "bbox": {
+              "x": 0.235,
+              "y": 0.1,
+              "w": 0.45000000000000007,
+              "h": 0.37
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hat",
+            "name": "Wide-brimmed hat with red feather",
+            "parent_id": "character",
+            "description": "Tan wide-brimmed floppy hat with a bright orange-red plume feather attached to the left side, worn over the hair, casting soft shadow on the face.",
+            "bbox": {
+              "x": 0.265,
+              "y": 0.01,
+              "w": 0.44999999999999996,
+              "h": 0.185
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-blue steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses, reflecting warm sunset light.",
+            "bbox": {
+              "x": 0.24,
+              "y": 0.235,
+              "w": 0.42000000000000004,
+              "h": 0.76
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.skirt",
+            "name": "Rust-red skirt",
+            "parent_id": "character",
+            "description": "Layered rust-red fabric skirt with darker trim, worn beneath the armor at the waist, visible between breastplate and greaves.",
+            "bbox": {
+              "x": 0.28,
+              "y": 0.52,
+              "w": 0.345,
+              "h": 0.19499999999999995
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt, catching golden light.",
+            "bbox": {
+              "x": 0.375,
+              "y": 0.45,
+              "w": 0.19499999999999995,
+              "h": 0.05499999999999999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves, one gripping a sword hilt.",
+            "bbox": {
+              "x": 0.195,
+              "y": 0.47,
+              "w": 0.08500000000000002,
+              "h": 0.10999999999999999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.sword",
+            "name": "Longsword",
+            "parent_id": "character",
+            "description": "Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand, blade angled upward, catching golden sunset reflection.",
+            "bbox": {
+              "x": 0.065,
+              "y": 0.04,
+              "w": 0.21500000000000002,
+              "h": 0.575
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.shield",
+            "name": "Round blue shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted deep blue with subtle wear marks, held in the left hand, edge facing forward, partially shadowed by the arm.",
+            "bbox": {
+              "x": 0.58,
+              "y": 0.41,
+              "w": 0.18000000000000005,
+              "h": 0.35500000000000004
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Coastal sunset landscape",
+            "parent_id": null,
+            "description": "Dramatic sunset scene with fiery orange and purple sky over a vast blue sea, rocky cliff on the right, and distant horizon; no castle or mountains visible.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.sea",
+            "name": "Ocean",
+            "parent_id": "environment",
+            "description": "Vast deep blue sea with gentle waves and shimmering golden reflections from the setting sun, stretching to the horizon behind the character.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.405,
+              "w": 0.87,
+              "h": 0.594
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.cliff",
+            "name": "Rocky cliff",
+            "parent_id": "environment",
+            "description": "Steep ochre and brown rocky cliff face on the right side of the image, textured with erosion, rising from the sea and supporting the character’s stance.",
+            "bbox": {
+              "x": 0.55,
+              "y": 0.185,
+              "w": 0.44999999999999996,
+              "h": 0.8140000000000001
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.sky",
+            "name": "Sunset sky",
+            "parent_id": "environment",
+            "description": "Vivid gradient sky transitioning from deep indigo at the top through violet to intense orange and yellow near the horizon, with soft cloud streaks and a visible sun disc.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.42
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Cliff edge ground",
+            "parent_id": null,
+            "description": "Uneven rocky ground at the cliff’s edge, rendered in warm ochre and brown tones, with sparse grass and small stones around the character’s feet.",
+            "bbox": {
+              "x": 0.15,
+              "y": 0.85,
+              "w": 0.6,
+              "h": 0.14900000000000002
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": {
+          "target_applied": true,
+          "target_comment": "The background has been successfully replaced with a seaside cliff at dusk.",
+          "composition_score": 1.0,
+          "composition_comment": "The composition remains consistent with the original image, maintaining the framing and position of the main subject.",
+          "preserved": [
+            {
+              "entity_id": "character.face",
+              "score": 0.9,
+              "comment": "The face is well-preserved with minor detail drift, maintaining the expression and features described."
+            }
+          ],
+          "passed": true,
+          "warnings": []
+        },
+        "attempts": 1,
+        "warnings": [],
+        "error": null,
+        "created_at": "2026-10-05T23:11:00.471740Z",
+        "updated_at": "2026-10-05T23:12:07.738610Z"
+      },
+      "5ee4146d-3150-4c28-9294-68d19ab89703": {
+        "id": "5ee4146d-3150-4c28-9294-68d19ab89703",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "49cc85bc-548a-4034-a57b-b04fa25953c8",
+        "width": 1024,
+        "height": 1024,
+        "instruction": "改为一把散发着火元素魔法能量的长剑",
+        "intent": {
+          "operation": "replace",
+          "target_entity_ids": [
+            "character.sword"
+          ],
+          "new_entity_name": "flaming longsword",
+          "location_hint": "in the character's right hand",
+          "change_description": "Replace the current longsword with a longsword emitting fiery magical energy."
+        },
+        "compiled_prompt": "Edit the last image (image 3) (the current version of the artwork). Output an edited version of the last image (image 3) with the same framing, composition, camera angle and art style.\n\nRequested change: Replace the current longsword with a longsword emitting fiery magical energy.\nWhere: in the character's right hand\nElements to change: Longsword\nLongsword occupies x=0.080, y=0.050, w=0.230, h=0.530 of the current image (normalized 0-1). Change only this region; leave the rest of the full frame unchanged.\n\nPreserve exactly — identity, shape, colors, pose and position unchanged:\n- Face (character.face) — Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.. Must match reference image 1.\n- Hair (character.hair) — Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.. Must match reference image 2.\n- Plate armor (character.armor) — Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses..\n- Rust-orange skirt (character.skirt) — Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist..\n- Brown leather belt (character.belt) — Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt..\n- Leather gloves (character.gloves) — Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves..\n\nEdit the full frame of the last image (image 3). Keep the exact framing: same camera distance and crop; every element keeps its position and size in the frame. Do not zoom in, zoom out, crop or re-center.\nDo not add, remove, move or restyle anything that is not part of the requested change. Keep facial expressions unchanged. Keep lighting and color grading consistent with the last image (image 3) unless the requested change is about them.\nImages before the last one are identity references only: do not paste them into the output and do not add extra copies of them.",
+        "prompt_style": null,
+        "image_provider": null,
+        "reference_artifact_ids": [
+          "08d3328c-a4c4-4b09-9f2b-5e4391685c6f",
+          "42a00050-4ec1-4db3-8c40-eaec5680513f"
+        ],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a flaming sword and shield.",
+            "bbox": {
+              "x": 0.23,
+              "y": 0.005,
+              "w": 0.48,
+              "h": 0.99
+            },
+            "bbox_source": "model",
+            "status": "approved",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
+            "bbox": {
+              "x": 0.43,
+              "y": 0.03,
+              "w": 0.11000000000000004,
+              "h": 0.13
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.",
+            "bbox": {
+              "x": 0.38,
+              "y": 0.005,
+              "w": 0.20999999999999996,
+              "h": 0.165
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "5ee4146d-3150-4c28-9294-68d19ab89703",
+            "anchor_artifact_id": "500e9047-5703-4f0a-b7d1-090f72411b70"
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
+            "bbox": {
+              "x": 0.28,
+              "y": 0.16,
+              "w": 0.39,
+              "h": 0.82
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.skirt",
+            "name": "Rust-orange skirt",
+            "parent_id": "character",
+            "description": "Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist.",
+            "bbox": {
+              "x": 0.33,
+              "y": 0.44,
+              "w": 0.29,
+              "h": 0.19
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
+            "bbox": {
+              "x": 0.4,
+              "y": 0.38,
+              "w": 0.17999999999999994,
+              "h": 0.07
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.24,
+              "y": 0.45,
+              "w": 0.08000000000000002,
+              "h": 0.08000000000000002
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.sword",
+            "name": "Flaming longsword",
+            "parent_id": "character",
+            "description": "Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand, blade engulfed in bright orange-red flame extending upward.",
+            "bbox": {
+              "x": 0.19,
+              "y": 0.0,
+              "w": 0.12,
+              "h": 0.58
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.shield",
+            "name": "Round blue shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted deep blue with subtle wear marks, held in the left hand, edge facing forward.",
+            "bbox": {
+              "x": 0.59,
+              "y": 0.4,
+              "w": 0.20000000000000007,
+              "h": 0.29999999999999993
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.48
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.castle",
+            "name": "Stone castle",
+            "parent_id": "environment",
+            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
+            "bbox": {
+              "x": 0.7,
+              "y": 0.18,
+              "w": 0.20000000000000007,
+              "h": 0.22000000000000003
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Snow-capped mountain",
+            "parent_id": "environment",
+            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.62,
+              "y": 0.045,
+              "w": 0.38,
+              "h": 0.335
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.44,
+              "w": 1.0,
+              "h": 0.56
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": {
+          "target_applied": true,
+          "target_comment": "The longsword has been replaced with one emitting fiery magical energy.",
+          "composition_score": 1.0,
+          "composition_comment": "The framing, camera distance, and position of the main subject remain consistent between images.",
+          "preserved": [
+            {
+              "entity_id": "character.face",
+              "score": 1.0,
+              "comment": "The face is identical in both images and matches the reference closely."
+            },
+            {
+              "entity_id": "character.hair",
+              "score": 1.0,
+              "comment": "The hair remains unchanged and matches the reference image."
+            },
+            {
+              "entity_id": "character.armor",
+              "score": 1.0,
+              "comment": "The armor is unchanged between images."
+            },
+            {
+              "entity_id": "character.skirt",
+              "score": 1.0,
+              "comment": "The skirt is unchanged between images."
+            },
+            {
+              "entity_id": "character.belt",
+              "score": 1.0,
+              "comment": "The belt is unchanged between images."
+            },
+            {
+              "entity_id": "character.gloves",
+              "score": 1.0,
+              "comment": "The gloves are unchanged between images."
+            }
+          ],
+          "passed": true,
+          "warnings": []
+        },
+        "attempts": 1,
+        "warnings": [],
+        "error": null,
+        "created_at": "2026-10-06T00:26:22.438727Z",
+        "updated_at": "2026-10-11T17:46:10.056821Z"
+      },
+      "fa2e16c1-221d-43a9-aa3a-1a0020b5939e": {
+        "id": "fa2e16c1-221d-43a9-aa3a-1a0020b5939e",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": "5ee4146d-3150-4c28-9294-68d19ab89703",
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "625f1728-9e16-4e2a-b351-9e731ad30123",
+        "width": 1024,
+        "height": 1024,
+        "instruction": "把面部改为英姿飒爽的女将军",
+        "intent": {
+          "operation": "restyle",
+          "target_entity_ids": [
+            "character.face"
+          ],
+          "new_entity_name": null,
+          "location_hint": "on the character's face",
+          "change_description": "Restyle the face to look like a valiant female general with a confident and commanding expression."
+        },
+        "compiled_prompt": "Edit the last image (image 3) (the current version of the artwork). Output an edited version of the last image (image 3) with the same framing, composition, camera angle and art style.\n\nRequested change: Restyle the face to look like a valiant female general with a confident and commanding expression.\nWhere: on the character's face\nElements to change: Face\nFace occupies x=0.430, y=0.030, w=0.110, h=0.130 of the current image (normalized 0-1). Change only this region; leave the rest of the full frame unchanged.\n\nPreserve exactly — identity, shape, colors, pose and position unchanged:\n- Hair (character.hair) — Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.. Must match reference image 1.\n- Plate armor (character.armor) — Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.. Must match reference image 2.\n- Rust-orange skirt (character.skirt) — Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist..\n- Brown leather belt (character.belt) — Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt..\n- Leather gloves (character.gloves) — Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves..\n- Flaming longsword (character.sword) — Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand, blade engulfed in bright orange-red flame extending upward..\n\nEdit the full frame of the last image (image 3). Keep the exact framing: same camera distance and crop; every element keeps its position and size in the frame. Do not zoom in, zoom out, crop or re-center.\nDo not add, remove, move or restyle anything that is not part of the requested change. Keep facial expressions unchanged. Keep lighting and color grading consistent with the last image (image 3) unless the requested change is about them.\nImages before the last one are identity references only: do not paste them into the output and do not add extra copies of them.",
+        "prompt_style": null,
+        "image_provider": null,
+        "reference_artifact_ids": [
+          "42a00050-4ec1-4db3-8c40-eaec5680513f",
+          "27324be5-d412-4463-98e2-6cad6e929a49"
+        ],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a flaming sword and shield.",
+            "bbox": {
+              "x": 0.23,
+              "y": 0.005,
+              "w": 0.485,
+              "h": 0.99
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
+            "bbox": {
+              "x": 0.43,
+              "y": 0.025,
+              "w": 0.11000000000000004,
+              "h": 0.135
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.",
+            "bbox": {
+              "x": 0.38,
+              "y": 0.003,
+              "w": 0.21499999999999997,
+              "h": 0.167
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "42a00050-4ec1-4db3-8c40-eaec5680513f"
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
+            "bbox": {
+              "x": 0.285,
+              "y": 0.16,
+              "w": 0.38000000000000006,
+              "h": 0.825
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "27324be5-d412-4463-98e2-6cad6e929a49"
+          },
+          {
+            "id": "character.skirt",
+            "name": "Rust-orange skirt",
+            "parent_id": "character",
+            "description": "Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist.",
+            "bbox": {
+              "x": 0.33,
+              "y": 0.45,
+              "w": 0.295,
+              "h": 0.18
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "c6e124b6-a1b0-4d3f-bd4d-c174a1d15eb2"
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
+            "bbox": {
+              "x": 0.405,
+              "y": 0.385,
+              "w": 0.17999999999999994,
+              "h": 0.07
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "0710af51-34fb-4828-aa48-2d391ad9c39e"
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.24,
+              "y": 0.45,
+              "w": 0.08000000000000002,
+              "h": 0.08000000000000002
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "5d4352ce-bfcf-4d09-9a70-b701ad01a71e"
+          },
+          {
+            "id": "character.sword",
+            "name": "Flaming longsword",
+            "parent_id": "character",
+            "description": "Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand, blade engulfed in bright orange-red flame extending upward.",
+            "bbox": {
+              "x": 0.195,
+              "y": 0.0,
+              "w": 0.12,
+              "h": 0.58
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "5ee4146d-3150-4c28-9294-68d19ab89703",
+            "anchor_artifact_id": "c941feb3-4117-4e64-b81c-1c308b444e28"
+          },
+          {
+            "id": "character.shield",
+            "name": "Round blue shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted deep blue with subtle wear marks, held in the left hand, edge facing forward.",
+            "bbox": {
+              "x": 0.595,
+              "y": 0.4,
+              "w": 0.19500000000000006,
+              "h": 0.29999999999999993
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.5
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.castle",
+            "name": "Stone castle",
+            "parent_id": "environment",
+            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
+            "bbox": {
+              "x": 0.7,
+              "y": 0.18,
+              "w": 0.21000000000000008,
+              "h": 0.22000000000000003
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Snow-capped mountain",
+            "parent_id": "environment",
+            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.62,
+              "y": 0.045,
+              "w": 0.38,
+              "h": 0.275
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.42,
+              "w": 1.0,
+              "h": 0.5800000000000001
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": {
+          "target_applied": true,
+          "target_comment": "The face has been restyled to convey a more confident and commanding expression, fitting the description of a valiant female general.",
+          "composition_score": 1.0,
+          "composition_comment": "The framing, camera distance, and position of the main subject remain consistent between the images.",
+          "preserved": [
+            {
+              "entity_id": "character.hair",
+              "score": 1.0,
+              "comment": "The hair remains consistent with the description and reference image."
+            },
+            {
+              "entity_id": "character.armor",
+              "score": 1.0,
+              "comment": "The armor is unchanged and matches the reference image."
+            },
+            {
+              "entity_id": "character.skirt",
+              "score": 1.0,
+              "comment": "The skirt remains consistent with the description."
+            },
+            {
+              "entity_id": "character.belt",
+              "score": 1.0,
+              "comment": "The belt is unchanged and matches the description."
+            },
+            {
+              "entity_id": "character.gloves",
+              "score": 1.0,
+              "comment": "The gloves remain consistent with the description."
+            },
+            {
+              "entity_id": "character.sword",
+              "score": 1.0,
+              "comment": "The sword remains consistent with the description."
+            }
+          ],
+          "passed": true,
+          "warnings": []
+        },
+        "attempts": 1,
+        "warnings": [],
+        "error": null,
+        "created_at": "2026-10-06T00:28:44.541215Z",
+        "updated_at": "2026-10-06T00:29:35.588862Z"
+      },
+      "d04d22c7-42df-446f-bbb1-c824ef863034": {
+        "id": "d04d22c7-42df-446f-bbb1-c824ef863034",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": "fa2e16c1-221d-43a9-aa3a-1a0020b5939e",
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "f3b58e42-b017-4691-8c3b-081d57236597",
+        "width": 1024,
+        "height": 1024,
+        "instruction": "改为在呐喊",
+        "intent": {
+          "operation": "restyle",
+          "target_entity_ids": [
+            "character.face"
+          ],
+          "new_entity_name": null,
+          "location_hint": "on the character's face",
+          "change_description": "Change the character's expression to appear as if they are shouting."
+        },
+        "compiled_prompt": "Edit the last image (image 3) (the current version of the artwork). Output an edited version of the last image (image 3) with the same framing, composition, camera angle and art style.\n\nRequested change: Change the character's expression to appear as if they are shouting.\nWhere: on the character's face\nElements to change: Face\nFace occupies x=0.430, y=0.025, w=0.110, h=0.135 of the current image (normalized 0-1). Change only this region; leave the rest of the full frame unchanged.\n\nPreserve exactly — identity, shape, colors, pose and position unchanged:\n- Hair (character.hair) — Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.. Must match reference image 1.\n- Plate armor (character.armor) — Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.. Must match reference image 2.\n- Rust-orange skirt (character.skirt) — Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist..\n- Brown leather belt (character.belt) — Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt..\n- Leather gloves (character.gloves) — Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves..\n- Flaming longsword (character.sword) — Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand, blade engulfed in bright orange-red flame extending upward..\n\nEdit the full frame of the last image (image 3). Keep the exact framing: same camera distance and crop; every element keeps its position and size in the frame. Do not zoom in, zoom out, crop or re-center.\nDo not add, remove, move or restyle anything that is not part of the requested change. Keep facial expressions unchanged. Keep lighting and color grading consistent with the last image (image 3) unless the requested change is about them.\nImages before the last one are identity references only: do not paste them into the output and do not add extra copies of them.\n\nThe previous attempt was rejected: the requested change was not visible. Fix this.",
+        "prompt_style": null,
+        "image_provider": null,
+        "reference_artifact_ids": [
+          "42a00050-4ec1-4db3-8c40-eaec5680513f",
+          "27324be5-d412-4463-98e2-6cad6e929a49"
+        ],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a flaming sword and shield.",
+            "bbox": {
+              "x": 0.23,
+              "y": 0.006,
+              "w": 0.48,
+              "h": 0.988
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
+            "bbox": {
+              "x": 0.43,
+              "y": 0.028,
+              "w": 0.11000000000000004,
+              "h": 0.132
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.",
+            "bbox": {
+              "x": 0.38,
+              "y": 0.004,
+              "w": 0.21499999999999997,
+              "h": 0.166
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "42a00050-4ec1-4db3-8c40-eaec5680513f"
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
+            "bbox": {
+              "x": 0.28,
+              "y": 0.16,
+              "w": 0.38,
+              "h": 0.82
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "27324be5-d412-4463-98e2-6cad6e929a49"
+          },
+          {
+            "id": "character.skirt",
+            "name": "Rust-orange skirt",
+            "parent_id": "character",
+            "description": "Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist.",
+            "bbox": {
+              "x": 0.33,
+              "y": 0.44,
+              "w": 0.295,
+              "h": 0.19
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "c6e124b6-a1b0-4d3f-bd4d-c174a1d15eb2"
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
+            "bbox": {
+              "x": 0.4,
+              "y": 0.38,
+              "w": 0.17999999999999994,
+              "h": 0.07
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "0710af51-34fb-4828-aa48-2d391ad9c39e"
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.235,
+              "y": 0.45,
+              "w": 0.08000000000000002,
+              "h": 0.08000000000000002
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "5d4352ce-bfcf-4d09-9a70-b701ad01a71e"
+          },
+          {
+            "id": "character.sword",
+            "name": "Flaming longsword",
+            "parent_id": "character",
+            "description": "Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand, blade engulfed in bright orange-red flame extending upward.",
+            "bbox": {
+              "x": 0.195,
+              "y": 0.0,
+              "w": 0.12,
+              "h": 0.58
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "5ee4146d-3150-4c28-9294-68d19ab89703",
+            "anchor_artifact_id": "c941feb3-4117-4e64-b81c-1c308b444e28"
+          },
+          {
+            "id": "character.shield",
+            "name": "Round blue shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted deep blue with subtle wear marks, held in the left hand, edge facing forward.",
+            "bbox": {
+              "x": 0.595,
+              "y": 0.4,
+              "w": 0.20000000000000007,
+              "h": 0.29999999999999993
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.48
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.castle",
+            "name": "Stone castle",
+            "parent_id": "environment",
+            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
+            "bbox": {
+              "x": 0.7,
+              "y": 0.18,
+              "w": 0.21500000000000008,
+              "h": 0.22000000000000003
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Snow-capped mountain",
+            "parent_id": "environment",
+            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.62,
+              "y": 0.045,
+              "w": 0.38,
+              "h": 0.275
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.42,
+              "w": 1.0,
+              "h": 0.5800000000000001
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": {
+          "target_applied": false,
+          "target_comment": "The character's expression does not appear to have changed to a shouting expression.",
+          "composition_score": 1.0,
+          "composition_comment": "The framing, camera distance, and position of the main subject remain consistent between images.",
+          "preserved": [
+            {
+              "entity_id": "character.hair",
+              "score": 1.0,
+              "comment": "The hair remains identical in both images and matches the reference."
+            },
+            {
+              "entity_id": "character.armor",
+              "score": 1.0,
+              "comment": "The armor is unchanged and matches the reference."
+            },
+            {
+              "entity_id": "character.skirt",
+              "score": 1.0,
+              "comment": "The skirt remains unchanged."
+            },
+            {
+              "entity_id": "character.belt",
+              "score": 1.0,
+              "comment": "The belt is unchanged."
+            },
+            {
+              "entity_id": "character.gloves",
+              "score": 1.0,
+              "comment": "The gloves remain unchanged."
+            },
+            {
+              "entity_id": "character.sword",
+              "score": 1.0,
+              "comment": "The sword remains unchanged."
+            }
+          ],
+          "passed": false,
+          "warnings": [
+            "改动未生效：The character's expression does not appear to have changed to a shouting expression."
+          ]
+        },
+        "attempts": 2,
+        "warnings": [
+          "验收未通过（共尝试 2 次），请检查或回退",
+          "改动未生效：The character's expression does not appear to have changed to a shouting expression."
+        ],
+        "error": null,
+        "created_at": "2026-10-06T05:41:15.616629Z",
+        "updated_at": "2026-10-06T05:45:32.376321Z"
+      },
+      "849328d6-1b04-4472-8930-1c9a6442fb5e": {
+        "id": "849328d6-1b04-4472-8930-1c9a6442fb5e",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "2e0bc03e-e531-41da-8613-fa97c0f92661",
+        "width": 1024,
+        "height": 1024,
+        "instruction": "把骑士的脸改成王者荣耀风格",
+        "intent": {
+          "operation": "restyle",
+          "target_entity_ids": [
+            "character"
+          ],
+          "new_entity_name": null,
+          "location_hint": "on the knight's face",
+          "change_description": "Restyle the knight's face to match the art style of Honor of Kings."
+        },
+        "compiled_prompt": "Edit the last image (image 3) (the current version of the artwork). Output an edited version of the last image (image 3) with the same framing, composition, camera angle and art style.\n\nRequested change: Restyle the knight's face to match the art style of Honor of Kings.\nWhere: on the knight's face\nElements to change: Young armored knight\nYoung armored knight occupies x=0.220, y=0.006, w=0.500, h=0.991 of the current image (normalized 0-1). Change only this region; leave the rest of the full frame unchanged.\n\nIdentity references (match appearance only, do not paste into the scene):\n- Reference image 1: Hair (character.hair) — Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders..\n- Reference image 2: Plate armor (character.armor) — Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses..\nImages before the last one are identity references only: do not paste them into the output and do not add extra copies of them.\n\nApply the requested change on the last image (image 3) and leave everything else as it already appears in that image.\n\nThe previous attempt was rejected: protected elements changed. Fix this.",
+        "prompt_style": "target_only",
+        "image_provider": "dashscope",
+        "reference_artifact_ids": [
+          "571a3ac5-7ee4-4056-9fed-b35df810a3c6",
+          "5a27d049-02ef-4f5b-8c54-fd6b06dbd015"
+        ],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a sword and shield.",
+            "bbox": {
+              "x": 0.24,
+              "y": 0.008,
+              "w": 0.49,
+              "h": 0.991
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
+            "bbox": {
+              "x": 0.43,
+              "y": 0.03,
+              "w": 0.12000000000000005,
+              "h": 0.14
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.",
+            "bbox": {
+              "x": 0.375,
+              "y": 0.008,
+              "w": 0.22999999999999998,
+              "h": 0.177
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "571a3ac5-7ee4-4056-9fed-b35df810a3c6"
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
+            "bbox": {
+              "x": 0.29,
+              "y": 0.17,
+              "w": 0.38000000000000006,
+              "h": 0.825
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "5a27d049-02ef-4f5b-8c54-fd6b06dbd015"
+          },
+          {
+            "id": "character.skirt",
+            "name": "Rust-orange skirt",
+            "parent_id": "character",
+            "description": "Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist.",
+            "bbox": {
+              "x": 0.335,
+              "y": 0.47,
+              "w": 0.3,
+              "h": 0.18000000000000005
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "35c6ab13-657b-4623-b5a5-f8682cd1d83c"
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
+            "bbox": {
+              "x": 0.415,
+              "y": 0.395,
+              "w": 0.16999999999999998,
+              "h": 0.09499999999999997
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "460d2435-aa36-4d71-9e6f-8a531a577eaa"
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.24,
+              "y": 0.445,
+              "w": 0.08500000000000002,
+              "h": 0.14999999999999997
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "f2a8ff08-6872-4508-8ebe-b36c3cd2e9d1"
+          },
+          {
+            "id": "character.sword",
+            "name": "Longsword",
+            "parent_id": "character",
+            "description": "Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand, blade angled upward.",
+            "bbox": {
+              "x": 0.085,
+              "y": 0.058,
+              "w": 0.235,
+              "h": 0.5369999999999999
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "c025a26a-42e9-4091-98d5-1f9354fd3656"
+          },
+          {
+            "id": "character.shield",
+            "name": "Round blue shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted deep blue with subtle wear marks, held in the left hand, edge facing forward.",
+            "bbox": {
+              "x": 0.6,
+              "y": 0.415,
+              "w": 0.19500000000000006,
+              "h": 0.3
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "e569763a-c750-451a-9a7f-ef6cb1163d4a"
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.5
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "bf6a73f4-782b-4f2f-bbd3-f1bdda343df2"
+          },
+          {
+            "id": "environment.castle",
+            "name": "Stone castle",
+            "parent_id": "environment",
+            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
+            "bbox": {
+              "x": 0.705,
+              "y": 0.19,
+              "w": 0.21000000000000008,
+              "h": 0.21999999999999997
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Snow-capped mountain",
+            "parent_id": "environment",
+            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.625,
+              "y": 0.05,
+              "w": 0.375,
+              "h": 0.33
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.44,
+              "w": 1.0,
+              "h": 0.56
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "ca558ca9-ece5-4cff-bd04-466aa3e1f885"
+          }
+        ],
+        "verification": {
+          "target_applied": true,
+          "target_comment": "The knight's face has been restyled to match the art style of Honor of Kings.",
+          "composition_score": 0.95,
+          "composition_comment": "The composition remains consistent with only slight adjustments in the character's positioning.",
+          "preserved": [
+            {
+              "entity_id": "character.hair",
+              "score": 0.9,
+              "comment": "Hair style and color are well-preserved with minor adjustments."
+            },
+            {
+              "entity_id": "character.armor",
+              "score": 1.0,
+              "comment": "Armor remains identical."
+            },
+            {
+              "entity_id": "character.skirt",
+              "score": 1.0,
+              "comment": "Skirt is unchanged."
+            },
+            {
+              "entity_id": "character.belt",
+              "score": 1.0,
+              "comment": "Belt is unchanged."
+            },
+            {
+              "entity_id": "character.gloves",
+              "score": 1.0,
+              "comment": "Gloves are unchanged."
+            },
+            {
+              "entity_id": "character.sword",
+              "score": 1.0,
+              "comment": "Sword is unchanged."
+            },
+            {
+              "entity_id": "character.shield",
+              "score": 1.0,
+              "comment": "Shield is unchanged."
+            },
+            {
+              "entity_id": "environment",
+              "score": 1.0,
+              "comment": "Background landscape is unchanged."
+            },
+            {
+              "entity_id": "environment.castle",
+              "score": 1.0,
+              "comment": "Castle is unchanged."
+            },
+            {
+              "entity_id": "environment.mountain",
+              "score": 1.0,
+              "comment": "Mountain is unchanged."
+            },
+            {
+              "entity_id": "foreground",
+              "score": 1.0,
+              "comment": "Foreground meadow is unchanged."
+            }
+          ],
+          "passed": true,
+          "warnings": []
+        },
+        "attempts": 2,
+        "warnings": [],
+        "error": null,
+        "created_at": "2026-10-11T18:39:23.469610Z",
+        "updated_at": "2026-10-11T18:40:40.004688Z"
+      },
+      "39aafb6d-273b-4ac8-bef1-cd3326685351": {
+        "id": "39aafb6d-273b-4ac8-bef1-cd3326685351",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "93c70f46-e2ef-41c7-89a3-e3aaf6be23f1",
+        "width": 1024,
+        "height": 1024,
+        "instruction": "把face改成王者荣耀风格",
+        "intent": {
+          "operation": "restyle",
+          "target_entity_ids": [
+            "character.face"
+          ],
+          "new_entity_name": null,
+          "location_hint": "on the character's face",
+          "change_description": "Restyle the face to match the art style of Honor of Kings."
+        },
+        "compiled_prompt": "Edit the last image (image 3) (the current version of the artwork). Output an edited version of the last image (image 3) with the same framing, composition, camera angle and art style.\n\nRequested change: Restyle the face to match the art style of Honor of Kings.\nWhere: on the character's face\nElements to change: Face\nFace occupies x=0.430, y=0.030, w=0.110, h=0.130 of the current image (normalized 0-1). Change only this region; leave the rest of the full frame unchanged.\n\nIdentity references (match appearance only, do not paste into the scene):\n- Reference image 1: Landscape background (environment) — Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds..\n- Reference image 2: Flower meadow (foreground) — Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet..\nImages before the last one are identity references only: do not paste them into the output and do not add extra copies of them.\n\nApply the requested change on the last image (image 3) and leave everything else as it already appears in that image.",
+        "prompt_style": "target_only",
+        "image_provider": "dashscope",
+        "reference_artifact_ids": [
+          "bf6a73f4-782b-4f2f-bbd3-f1bdda343df2",
+          "ca558ca9-ece5-4cff-bd04-466aa3e1f885"
+        ],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a sword and shield.",
+            "bbox": {
+              "x": 0.23,
+              "y": 0.006,
+              "w": 0.49,
+              "h": 0.991
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
+            "bbox": {
+              "x": 0.44,
+              "y": 0.03,
+              "w": 0.11000000000000004,
+              "h": 0.13
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.",
+            "bbox": {
+              "x": 0.38,
+              "y": 0.006,
+              "w": 0.20999999999999996,
+              "h": 0.164
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
+            "bbox": {
+              "x": 0.28,
+              "y": 0.16,
+              "w": 0.39,
+              "h": 0.7899999999999999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.skirt",
+            "name": "Rust-orange skirt",
+            "parent_id": "character",
+            "description": "Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist.",
+            "bbox": {
+              "x": 0.33,
+              "y": 0.45,
+              "w": 0.29,
+              "h": 0.18
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
+            "bbox": {
+              "x": 0.4,
+              "y": 0.38,
+              "w": 0.17999999999999994,
+              "h": 0.06
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.23,
+              "y": 0.43,
+              "w": 0.09,
+              "h": 0.10000000000000003
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.sword",
+            "name": "Longsword",
+            "parent_id": "character",
+            "description": "Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand, blade angled upward.",
+            "bbox": {
+              "x": 0.08,
+              "y": 0.05,
+              "w": 0.22999999999999998,
+              "h": 0.5299999999999999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.shield",
+            "name": "Round blue shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted deep blue with subtle wear marks, held in the left hand, edge facing forward.",
+            "bbox": {
+              "x": 0.59,
+              "y": 0.4,
+              "w": 0.20000000000000007,
+              "h": 0.29499999999999993
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.45
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "bf6a73f4-782b-4f2f-bbd3-f1bdda343df2"
+          },
+          {
+            "id": "environment.castle",
+            "name": "Stone castle",
+            "parent_id": "environment",
+            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
+            "bbox": {
+              "x": 0.7,
+              "y": 0.18,
+              "w": 0.21000000000000008,
+              "h": 0.21500000000000002
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Snow-capped mountain",
+            "parent_id": "environment",
+            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.62,
+              "y": 0.045,
+              "w": 0.38,
+              "h": 0.275
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.42,
+              "w": 1.0,
+              "h": 0.5800000000000001
+            },
+            "bbox_source": "model",
+            "status": "locked",
+            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+            "anchor_artifact_id": "ca558ca9-ece5-4cff-bd04-466aa3e1f885"
+          }
+        ],
+        "verification": {
+          "target_applied": true,
+          "target_comment": "The face has been restyled to match the art style of Honor of Kings.",
+          "composition_score": 1.0,
+          "composition_comment": "The framing and composition remain consistent between the images.",
+          "preserved": [
+            {
+              "entity_id": "environment",
+              "score": 1.0,
+              "comment": "The landscape background is preserved with no noticeable changes."
+            },
+            {
+              "entity_id": "environment.castle",
+              "score": 1.0,
+              "comment": "The stone castle remains unchanged and consistent."
+            },
+            {
+              "entity_id": "environment.mountain",
+              "score": 1.0,
+              "comment": "The snow-capped mountain is unchanged and consistent."
+            },
+            {
+              "entity_id": "foreground",
+              "score": 1.0,
+              "comment": "The flower meadow is preserved with no noticeable changes."
+            }
+          ],
+          "passed": true,
+          "warnings": []
+        },
+        "attempts": 1,
+        "warnings": [],
+        "error": null,
+        "created_at": "2026-10-11T18:42:42.539332Z",
+        "updated_at": "2026-10-11T18:43:30.824410Z"
+      }
+    },
+    "5a2c1db0-9b19-4a6a-892e-9a3e6e885a4f": {
+      "6481e5ad-c868-4e46-9e7d-2a1463a50e42": {
+        "id": "6481e5ad-c868-4e46-9e7d-2a1463a50e42",
+        "session_id": "5a2c1db0-9b19-4a6a-892e-9a3e6e885a4f",
+        "parent_id": null,
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "49e92d6b-f96f-4d29-9372-69130aee0774",
+        "width": 1024,
+        "height": 1024,
+        "instruction": null,
+        "intent": null,
+        "compiled_prompt": null,
+        "prompt_style": null,
+        "image_provider": null,
+        "reference_artifact_ids": [],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a sword and shield.",
+            "bbox": {
+              "x": 0.2,
+              "y": 0.005,
+              "w": 0.589,
+              "h": 0.994
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a focused, solemn expression.",
+            "bbox": {
+              "x": 0.43,
+              "y": 0.03,
+              "w": 0.11000000000000004,
+              "h": 0.13
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Shoulder-length wavy reddish-blonde hair, softly framing the face and catching light highlights.",
+            "bbox": {
+              "x": 0.38,
+              "y": 0.005,
+              "w": 0.20999999999999996,
+              "h": 0.165
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and riveted leather straps; includes pauldrons, vambraces, greaves, and a gorget.",
+            "bbox": {
+              "x": 0.28,
+              "y": 0.16,
+              "w": 0.39,
+              "h": 0.7899999999999999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.skirt",
+            "name": "Undergarment skirt",
+            "parent_id": "character",
+            "description": "Rust-orange pleated fabric skirt worn beneath the armor, with darker brown leather trim and straps at the waist.",
+            "bbox": {
+              "x": 0.33,
+              "y": 0.45,
+              "w": 0.295,
+              "h": 0.18
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.belt",
+            "name": "Leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with a metal buckle, worn over the armor at the waist, with hanging straps and pouches.",
+            "bbox": {
+              "x": 0.4,
+              "y": 0.38,
+              "w": 0.17999999999999994,
+              "h": 0.07
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.235,
+              "y": 0.435,
+              "w": 0.09000000000000002,
+              "h": 0.10000000000000003
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.sword",
+            "name": "Longsword",
+            "parent_id": "character",
+            "description": "Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand; blade gleams with soft highlights.",
+            "bbox": {
+              "x": 0.08,
+              "y": 0.05,
+              "w": 0.22999999999999998,
+              "h": 0.5299999999999999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.shield",
+            "name": "Round shield",
+            "parent_id": "character",
+            "description": "Circular blue-painted wooden shield with a dark rim and central boss, held in the left hand; surface shows minor scuffs and wear.",
+            "bbox": {
+              "x": 0.595,
+              "y": 0.4,
+              "w": 0.19400000000000006,
+              "h": 0.29499999999999993
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.5
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.castle",
+            "name": "Castle",
+            "parent_id": "environment",
+            "description": "Stone medieval castle with multiple conical-roofed towers and orange-tiled roofs, situated on a hill in the mid-ground, partially obscured by haze.",
+            "bbox": {
+              "x": 0.695,
+              "y": 0.18,
+              "w": 0.21000000000000008,
+              "h": 0.22000000000000003
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Mountain range",
+            "parent_id": "environment",
+            "description": "Majestic jagged mountains with snow-covered peaks rising behind the castle, rendered in cool blues and grays with atmospheric perspective.",
+            "bbox": {
+              "x": 0.62,
+              "y": 0.045,
+              "w": 0.38,
+              "h": 0.275
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Floral meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field in the foreground, densely scattered with small colorful wildflowers (yellow, red, blue, white).",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.42,
+              "w": 1.0,
+              "h": 0.5800000000000001
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": null,
+        "attempts": 0,
+        "warnings": [],
+        "error": null,
+        "created_at": "2026-10-06T13:13:57.453933Z",
+        "updated_at": "2026-10-06T13:13:57.453935Z"
+      }
+    },
+    "ccaabf34-bace-4203-ab8d-5f0d8a646f00": {
+      "866dc31c-7336-4470-8ee3-065624209d17": {
+        "id": "866dc31c-7336-4470-8ee3-065624209d17",
+        "session_id": "ccaabf34-bace-4203-ab8d-5f0d8a646f00",
+        "parent_id": null,
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "0904a870-7d3d-4b9f-8be8-0eb10025e6ce",
+        "width": 1024,
+        "height": 1024,
+        "instruction": null,
+        "intent": null,
+        "compiled_prompt": null,
+        "prompt_style": null,
+        "image_provider": null,
+        "reference_artifact_ids": [],
+        "entities": [
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field dotted with small wildflowers in blue, yellow, red, white, and orange; painted with soft impressionistic brushstrokes.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.42,
+              "w": 1.0,
+              "h": 0.5800000000000001
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape",
+            "parent_id": null,
+            "description": "Rolling green hills with scattered trees and shrubs, leading to distant blue mountains under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.21,
+              "w": 1.0,
+              "h": 0.31000000000000005
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.castle",
+            "name": "Castle",
+            "parent_id": "environment",
+            "description": "Stone medieval castle with multiple conical towers topped with orange-brown roofs, situated on a grassy knoll amid trees.",
+            "bbox": {
+              "x": 0.705,
+              "y": 0.175,
+              "w": 0.21000000000000008,
+              "h": 0.22300000000000003
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountains",
+            "name": "Mountains",
+            "parent_id": "environment",
+            "description": "Layered mountain range with sharp, snow-dusted peaks in the background; closest peak is prominent and jagged, rendered in cool blues and greys.",
+            "bbox": {
+              "x": 0.38,
+              "y": 0.045,
+              "w": 0.62,
+              "h": 0.36000000000000004
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.sky",
+            "name": "Sky",
+            "parent_id": "environment",
+            "description": "Bright blue sky with soft, fluffy white cumulus clouds, especially concentrated near the mountain peaks.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.295
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.trees",
+            "name": "Trees and shrubs",
+            "parent_id": "environment",
+            "description": "Clusters of dark green deciduous trees and rounded shrubs scattered across the midground hills and around the castle base.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.305,
+              "w": 1.0,
+              "h": 0.195
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": null,
+        "attempts": 0,
+        "warnings": [],
+        "error": null,
+        "created_at": "2026-10-06T13:14:25.047403Z",
+        "updated_at": "2026-10-06T13:14:25.047403Z"
+      }
+    }
+  }
+}

@@ -1,0 +1,367 @@
+{
+  "libraries": {
+    "f97de10f-4715-4e4b-99be-23f2d322f584": {
+      "id": "f97de10f-4715-4e4b-99be-23f2d322f584",
+      "owner_key_id": "development",
+      "name": "默认",
+      "purpose": "",
+      "created_at": "2026-10-06T13:38:21.990507Z",
+      "updated_at": "2026-10-06T13:38:21.990507Z"
+    },
+    "eb2fe548-b2b8-455b-a7cc-c6b96c1f488b": {
+      "id": "eb2fe548-b2b8-455b-a7cc-c6b96c1f488b",
+      "owner_key_id": "development",
+      "name": "browser-check",
+      "purpose": "",
+      "created_at": "2026-10-06T13:38:55.870828Z",
+      "updated_at": "2026-10-06T13:38:55.870828Z"
+    }
+  },
+  "items": {
+    "f9d705af-4db1-4fc8-abba-89b47a1f82c0": {
+      "id": "f9d705af-4db1-4fc8-abba-89b47a1f82c0",
+      "owner_key_id": "development",
+      "library_id": "eb2fe548-b2b8-455b-a7cc-c6b96c1f488b",
+      "artifact_id": "d90b7fc2-c19f-42d5-9750-2427e000cb8d",
+      "title": "红块",
+      "objects": [
+        "纯色背景"
+      ],
+      "tags": [
+        "纯色",
+        "红色",
+        "背景",
+        "单色",
+        "极简"
+      ],
+      "keywords": [],
+      "description": "图像为均匀的纯红色平面，无任何图案、纹理或物体，整体呈现单一色调的视觉效果。",
+      "style": "数字生成的单色平面，色彩饱和度高，无光影变化，构图完全均一，属于极简主义风格。",
+      "source_project": "",
+      "character_name": "",
+      "content_sha256": "",
+      "asset_type": "",
+      "view": "",
+      "genre": "",
+      "background": "",
+      "pose": "",
+      "palette": [],
+      "materials": [],
+      "caption_status": "ok",
+      "caption_error": null,
+      "shape_feat": null,
+      "created_at": "2026-10-06T13:38:55.890615Z",
+      "updated_at": "2026-10-06T13:38:55.890615Z"
+    },
+    "d523cf74-7a51-486d-9844-af9cce566589": {
+      "id": "d523cf74-7a51-486d-9844-af9cce566589",
+      "owner_key_id": "development",
+      "library_id": "f97de10f-4715-4e4b-99be-23f2d322f584",
+      "artifact_id": "9ee28e5b-14e1-49aa-aa92-e95781037fb7",
+      "title": "版本1",
+      "objects": [
+        "少女",
+        "剑",
+        "盾牌",
+        "铠甲",
+        "城堡",
+        "山峦",
+        "草地"
+      ],
+      "tags": [
+        "fantasy",
+        "painting",
+        "heroine",
+        "medieval",
+        "epic"
+      ],
+      "keywords": [],
+      "description": "一位红发少女身着银色板甲与橙红色裙甲，手持长剑与蓝色圆盾，站立于开满野花的翠绿草地上；背景是巍峨雪山与一座尖塔林立的中世纪城堡。",
+      "style": "写实油画风格，柔和自然光照明，构图居中突出人物，色彩明快饱满，笔触可见。",
+      "source_project": "",
+      "character_name": "",
+      "content_sha256": "",
+      "asset_type": "character",
+      "view": "full_body",
+      "genre": "fantasy",
+      "background": "environment",
+      "pose": "standing",
+      "palette": [
+        "银灰",
+        "翠绿",
+        "橙红",
+        "天蓝",
+        "米白"
+      ],
+      "materials": [
+        "金属",
+        "布料",
+        "皮革"
+      ],
+      "caption_status": "ok",
+      "caption_error": null,
+      "shape_feat": null,
+      "created_at": "2026-10-06T13:59:19.066742Z",
+      "updated_at": "2026-10-06T14:10:17.793536Z"
+    },
+    "d8b9df21-f214-48b9-a3bf-447917d7b375": {
+      "id": "d8b9df21-f214-48b9-a3bf-447917d7b375",
+      "owner_key_id": "development",
+      "library_id": "f97de10f-4715-4e4b-99be-23f2d322f584",
+      "artifact_id": "c228fc87-09f1-4038-b610-a867c79d5ade",
+      "title": "山间古堡",
+      "objects": [
+        "城堡",
+        "山峰",
+        "草地",
+        "小径",
+        "野花",
+        "树木"
+      ],
+      "tags": [
+        "风景",
+        "幻想",
+        "油画",
+        "宁静",
+        "自然"
+      ],
+      "keywords": [],
+      "description": "一幅宁静的幻想风格风景画，一条蜿蜒小径穿过开满野花的翠绿草甸，通向远处山丘上的石砌城堡；背景是雄伟的雪山与层叠山峦，天空晴朗，云朵轻盈。",
+      "style": "油画质感，柔和笔触与朦胧远景营造出梦幻氛围；构图采用引导线（小径）增强纵深感，色彩明亮清新，光影自然柔和。",
+      "source_project": "",
+      "character_name": "",
+      "content_sha256": "",
+      "asset_type": "environment",
+      "view": "scene",
+      "genre": "fantasy",
+      "background": "environment",
+      "pose": "none",
+      "palette": [
+        "翠绿",
+        "天蓝",
+        "米白",
+        "赭石",
+        "淡黄"
+      ],
+      "materials": [
+        "石头",
+        "木头",
+        "草",
+        "土壤"
+      ],
+      "caption_status": "ok",
+      "caption_error": null,
+      "shape_feat": null,
+      "created_at": "2026-10-06T14:04:32.448553Z",
+      "updated_at": "2026-10-06T14:04:32.448553Z"
+    },
+    "bc3e8173-093e-4c1b-8e20-98291fea80d8": {
+      "id": "bc3e8173-093e-4c1b-8e20-98291fea80d8",
+      "owner_key_id": "development",
+      "library_id": "f97de10f-4715-4e4b-99be-23f2d322f584",
+      "artifact_id": "252ea69c-06ed-4d36-a3df-9d6a882b2da8",
+      "title": "中世纪女剑士",
+      "objects": [
+        "少女",
+        "长剑",
+        "圆盾",
+        "铠甲",
+        "城堡",
+        "山峦",
+        "草地"
+      ],
+      "tags": [
+        "奇幻",
+        "写实绘画",
+        "英雄",
+        "中世纪",
+        "冒险"
+      ],
+      "keywords": [],
+      "description": "一位红发少女身着银色板甲与红色裙甲，手持长剑与蓝色圆盾，站立于开满野花的翠绿草地上。背景是连绵青山与一座尖顶石砌城堡，天空晴朗，云朵轻盈。",
+      "style": "写实油画风格，笔触细腻，光影柔和自然；构图居中对称，色彩明快饱满，突出人物主体与开阔远景的层次感。",
+      "source_project": "",
+      "character_name": "",
+      "content_sha256": "",
+      "asset_type": "character",
+      "view": "full_body",
+      "genre": "fantasy",
+      "background": "environment",
+      "pose": "standing",
+      "palette": [
+        "银灰",
+        "翠绿",
+        "赭红",
+        "天蓝",
+        "米白"
+      ],
+      "materials": [
+        "金属",
+        "布料",
+        "皮革",
+        "石头"
+      ],
+      "caption_status": "ok",
+      "caption_error": null,
+      "shape_feat": null,
+      "created_at": "2026-10-06T14:06:25.442000Z",
+      "updated_at": "2026-10-06T14:10:06.156193Z"
+    },
+    "35a16aac-f428-40fe-a880-e15a9e0173ab": {
+      "id": "35a16aac-f428-40fe-a880-e15a9e0173ab",
+      "owner_key_id": "development",
+      "library_id": "f97de10f-4715-4e4b-99be-23f2d322f584",
+      "artifact_id": "b90db362-587e-4e8d-9e82-2c45ef12938f",
+      "title": "暗影剑士",
+      "objects": [
+        "男性角色",
+        "长剑",
+        "王冠",
+        "披风",
+        "锁链",
+        "护甲"
+      ],
+      "tags": [
+        "fantasy",
+        "dark",
+        "elegant",
+        "mysterious",
+        "digital art"
+      ],
+      "keywords": [],
+      "description": "一位黑发飘逸、身着暗色系华丽战甲的男性角色，头戴尖刺王冠，手持锈迹斑驳的长剑，周身缠绕锁链与飘带，姿态凌厉而优雅。背景为纯黑，突出角色的轮廓与动态细节。",
+      "style": "数字绘画风格，高对比度光影处理，强调流动感与戏剧性构图；色彩沉稳内敛，以深色调为主，辅以金属反光与丝带亮色点缀。",
+      "source_project": "",
+      "character_name": "",
+      "content_sha256": "",
+      "asset_type": "character",
+      "view": "full_body",
+      "genre": "fantasy",
+      "background": "transparent",
+      "pose": "standing",
+      "palette": [
+        "黑色",
+        "深灰",
+        "暗蓝",
+        "银白",
+        "锈红"
+      ],
+      "materials": [
+        "金属",
+        "布料",
+        "皮革",
+        "皮肤"
+      ],
+      "caption_status": "ok",
+      "caption_error": null,
+      "shape_feat": null,
+      "created_at": "2026-10-06T14:34:07.080834Z",
+      "updated_at": "2026-10-06T14:34:07.080834Z"
+    },
+    "e7901170-9a01-4fb9-9f22-4a0e8aed20d7": {
+      "id": "e7901170-9a01-4fb9-9f22-4a0e8aed20d7",
+      "owner_key_id": "development",
+      "library_id": "f97de10f-4715-4e4b-99be-23f2d322f584",
+      "artifact_id": "981829ce-59b2-4889-9911-83ee45983752",
+      "title": "少女骑士",
+      "objects": [
+        "少女",
+        "剑",
+        "盾牌",
+        "盔甲",
+        "宽檐帽",
+        "城堡",
+        "山峦",
+        "草地"
+      ],
+      "tags": [
+        "fantasy",
+        "painting",
+        "heroine",
+        "medieval",
+        "adventure"
+      ],
+      "keywords": [],
+      "description": "一位身穿银色板甲、头戴宽檐黑帽的少女骑士站立在开满野花的草地上，右手持剑、左手持圆盾，背景是远处的石砌城堡与连绵山脉。",
+      "style": "油画风格，笔触可见，光线柔和明亮，构图居中突出人物，色彩饱和而富有层次。",
+      "source_project": "",
+      "character_name": "",
+      "content_sha256": "a1540842dabee3d61cc09490f137339f608c4bafa61012741fcecad42cc80d96",
+      "asset_type": "character",
+      "view": "full_body",
+      "genre": "fantasy",
+      "background": "environment",
+      "pose": "standing",
+      "palette": [
+        "银灰",
+        "翠绿",
+        "赭红",
+        "深蓝",
+        "米白"
+      ],
+      "materials": [
+        "金属",
+        "布料",
+        "皮革",
+        "木材"
+      ],
+      "caption_status": "ok",
+      "caption_error": null,
+      "shape_feat": null,
+      "created_at": "2026-10-11T18:34:11.016277Z",
+      "updated_at": "2026-10-11T18:34:11.016277Z"
+    },
+    "d9f958e2-2a3d-4a2a-b0f2-27f63fa73eee": {
+      "id": "d9f958e2-2a3d-4a2a-b0f2-27f63fa73eee",
+      "owner_key_id": "development",
+      "library_id": "f97de10f-4715-4e4b-99be-23f2d322f584",
+      "artifact_id": "2486116c-ebe1-4af2-bf37-94c5818b8951",
+      "title": "围棋少女",
+      "objects": [
+        "少女",
+        "围棋棋盘",
+        "黑白棋子",
+        "棋罐",
+        "传统亭台",
+        "远山",
+        "红枫叶"
+      ],
+      "tags": [
+        "东方",
+        "古风",
+        "策略",
+        "静谧",
+        "插画"
+      ],
+      "keywords": [],
+      "description": "一位身着红白相间汉服的年轻女子正专注地在木制棋盘上下围棋，背景是秋日山水与古典亭台，红枫飘落，氛围宁静而富有哲思。",
+      "style": "数字插画风格，柔和暖光渲染，构图采用斜角近景突出人物与棋盘，色彩雅致和谐，笔触细腻带水墨意境。",
+      "source_project": "",
+      "character_name": "",
+      "content_sha256": "9f52918925ec78d02f43d4e976564e6cd95740cb1a02a9c9edcc6f9b82b472f5",
+      "asset_type": "character",
+      "view": "bust",
+      "genre": "eastern",
+      "background": "environment",
+      "pose": "idle",
+      "palette": [
+        "朱红",
+        "象牙白",
+        "墨黑",
+        "赭石",
+        "浅金"
+      ],
+      "materials": [
+        "布料",
+        "木头",
+        "陶瓷",
+        "皮肤"
+      ],
+      "caption_status": "ok",
+      "caption_error": null,
+      "shape_feat": null,
+      "created_at": "2026-10-11T19:12:54.165939Z",
+      "updated_at": "2026-10-11T19:12:54.165939Z"
+    }
+  }
+}

@@ -15,6 +15,7 @@
 | [04_实验数据表.md](04_实验数据表.md) | 双分支 / 小物件 mask / 定位模型对照，可直接做成 Word 表 |
 | [05_录屏脚本.md](05_录屏脚本.md) | 3 分钟演示分镜（素材库 + 多轮编辑） |
 | [06_面试事实卡.md](06_面试事实卡.md) | 模块路径、接口、模型分工、未做事项；防追问穿帮 |
+| [InfDrawing_interview_qa_two_rounds.docx](InfDrawing_interview_qa_two_rounds.docx) | 面试对练稿（提问→回答→追问→再答）；可用 `make_interview_docx.py` 重生成 |
 | `figures/` | 从现有 Word 抽出的 3 张图，文件名已编号 |
 
 ## 建议 PDF 目录（对应题目四问）

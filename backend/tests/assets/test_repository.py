@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import asyncio
 
-from app.assets.repository import MemoryAssetRepository, item_matches_query
+from app.assets.repository import (
+    MemoryAssetRepository,
+    item_matches_query,
+    tokenize_query,
+)
 from app.assets.schemas import AssetItem, AssetLibrary, utc_now
 
 
@@ -116,3 +120,23 @@ def test_item_matches_query_on_style() -> None:
     assert item_matches_query(_item(), "冷色")
     assert item_matches_query(_item(), "角色")
     assert not item_matches_query(_item(), "赛博")
+
+
+def test_tokenize_query_keeps_phrase_and_jieba_parts() -> None:
+    tokens = tokenize_query("红发 剑士")
+    assert "红发" in tokens
+    assert "剑士" in tokens
+
+
+def test_item_matches_query_or_tokens() -> None:
+    knight = _item()
+    # Second token alone is enough (OR): 奇幻 is a tag on the knight item.
+    assert item_matches_query(knight, "赛博 奇幻")
+    # Neither token appears.
+    assert not item_matches_query(knight, "赛博 机甲")
+    # Phrase kept whole: character_name continuous match still works.
+    named = _item(character_name="女剑士")
+    assert item_matches_query(named, "女剑士")
+    # Unspaced Chinese: jieba emits 剑士 from 红发剑士.
+    with_swordsman = _item(keywords=["剑士"])
+    assert item_matches_query(with_swordsman, "红发剑士")

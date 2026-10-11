@@ -4,11 +4,17 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 from pathlib import Path
 from typing import Protocol
 
+import jieba
+
 from app.assets.schemas import AssetItem, AssetLibrary
 from app.config import settings
+
+# Split user query into phrases before jieba; keep phrases as OR tokens too.
+_QUERY_CHUNK_SPLIT = re.compile(r"[\s,，。；;、/|]+")
 
 
 class AssetRepository(Protocol):
@@ -134,17 +140,53 @@ class MemoryAssetRepository:
         owned = [item for item in self._items.values() if item.owner_key_id == owner_key_id]
         if library_id:
             owned = [item for item in owned if item.library_id == library_id]
-        needle = (query or "").strip().casefold()
-        if needle:
-            owned = [item for item in owned if item_matches_query(item, needle)]
+        if (query or "").strip():
+            owned = [item for item in owned if item_matches_query(item, query or "")]
         owned.sort(key=lambda item: item.created_at, reverse=True)
         return [item.model_copy(deep=True) for item in owned]
 
 
-def item_matches_query(item: AssetItem, needle: str) -> bool:
-    """Return True when ``needle`` (already casefolded) occurs in searchable fields."""
+def tokenize_query(query: str) -> list[str]:
+    """Split a library search query into OR tokens via whitespace chunks and jieba.
+
+    Each whitespace/punctuation-separated chunk is kept when length >= 2 so phrases
+    like ``红发`` survive even when jieba emits single characters. jieba tokens of
+    length >= 2 are added as well. If nothing remains, fall back to the full query.
+    """
+    text = (query or "").strip()
+    if not text:
+        return []
+
+    tokens: list[str] = []
+    seen: set[str] = set()
+
+    def _add(raw: str) -> None:
+        token = raw.strip().casefold()
+        if len(token) < 2 or token in seen:
+            return
+        seen.add(token)
+        tokens.append(token)
+
+    for chunk in _QUERY_CHUNK_SPLIT.split(text):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        _add(chunk)
+        for part in jieba.lcut(chunk, cut_all=False):
+            _add(part)
+
+    if not tokens:
+        _add(text)
+    return tokens
+
+
+def item_matches_query(item: AssetItem, query: str) -> bool:
+    """Return True when any query token is a substring of searchable fields (OR)."""
+    tokens = tokenize_query(query)
+    if not tokens:
+        return True
     haystack = item.search_blob().casefold()
-    return needle in haystack
+    return any(token in haystack for token in tokens)
 
 
 def _atomic_write_json(path: Path, payload: object) -> None:

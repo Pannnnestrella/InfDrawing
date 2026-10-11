@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { AssetItem } from "./library-api";
-import { itemMatchesQuery } from "./library-search";
+import { itemMatchesQuery, tokenizeQuery } from "./library-search";
 
 function item(overrides: Partial<AssetItem> = {}): AssetItem {
   return {
@@ -55,5 +55,11 @@ describe("itemMatchesQuery", () => {
     expect(itemMatchesQuery(row, "持剑")).toBe(true);
     expect(itemMatchesQuery(row, "骑士demo")).toBe(true);
     expect(itemMatchesQuery(row, "女剑士")).toBe(true);
+  });
+
+  it("tokenizes on whitespace and matches with OR", () => {
+    expect(tokenizeQuery("红发 剑士")).toEqual(["红发", "剑士"]);
+    expect(itemMatchesQuery(item(), "赛博 奇幻")).toBe(true);
+    expect(itemMatchesQuery(item(), "赛博 机甲")).toBe(false);
   });
 });

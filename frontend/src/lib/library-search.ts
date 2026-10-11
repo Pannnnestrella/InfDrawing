@@ -8,11 +8,32 @@ import {
 } from "./library-catalog";
 import type { AssetItem } from "./library-api";
 
-/** Case-insensitive substring match across caption and game-catalog fields. */
-export function itemMatchesQuery(item: AssetItem, query: string): boolean {
-  const needle = query.trim().toLowerCase();
-  if (!needle) return true;
-  const haystack = [
+const QUERY_CHUNK_SPLIT = /[\s,，。；;、/|]+/;
+
+/**
+ * Approximate the backend OR tokenizer without jieba (production search hits the API).
+ * Keeps whitespace/punctuation chunks of length >= 2.
+ */
+export function tokenizeQuery(query: string): string[] {
+  const text = query.trim();
+  if (!text) return [];
+  const tokens: string[] = [];
+  const seen = new Set<string>();
+  for (const chunk of text.split(QUERY_CHUNK_SPLIT)) {
+    const token = chunk.trim().toLowerCase();
+    if (token.length < 2 || seen.has(token)) continue;
+    seen.add(token);
+    tokens.push(token);
+  }
+  if (tokens.length === 0) {
+    const folded = text.toLowerCase();
+    if (folded) tokens.push(folded);
+  }
+  return tokens;
+}
+
+function searchBlob(item: AssetItem): string {
+  return [
     item.title,
     item.description,
     item.style,
@@ -31,5 +52,12 @@ export function itemMatchesQuery(item: AssetItem, query: string): boolean {
   ]
     .join(" ")
     .toLowerCase();
-  return haystack.includes(needle);
+}
+
+/** Case-insensitive OR of token substrings across caption and game-catalog fields. */
+export function itemMatchesQuery(item: AssetItem, query: string): boolean {
+  const tokens = tokenizeQuery(query);
+  if (tokens.length === 0) return true;
+  const haystack = searchBlob(item);
+  return tokens.some((token) => haystack.includes(token));
 }

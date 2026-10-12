@@ -11,7 +11,7 @@ from collections.abc import Callable, Coroutine
 from typing import Any, Literal, Protocol
 
 import httpx
-from PIL import Image, ImageOps
+from PIL import Image, ImageDraw, ImageOps
 
 from app.config import Settings, settings
 from app.controlled_edit.anchors import crop_entity
@@ -30,13 +30,25 @@ from app.controlled_edit.inpaint_types import (
     MaskRecord,
 )
 from app.controlled_edit.intent_parser import parse_intent
-from app.controlled_edit.masks import png_bytes, prepare_mask
+from app.controlled_edit.masks import PreparedMask, png_bytes, prepare_mask
 from app.controlled_edit.prompt_compiler import compile_edit_prompt
+from app.controlled_edit.alpha import (
+    flatten_for_model,
+    has_meaningful_alpha,
+    match_source_size,
+    reattach_alpha,
+)
+from app.controlled_edit.image_models import QWEN_EDIT_MODELS, WAN27_MODELS
+from app.controlled_edit.qwen_mask_prompt import (
+    qwen_fullframe_alpha_clause,
+    wants_transparency,
+)
 from app.controlled_edit.region_ops import (
     build_edit_mask,
     framing_drift,
     lock_composite,
     mask_png_bytes,
+    target_pixel_bboxes,
     uses_local_mask,
 )
 from app.controlled_edit.repository import EditRepository, get_edit_repository
@@ -59,6 +71,7 @@ from app.controlled_edit.schemas import (
 )
 from app.controlled_edit.segmentation import SegmentRequest
 from app.controlled_edit.sizing import pad_to_supported, restore_original_frame
+# match_source_size lives in alpha.py (RGBA-aware)
 from app.controlled_edit.verifier import retry_feedback, verify_edit
 from app.controlled_edit.vision import VisionError
 from app.pipeline.image_providers.base import ImageProviderError
@@ -248,16 +261,18 @@ class ControlledEditService:
         parent = await self._ready_version(session_id, request.parent_version_id)
         if request.edit_mode == "local":
             if request.image_provider == "openai":
-                raise EditorUnavailableError("局部 Crop/Stitch 当前使用万相，请选择通义提供商")
+                raise EditorUnavailableError("局部 Mask 编辑当前使用万相，请选择通义提供商")
             if self._config.dashscope_edit_model != request.inpaint_options.model:
                 raise EditorUnavailableError("局部重绘模型与服务器配置不一致")
-            await self.prepare_local_crop(
-                owner_key_id,
-                session_id,
-                parent.id,
-                request.mask_artifact_id or "",
-                request.inpaint_options,
-            )
+            mask_id = request.mask_artifact_id or ""
+            if request.inpaint_options.placement == "fullframe":
+                await self.prepare_local_fullframe(
+                    owner_key_id, session_id, parent.id, mask_id, request.inpaint_options
+                )
+            else:
+                await self.prepare_local_crop(
+                    owner_key_id, session_id, parent.id, mask_id, request.inpaint_options
+                )
         intent = await parse_intent(self._vision_factory(), request.instruction, parent.entities)
         known = {entity.id for entity in parent.entities}
         chosen = [entity_id for entity_id in request.target_entity_ids if entity_id in known]
@@ -331,9 +346,18 @@ class ControlledEditService:
         )
         prompt_style = version.prompt_style or self._config.cedit_prompt_style
         explicit_local = bool(version.local_edit and version.local_edit.edit_mode == "local")
+        auto_local = bool(
+            not explicit_local
+            and not (version.local_edit and version.local_edit.edit_mode == "full")
+            and uses_local_mask(version.intent, parent.entities)
+            and _wanx_mask_available(self._config)
+        )
+        auto_engine = (self._config.cedit_auto_local_engine or "wan27_bbox").strip()
+        use_wan27_bbox = auto_local and auto_engine == "wan27_bbox"
+        use_wanx_mask = explicit_local or (auto_local and auto_engine == "wanx21_mask")
         editor = (
             None
-            if explicit_local
+            if explicit_local or use_wan27_bbox
             else self._editor_factory(image_provider, image_model)
         )
         vision = self._vision_factory()
@@ -345,29 +369,50 @@ class ControlledEditService:
         parsed_entities: list[SceneEntity] | None = None
         parse_warnings: list[str] = []
         crop = None
+        fullframe_mask_bytes: bytes | None = None
+        fullframe_mask_id: str | None = None
         if explicit_local and version.local_edit:
-            crop = await self.prepare_local_crop(
-                owner_key_id,
-                version.session_id,
-                parent.id,
-                version.local_edit.mask_artifact_id or "",
-                version.local_edit.inpaint_options,
-            )
-            crop_artifact = await self._artifacts.create_image(
-                owner_key_id, crop.image, "image/png"
-            )
-            gen_mask = await self._artifacts.create_image(owner_key_id, crop.mask, "image/png")
-            blend = await self._artifacts.create_image(owner_key_id, crop.blend, "image/png")
-            version.stitcher = crop.stitcher.model_copy(
-                update={
-                    "source_artifact_id": parent.image_artifact_id,
-                    "parent_version_id": parent.id,
-                    "mask_artifact_id": version.local_edit.mask_artifact_id,
-                    "crop_artifact_id": crop_artifact.id,
-                    "generation_mask_artifact_id": gen_mask.id,
-                    "blend_artifact_id": blend.id,
-                }
-            )
+            options = version.local_edit.inpaint_options
+            if options.placement == "fullframe":
+                prepared = await self.prepare_local_fullframe(
+                    owner_key_id,
+                    version.session_id,
+                    parent.id,
+                    version.local_edit.mask_artifact_id or "",
+                    options,
+                )
+                gen_mask = await self._artifacts.create_image(
+                    owner_key_id, mask_png_bytes(prepared.hard), "image/png"
+                )
+                fullframe_mask_bytes = mask_png_bytes(prepared.hard)
+                fullframe_mask_id = gen_mask.id
+            else:
+                crop = await self.prepare_local_crop(
+                    owner_key_id,
+                    version.session_id,
+                    parent.id,
+                    version.local_edit.mask_artifact_id or "",
+                    options,
+                )
+                crop_artifact = await self._artifacts.create_image(
+                    owner_key_id, crop.image, "image/png"
+                )
+                gen_mask = await self._artifacts.create_image(
+                    owner_key_id, crop.mask, "image/png"
+                )
+                blend = await self._artifacts.create_image(
+                    owner_key_id, crop.blend, "image/png"
+                )
+                version.stitcher = crop.stitcher.model_copy(
+                    update={
+                        "source_artifact_id": parent.image_artifact_id,
+                        "parent_version_id": parent.id,
+                        "mask_artifact_id": version.local_edit.mask_artifact_id,
+                        "crop_artifact_id": crop_artifact.id,
+                        "generation_mask_artifact_id": gen_mask.id,
+                        "blend_artifact_id": blend.id,
+                    }
+                )
         for attempt in range(1, max_attempts + 1):
             compiled = compile_edit_prompt(
                 version.intent,
@@ -394,30 +439,53 @@ class ControlledEditService:
                 else [e.anchor_artifact_id for e in lock_refs if e.anchor_artifact_id]
             )
             await self._set_step(version, "generating" if attempt == 1 else "retrying")
-            padded = pad_to_supported(parent_bytes)
-            use_mask = explicit_local or (
-                not (version.local_edit and version.local_edit.edit_mode == "full")
-                and uses_local_mask(version.intent, parent.entities)
-                and _wanx_mask_available(self._config)
+            parent_has_alpha = has_meaningful_alpha(parent_bytes)
+            instruction_text = version.instruction or (
+                version.intent.change_description if version.intent else ""
             )
-            if use_mask:
+            allow_alpha = wants_transparency(
+                instruction_text, parent_has_alpha=parent_has_alpha
+            )
+            use_qwen_editor = (
+                image_provider == "dashscope"
+                and image_model is not None
+                and image_model in QWEN_EDIT_MODELS
+            )
+            padded = pad_to_supported(
+                parent_bytes, keep_alpha=allow_alpha if use_qwen_editor else False
+            )
+            alpha_support: bytes | None = None
+            if use_wanx_mask:
                 if "local_mask:wanx" not in version.warnings:
                     version.warnings.append("local_mask:wanx")
                 from app.pipeline.image_providers.dashscope_wanx import (
                     DashScopeWanxProvider,
                 )
 
-                base_prompt = version.instruction or version.intent.change_description
+                base_prompt = instruction_text
                 feedback_text = f"修正上次问题：{feedback[:300]}。" if feedback else ""
                 wanx_prompt = (feedback_text + base_prompt)[:800]
                 version.compiled_prompt = wanx_prompt
                 if crop and version.stitcher:
                     mask_bytes = crop.mask
-                    image_bytes = crop.image
+                    image_bytes = (
+                        flatten_for_model(crop.image)
+                        if has_meaningful_alpha(crop.image)
+                        else crop.image
+                    )
                     primary_id = version.stitcher.crop_artifact_id or parent.image_artifact_id
                     mask_id = version.stitcher.generation_mask_artifact_id
                     primary_role_lit: Literal["primary", "crop"] = "crop"
-                    primary_label = "裁剪图（发给万相）"
+                    primary_label = "裁剪图（发给万相 2.1 Legacy）"
+                    alpha_support = crop.blend
+                elif fullframe_mask_bytes and fullframe_mask_id:
+                    mask_bytes = fullframe_mask_bytes
+                    image_bytes = flatten_for_model(parent_bytes)
+                    primary_id = parent.image_artifact_id
+                    mask_id = fullframe_mask_id
+                    primary_role_lit = "primary"
+                    primary_label = "整图 + Mask（万相 2.1 Legacy，不裁剪）"
+                    alpha_support = fullframe_mask_bytes
                 else:
                     with Image.open(io.BytesIO(parent_bytes)) as parent_im:
                         size = parent_im.size
@@ -428,14 +496,17 @@ class ControlledEditService:
                         unconstrained="keep",
                     )
                     mask_bytes = mask_png_bytes(mask)
-                    image_bytes = parent_bytes
+                    image_bytes = flatten_for_model(parent_bytes)
                     mask_artifact = await self._artifacts.create_image(
                         owner_key_id, mask_bytes, "image/png"
                     )
                     primary_id = parent.image_artifact_id
                     mask_id = mask_artifact.id
                     primary_role_lit = "primary"
-                    primary_label = "整图 base_image（发给万相）"
+                    primary_label = "整图 + 矩形 Mask（万相 2.1 Legacy）"
+                    alpha_support = mask_bytes
+                if parent_has_alpha:
+                    primary_label += " · 区外保留透明"
                 version.sent_images = _wanx_sent_images(
                     primary_id=primary_id or "",
                     primary_role=primary_role_lit,
@@ -451,24 +522,114 @@ class ControlledEditService:
                         prompt=wanx_prompt,
                     )
                 )
+                candidate = raw
+            elif use_wan27_bbox:
+                if "local_bbox:wan27" not in version.warnings:
+                    version.warnings.append("local_bbox:wan27")
+                from app.pipeline.image_providers.dashscope_wan27_edit import (
+                    DashScopeWan27EditProvider,
+                )
+
+                with Image.open(io.BytesIO(parent_bytes)) as parent_im:
+                    size = parent_im.size
+                boxes = target_pixel_bboxes(
+                    size, parent.entities, version.intent.target_entity_ids, max_boxes=2
+                )
+                if not boxes:
+                    raise EditorUnavailableError("自动局部缺少有效目标框，请改用整图或 Mask")
+                base_prompt = instruction_text
+                feedback_text = f"修正上次问题：{feedback[:300]}。" if feedback else ""
+                wan_prompt = (
+                    feedback_text
+                    + base_prompt
+                    + "仅修改框选区域，保持其余像素、油画笔触与光照一致。"
+                )[:5000]
+                version.compiled_prompt = wan_prompt
+                label = (
+                    f"整图 + Wan 2.7 bbox "
+                    f"({self._config.cedit_auto_local_model}; {boxes})"
+                )
+                if parent_has_alpha:
+                    label += " · 区外保留透明"
+                version.sent_images = [
+                    SentImage(
+                        role="primary",
+                        artifact_id=parent.image_artifact_id or "",
+                        index=1,
+                        label=label,
+                        sent=True,
+                    )
+                ]
+                for entity in lock_refs:
+                    if not entity.anchor_artifact_id:
+                        continue
+                    version.sent_images.append(
+                        SentImage(
+                            role="reference",
+                            artifact_id=entity.anchor_artifact_id,
+                            label=f"锁定锚点 {entity.name}（未发送）",
+                            sent=False,
+                        )
+                    )
+                wan27 = DashScopeWan27EditProvider(
+                    self._config, model=self._config.cedit_auto_local_model
+                )
+                send_bytes = (
+                    flatten_for_model(parent_bytes) if parent_has_alpha else parent_bytes
+                )
+                raw = await _with_transport_retries(
+                    functools.partial(
+                        wan27.multi_image_edit,
+                        image_bytes=send_bytes,
+                        reference_images=[],
+                        prompt=wan_prompt,
+                        size="2K",
+                        bbox_list=[boxes],
+                    )
+                )
+                candidate = match_source_size(raw, parent_bytes)
+                alpha_support = _boxes_to_support_mask(size, boxes)
             else:
                 assert editor is not None
+                full_prompt = compiled.prompt
+                if use_qwen_editor:
+                    full_prompt = compiled.prompt + qwen_fullframe_alpha_clause(
+                        allow_alpha=allow_alpha
+                    )
+                    version.compiled_prompt = full_prompt
                 version.sent_images = _fullframe_sent_images(
                     parent_image_id=parent.image_artifact_id or "",
                     lock_refs=lock_refs,
                     image_layout=layout,
                 )
-                raw = await _with_transport_retries(
-                    functools.partial(
-                        editor.multi_image_edit,
-                        image_bytes=padded.png,
-                        reference_images=references,
-                        prompt=compiled.prompt,
-                        size=padded.size,
-                        input_fidelity=self._config.cedit_input_fidelity or None,
+                if allow_alpha and use_qwen_editor:
+                    for item in version.sent_images:
+                        if item.role == "primary":
+                            item.label = (item.label or "整图") + " · 允许透明 PNG"
+                edit_kwargs: dict[str, Any] = {
+                    "image_bytes": padded.png,
+                    "reference_images": references,
+                    "prompt": full_prompt,
+                    "size": padded.size if image_model not in WAN27_MODELS else "2K",
+                    "input_fidelity": self._config.cedit_input_fidelity or None,
+                }
+                if image_model in WAN27_MODELS:
+                    edit_kwargs["image_bytes"] = (
+                        flatten_for_model(parent_bytes)
+                        if parent_has_alpha
+                        else parent_bytes
                     )
+                    edit_kwargs["size"] = "2K"
+                raw = await _with_transport_retries(
+                    functools.partial(editor.multi_image_edit, **edit_kwargs)
                 )
-            candidate = raw if use_mask else restore_original_frame(raw, padded)
+                candidate = (
+                    match_source_size(raw, parent_bytes)
+                    if image_model in WAN27_MODELS
+                    else restore_original_frame(raw, padded)
+                )
+                if image_model in WAN27_MODELS and parent_has_alpha:
+                    alpha_support = None  # full-frame wan: reattach parent alpha everywhere
             if crop and version.stitcher:
                 candidate = await asyncio.to_thread(
                     inpaint_stitch, parent_bytes, raw, crop.blend, version.stitcher
@@ -476,7 +637,15 @@ class ControlledEditService:
                 version.stitcher = version.stitcher.model_copy(
                     update={"actual_output_size": _image_size(raw)}
                 )
-            if self._config.cedit_lock_paste and not use_mask:
+            elif parent_has_alpha and not (
+                use_qwen_editor and has_meaningful_alpha(candidate)
+            ):
+                # Wan/Wanx (and opaque Qwen outputs): restore parent alpha outside support.
+                candidate = reattach_alpha(parent_bytes, candidate, alpha_support)
+            elif parent_has_alpha and use_qwen_editor and has_meaningful_alpha(candidate):
+                if "rgba:qwen" not in version.warnings:
+                    version.warnings.append("rgba:qwen")
+            if self._config.cedit_lock_paste and not use_wanx_mask and not use_wan27_bbox:
                 candidate = lock_composite(
                     parent_bytes,
                     candidate,
@@ -631,15 +800,15 @@ class ControlledEditService:
         await self._repository.save_version(version)
         return record
 
-    async def prepare_local_crop(
+    async def _bound_prepared_mask(
         self,
         owner: str,
         session_id: str,
         version_id: str,
         mask_id: str,
         options: InpaintOptions,
-    ) -> CropResult:
-        """Prepare a crop and reject stale masks or spatial lock conflicts."""
+    ) -> tuple[bytes, bytes, PreparedMask]:
+        """Load a version-bound mask, prepare it, and reject lock overlaps."""
         await self._owned_session(owner, session_id)
         parent = await self._ready_version(session_id, version_id)
         record = next((m for m in parent.masks if m.artifact_id == mask_id), None)
@@ -649,9 +818,10 @@ class ControlledEditService:
         if hashlib.sha256(original).hexdigest() != record.source_sha256:
             raise VersionNotReadyError("Mask 的源图已变化，请重新确认")
         mask = await self._read_artifact(owner, mask_id)
-        crop = await asyncio.to_thread(inpaint_crop, original, mask, options)
-        prepared = prepare_mask(mask, crop.stitcher.source_size, options)
-        width, height = crop.stitcher.source_size
+        with Image.open(io.BytesIO(original)) as source:
+            size = source.size
+        prepared = await asyncio.to_thread(prepare_mask, mask, size, options)
+        width, height = size
         conflicts = []
         for entity in parent.entities:
             if entity.status != EntityStatus.LOCKED or entity.bbox is None:
@@ -667,7 +837,35 @@ class ControlledEditService:
                 conflicts.append(entity)
         if conflicts:
             raise LockConflictError(conflicts)
-        return crop
+        return original, mask, prepared
+
+    async def prepare_local_crop(
+        self,
+        owner: str,
+        session_id: str,
+        version_id: str,
+        mask_id: str,
+        options: InpaintOptions,
+    ) -> CropResult:
+        """Prepare a crop and reject stale masks or spatial lock conflicts."""
+        original, mask, _prepared = await self._bound_prepared_mask(
+            owner, session_id, version_id, mask_id, options
+        )
+        return await asyncio.to_thread(inpaint_crop, original, mask, options)
+
+    async def prepare_local_fullframe(
+        self,
+        owner: str,
+        session_id: str,
+        version_id: str,
+        mask_id: str,
+        options: InpaintOptions,
+    ) -> PreparedMask:
+        """Prepare a source-space mask for full-frame Wanx without cropping."""
+        _original, _mask, prepared = await self._bound_prepared_mask(
+            owner, session_id, version_id, mask_id, options
+        )
+        return prepared
 
     async def segment_mask(
         self,
@@ -708,6 +906,35 @@ class ControlledEditService:
         options: InpaintOptions,
     ) -> dict[str, Any]:
         """Create owned preview artifacts without making a generation request."""
+        if options.placement == "fullframe":
+            original, _mask, prepared = await self._bound_prepared_mask(
+                owner, session_id, version_id, mask_id, options
+            )
+            with Image.open(io.BytesIO(original)) as source:
+                rgb = source.convert("RGB")
+                size = rgb.size
+                tint = Image.blend(rgb, Image.new("RGB", size, (50, 150, 255)), 0.55)
+                overlay = Image.composite(tint, rgb, prepared.hard)
+            artifacts = [
+                await self._artifacts.create_image(owner, data, "image/png")
+                for data in (
+                    png_bytes(overlay),
+                    mask_png_bytes(prepared.hard),
+                    png_bytes(prepared.blend),
+                )
+            ]
+            width, height = size
+            return {
+                "crop_artifact_id": artifacts[0].id,
+                "mask_artifact_id": artifacts[1].id,
+                "blend_artifact_id": artifacts[2].id,
+                "placement": "fullframe",
+                "stitcher": {
+                    "crop_rect": [0, 0, width, height],
+                    "model_size": [width, height],
+                    "mask_bbox": list(prepared.bbox),
+                },
+            }
         crop = await self.prepare_local_crop(owner, session_id, version_id, mask_id, options)
         artifacts = [
             await self._artifacts.create_image(owner, data, "image/png")
@@ -717,6 +944,7 @@ class ControlledEditService:
             "crop_artifact_id": artifacts[0].id,
             "mask_artifact_id": artifacts[1].id,
             "blend_artifact_id": artifacts[2].id,
+            "placement": "crop",
             "stitcher": crop.stitcher.model_dump(mode="json"),
         }
 
@@ -879,6 +1107,24 @@ def get_controlled_edit_service() -> ControlledEditService:
     return _service
 
 
+def _boxes_to_support_mask(
+    size: tuple[int, int], boxes: list[list[int]]
+) -> bytes:
+    """Build a binary PNG mask covering pixel bboxes (white = editable support)."""
+    width, height = size
+    mask = Image.new("L", (width, height), 0)
+    draw = ImageDraw.Draw(mask)
+    for box in boxes:
+        if len(box) != 4:
+            continue
+        x0, y0, x1, y1 = (int(v) for v in box)
+        x0, x1 = max(0, min(x0, x1)), min(width, max(x0, x1))
+        y0, y1 = max(0, min(y0, y1)), min(height, max(y0, y1))
+        if x1 > x0 and y1 > y0:
+            draw.rectangle((x0, y0, x1 - 1, y1 - 1), fill=255)
+    return png_bytes(mask)
+
+
 def _wanx_sent_images(
     *,
     primary_id: str,
@@ -994,18 +1240,14 @@ def _resolve_image_model(
     provider: str, requested: str | None, config: Settings
 ) -> str | None:
     """Normalize the per-turn image model for full-frame editors."""
+    from app.controlled_edit.image_models import DASHSCOPE_FULLFRAME_MODELS
+
     if provider == "openai":
         return (requested or config.openai_image_model).strip() or config.openai_image_model
     if provider != "dashscope":
         return None
     model = (requested or config.cedit_image_model).strip()
-    allowed = {
-        config.cedit_image_model,
-        "qwen-image-2.0",
-        "qwen-image-2.0-pro",
-        "qwen-image-2.1-pro",
-        "qwen-image-2.1-turbo",
-    }
+    allowed = set(DASHSCOPE_FULLFRAME_MODELS) | {config.cedit_image_model, *QWEN_EDIT_MODELS}
     if model not in allowed:
         raise EditorUnavailableError(f"不支持的通义整图模型：{model}")
     return model
@@ -1018,11 +1260,16 @@ def _cedit_editor_factory(
     from app.pipeline.image_providers.dashscope_qwen_edit import (
         DashScopeQwenEditProvider,
     )
+    from app.pipeline.image_providers.dashscope_wan27_edit import (
+        DashScopeWan27EditProvider,
+    )
     from app.pipeline.image_providers.openai_images import OpenAIImageProvider
 
     chosen = provider or settings.cedit_image_provider
     _assert_editor_available(chosen, settings)
     if chosen == "dashscope":
         resolved = _resolve_image_model("dashscope", model, settings)
+        if resolved in WAN27_MODELS:
+            return DashScopeWan27EditProvider(model=resolved)
         return DashScopeQwenEditProvider(model=resolved)
     return OpenAIImageProvider()

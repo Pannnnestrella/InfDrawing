@@ -1049,6 +1049,96 @@
       "size_bytes": 4422,
       "sha256": "432adbec3432a1b7d30fe662fd9ce6722bdb4dd59dd7e7f75b8dd1ad3cd6b27a",
       "created_at": "2026-10-12T16:38:46.419180Z"
+    },
+    "b6689af9-7181-47b9-a738-f4205d987168": {
+      "id": "b6689af9-7181-47b9-a738-f4205d987168",
+      "owner_key_id": "development",
+      "job_id": null,
+      "storage_key": "artifacts/b6689af9-7181-47b9-a738-f4205d987168.png",
+      "media_type": "image/png",
+      "size_bytes": 2180916,
+      "sha256": "a8da1d6c1d51bc9fcea18af406764623359415649fcce9b57e0933163b22343b",
+      "created_at": "2026-10-12T18:38:31.350498Z"
+    },
+    "7fd64895-a201-4302-902b-4341e86028a5": {
+      "id": "7fd64895-a201-4302-902b-4341e86028a5",
+      "owner_key_id": "development",
+      "job_id": null,
+      "storage_key": "artifacts/7fd64895-a201-4302-902b-4341e86028a5.png",
+      "media_type": "image/png",
+      "size_bytes": 3434,
+      "sha256": "486374110cb0c0757e3d9e2fa4da30d4aa961a208acf4f2780255858af53e7e4",
+      "created_at": "2026-10-12T18:41:08.760540Z"
+    },
+    "dec3bc51-463d-4078-a24e-6e9d3f96a87e": {
+      "id": "dec3bc51-463d-4078-a24e-6e9d3f96a87e",
+      "owner_key_id": "development",
+      "job_id": null,
+      "storage_key": "artifacts/dec3bc51-463d-4078-a24e-6e9d3f96a87e.png",
+      "media_type": "image/png",
+      "size_bytes": 3900,
+      "sha256": "0e21684d01a9701122eb836fae4fbeee114374984b61ce05e027f83d4037afd2",
+      "created_at": "2026-10-12T18:41:08.807266Z"
+    },
+    "94763597-10f2-4d22-8b86-08bce0eee037": {
+      "id": "94763597-10f2-4d22-8b86-08bce0eee037",
+      "owner_key_id": "development",
+      "job_id": null,
+      "storage_key": "artifacts/94763597-10f2-4d22-8b86-08bce0eee037.png",
+      "media_type": "image/png",
+      "size_bytes": 4882,
+      "sha256": "6e8719ebd79d11dc84e10cae71402f54cfe59f259de386fae5db7236cf0d9cfd",
+      "created_at": "2026-10-12T18:41:08.855655Z"
+    },
+    "d03edbca-42dc-4a58-9c09-093531cfe05c": {
+      "id": "d03edbca-42dc-4a58-9c09-093531cfe05c",
+      "owner_key_id": "development",
+      "job_id": null,
+      "storage_key": "artifacts/d03edbca-42dc-4a58-9c09-093531cfe05c.png",
+      "media_type": "image/png",
+      "size_bytes": 1110880,
+      "sha256": "13560fcb76f3ce7ff5481de862bc22f0683c6aa635b595e7ced99fcd1114ddd3",
+      "created_at": "2026-10-12T18:42:43.969317Z"
+    },
+    "23e2d566-bc4b-4125-84bf-9794429060cb": {
+      "id": "23e2d566-bc4b-4125-84bf-9794429060cb",
+      "owner_key_id": "development",
+      "job_id": null,
+      "storage_key": "artifacts/23e2d566-bc4b-4125-84bf-9794429060cb.png",
+      "media_type": "image/png",
+      "size_bytes": 5693,
+      "sha256": "a5f36154fa59c9229c7693d87573ccbb2fd9f5ac9143b56de1ebfca0196888de",
+      "created_at": "2026-10-12T18:42:43.976190Z"
+    },
+    "a8d109d2-eeac-4559-9c5e-be2893668b2a": {
+      "id": "a8d109d2-eeac-4559-9c5e-be2893668b2a",
+      "owner_key_id": "development",
+      "job_id": null,
+      "storage_key": "artifacts/a8d109d2-eeac-4559-9c5e-be2893668b2a.png",
+      "media_type": "image/png",
+      "size_bytes": 12416,
+      "sha256": "52ca1daa04a56bb25fea2cf1a86051a28f10f72eeb19ed9e5467cdf13b29ee5c",
+      "created_at": "2026-10-12T18:42:43.983082Z"
+    },
+    "cab0b3b8-4f7c-453d-889d-b82161cdbbcd": {
+      "id": "cab0b3b8-4f7c-453d-889d-b82161cdbbcd",
+      "owner_key_id": "development",
+      "job_id": null,
+      "storage_key": "artifacts/cab0b3b8-4f7c-453d-889d-b82161cdbbcd.png",
+      "media_type": "image/png",
+      "size_bytes": 2041796,
+      "sha256": "4e64567003dd86257f803592dc5e2300c5f0ca3a36df5ce9e91f326b8985d38f",
+      "created_at": "2026-10-12T18:43:36.347478Z"
+    },
+    "c98f667f-816f-4dac-a62e-a9bcdf14e770": {
+      "id": "c98f667f-816f-4dac-a62e-a9bcdf14e770",
+      "owner_key_id": "development",
+      "job_id": null,
+      "storage_key": "artifacts/c98f667f-816f-4dac-a62e-a9bcdf14e770.png",
+      "media_type": "image/png",
+      "size_bytes": 2154184,
+      "sha256": "4bd320c988c39dc8121d7297a81732038ee3ef9779cef0898780eef14517055c",
+      "created_at": "2026-10-12T18:45:03.698880Z"
     }
   }
 }

@@ -5,9 +5,9 @@
       "owner_key_id": "development",
       "title": "Two-branch knight",
       "root_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
-      "current_version_id": "e32991bd-2fe9-4b5f-9c6e-c8e9372da7fa",
+      "current_version_id": "5ee4146d-3150-4c28-9294-68d19ab89703",
       "created_at": "2026-10-05T23:04:55.092637Z",
-      "updated_at": "2026-10-12T17:11:52.156248Z"
+      "updated_at": "2026-10-12T18:54:26.277909Z"
     },
     "5a2c1db0-9b19-4a6a-892e-9a3e6e885a4f": {
       "id": "5a2c1db0-9b19-4a6a-892e-9a3e6e885a4f",
@@ -213,9 +213,9 @@
               "h": 0.5
             },
             "bbox_source": "model",
-            "status": "locked",
-            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
-            "anchor_artifact_id": "bf6a73f4-782b-4f2f-bbd3-f1bdda343df2"
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
           },
           {
             "id": "environment.castle",
@@ -229,7 +229,7 @@
               "h": 0.22000000000000003
             },
             "bbox_source": "model",
-            "status": "locked",
+            "status": "editable",
             "anchor_version_id": null,
             "anchor_artifact_id": null
           },
@@ -245,7 +245,7 @@
               "h": 0.275
             },
             "bbox_source": "model",
-            "status": "locked",
+            "status": "editable",
             "anchor_version_id": null,
             "anchor_artifact_id": null
           },
@@ -261,20 +261,48 @@
               "h": 0.5800000000000001
             },
             "bbox_source": "model",
-            "status": "locked",
-            "anchor_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
-            "anchor_artifact_id": "ca558ca9-ece5-4cff-bd04-466aa3e1f885"
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
           }
         ],
         "verification": null,
         "attempts": 0,
         "warnings": [],
-        "masks": [],
+        "masks": [
+          {
+            "artifact_id": "7fd64895-a201-4302-902b-4341e86028a5",
+            "source_artifact_id": "56b8e2df-b36a-49c8-8f9c-3c30ce78ef25",
+            "source_sha256": "43a85236ba52f0b64afae142993ec135a28b824e881080f59e080933c2501c2c",
+            "width": 1024,
+            "height": 1024,
+            "source": "sam2",
+            "score": 0.9089720845222473
+          },
+          {
+            "artifact_id": "dec3bc51-463d-4078-a24e-6e9d3f96a87e",
+            "source_artifact_id": "56b8e2df-b36a-49c8-8f9c-3c30ce78ef25",
+            "source_sha256": "43a85236ba52f0b64afae142993ec135a28b824e881080f59e080933c2501c2c",
+            "width": 1024,
+            "height": 1024,
+            "source": "sam2",
+            "score": 0.8894367814064026
+          },
+          {
+            "artifact_id": "94763597-10f2-4d22-8b86-08bce0eee037",
+            "source_artifact_id": "56b8e2df-b36a-49c8-8f9c-3c30ce78ef25",
+            "source_sha256": "43a85236ba52f0b64afae142993ec135a28b824e881080f59e080933c2501c2c",
+            "width": 1024,
+            "height": 1024,
+            "source": "sam2",
+            "score": 0.6075195670127869
+          }
+        ],
         "local_edit": null,
         "stitcher": null,
         "error": null,
         "created_at": "2026-10-05T23:04:55.092667Z",
-        "updated_at": "2026-10-11T18:41:51.074598Z"
+        "updated_at": "2026-10-12T18:41:08.860006Z"
       },
       "af8aa254-47eb-4274-aabb-829cf20879e9": {
         "id": "af8aa254-47eb-4274-aabb-829cf20879e9",
@@ -2175,16 +2203,16 @@
         "created_at": "2026-10-06T00:26:22.438727Z",
         "updated_at": "2026-10-11T17:46:10.056821Z"
       },
-      "cf9d0660-7091-4ed0-8e47-0ff81d469de1": {
-        "id": "cf9d0660-7091-4ed0-8e47-0ff81d469de1",
+      "72567d68-05d2-47dd-9053-491a3b7cf60c": {
+        "id": "72567d68-05d2-47dd-9053-491a3b7cf60c",
         "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
         "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
         "status": "succeeded",
         "progress_step": null,
-        "image_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
+        "image_artifact_id": "b6689af9-7181-47b9-a738-f4205d987168",
         "width": 1024,
         "height": 1024,
-        "instruction": "将武器替换为散发着寒冰魔法的长剑",
+        "instruction": "将武器替换为围绕着冰魔法的长剑",
         "intent": {
           "operation": "replace",
           "target_entity_ids": [
@@ -2192,44 +2220,20 @@
           ],
           "new_entity_name": "longsword with ice magic",
           "location_hint": "in the character's right hand",
-          "change_description": "Replace the current longsword with a longsword that emits ice magic effects."
+          "change_description": "Replace the current longsword with a new longsword surrounded by swirling ice magic."
         },
-        "compiled_prompt": "将武器替换为散发着寒冰魔法的长剑",
-        "prompt_style": "target_only",
+        "compiled_prompt": "将武器替换为围绕着冰魔法的长剑仅修改框选区域，保持其余像素、油画笔触与光照一致。",
+        "prompt_style": "preserve",
         "image_provider": "dashscope",
-        "image_model": null,
-        "reference_artifact_ids": [
-          "bf6a73f4-782b-4f2f-bbd3-f1bdda343df2",
-          "ca558ca9-ece5-4cff-bd04-466aa3e1f885"
-        ],
+        "image_model": "qwen-image-3.0-pro",
+        "reference_artifact_ids": [],
         "sent_images": [
           {
             "role": "primary",
             "artifact_id": "56b8e2df-b36a-49c8-8f9c-3c30ce78ef25",
             "index": 1,
-            "label": "整图 base_image（发给万相）",
+            "label": "整图 + Wan 2.7 bbox (wan2.7-image-pro; [[81, 51, 317, 594]])",
             "sent": true
-          },
-          {
-            "role": "mask",
-            "artifact_id": "d74cabc4-71e7-408f-8d44-1ad8cf28e6b1",
-            "index": null,
-            "label": "Mask（白=改 / 黑=留，发给万相）",
-            "sent": true
-          },
-          {
-            "role": "reference",
-            "artifact_id": "bf6a73f4-782b-4f2f-bbd3-f1bdda343df2",
-            "index": null,
-            "label": "锁定锚点 Landscape background（未发送，仅身份/验收）",
-            "sent": false
-          },
-          {
-            "role": "reference",
-            "artifact_id": "ca558ca9-ece5-4cff-bd04-466aa3e1f885",
-            "index": null,
-            "label": "锁定锚点 Flower meadow（未发送，仅身份/验收）",
-            "sent": false
           }
         ],
         "entities": [
@@ -2237,12 +2241,12 @@
             "id": "character",
             "name": "Young armored knight",
             "parent_id": null,
-            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a glowing blue sword and shield.",
+            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a glowing sword and shield.",
             "bbox": {
               "x": 0.23,
               "y": 0.006,
-              "w": 0.49,
-              "h": 0.993
+              "w": 0.48,
+              "h": 0.988
             },
             "bbox_source": "model",
             "status": "editable",
@@ -2256,9 +2260,290 @@
             "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
             "bbox": {
               "x": 0.43,
-              "y": 0.028,
+              "y": 0.03,
               "w": 0.11000000000000004,
-              "h": 0.132
+              "h": 0.13
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.",
+            "bbox": {
+              "x": 0.385,
+              "y": 0.006,
+              "w": 0.20999999999999996,
+              "h": 0.164
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
+            "bbox": {
+              "x": 0.28,
+              "y": 0.16,
+              "w": 0.39,
+              "h": 0.7799999999999999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.skirt",
+            "name": "Rust-orange skirt",
+            "parent_id": "character",
+            "description": "Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist.",
+            "bbox": {
+              "x": 0.335,
+              "y": 0.45,
+              "w": 0.29,
+              "h": 0.18
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
+            "bbox": {
+              "x": 0.415,
+              "y": 0.385,
+              "w": 0.16999999999999998,
+              "h": 0.07500000000000001
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.235,
+              "y": 0.45,
+              "w": 0.08500000000000002,
+              "h": 0.08000000000000002
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.sword",
+            "name": "Glowing longsword",
+            "parent_id": "character",
+            "description": "Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand, blade crackling with bright blue lightning energy.",
+            "bbox": {
+              "x": 0.07,
+              "y": 0.05,
+              "w": 0.27,
+              "h": 0.565
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.shield",
+            "name": "Round blue shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted deep blue with subtle wear marks, held in the left hand, edge facing forward.",
+            "bbox": {
+              "x": 0.595,
+              "y": 0.4,
+              "w": 0.19500000000000006,
+              "h": 0.29499999999999993
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.42
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.castle",
+            "name": "Stone castle",
+            "parent_id": "environment",
+            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
+            "bbox": {
+              "x": 0.7,
+              "y": 0.18,
+              "w": 0.21000000000000008,
+              "h": 0.22000000000000003
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Snow-capped mountain",
+            "parent_id": "environment",
+            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.62,
+              "y": 0.045,
+              "w": 0.38,
+              "h": 0.29500000000000004
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.4,
+              "w": 1.0,
+              "h": 0.6
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": {
+          "target_applied": true,
+          "target_comment": "The longsword has been replaced with a new one surrounded by swirling ice magic.",
+          "composition_score": 1.0,
+          "composition_comment": "The framing, camera distance, and position of the main subject remain consistent between the images.",
+          "preserved": [],
+          "passed": true,
+          "warnings": []
+        },
+        "attempts": 1,
+        "warnings": [],
+        "masks": [],
+        "local_edit": {
+          "edit_mode": "auto",
+          "mask_artifact_id": null,
+          "inpaint_options": {
+            "threshold": 0.5,
+            "fill_holes": false,
+            "dilate_px": 8,
+            "feather_sigma_px": 4.0,
+            "context_from_mask_extend_factor": 2.0,
+            "min_context_px": 16,
+            "model": "wanx2.1-imageedit",
+            "placement": "crop"
+          }
+        },
+        "stitcher": null,
+        "error": null,
+        "created_at": "2026-10-12T18:37:44.527083Z",
+        "updated_at": "2026-10-12T18:38:31.354126Z"
+      },
+      "017f69bd-35f5-404c-8f16-42eafafa4464": {
+        "id": "017f69bd-35f5-404c-8f16-42eafafa4464",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "cab0b3b8-4f7c-453d-889d-b82161cdbbcd",
+        "width": 1024,
+        "height": 1024,
+        "instruction": "把武器改为散发着寒冰魔法的长剑",
+        "intent": {
+          "operation": "restyle",
+          "target_entity_ids": [
+            "character.sword"
+          ],
+          "new_entity_name": null,
+          "location_hint": null,
+          "change_description": "Transform the longsword into one emitting icy magic."
+        },
+        "compiled_prompt": "把武器改为散发着寒冰魔法的长剑",
+        "prompt_style": "preserve",
+        "image_provider": "dashscope",
+        "image_model": null,
+        "reference_artifact_ids": [],
+        "sent_images": [
+          {
+            "role": "crop",
+            "artifact_id": "d03edbca-42dc-4a58-9c09-093531cfe05c",
+            "index": 1,
+            "label": "裁剪图（发给万相 2.1 Legacy）",
+            "sent": true
+          },
+          {
+            "role": "mask",
+            "artifact_id": "23e2d566-bc4b-4125-84bf-9794429060cb",
+            "index": null,
+            "label": "Mask（白=改 / 黑=留，发给万相）",
+            "sent": true
+          }
+        ],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a glowing sword and shield.",
+            "bbox": {
+              "x": 0.23,
+              "y": 0.006,
+              "w": 0.485,
+              "h": 0.99
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
+            "bbox": {
+              "x": 0.43,
+              "y": 0.03,
+              "w": 0.11000000000000004,
+              "h": 0.13
             },
             "bbox_source": "model",
             "status": "editable",
@@ -2287,9 +2572,9 @@
             "parent_id": "character",
             "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
             "bbox": {
-              "x": 0.29,
+              "x": 0.28,
               "y": 0.16,
-              "w": 0.38000000000000006,
+              "w": 0.39,
               "h": 0.7899999999999999
             },
             "bbox_source": "model",
@@ -2322,7 +2607,7 @@
               "x": 0.4,
               "y": 0.38,
               "w": 0.17999999999999994,
-              "h": 0.06
+              "h": 0.07
             },
             "bbox_source": "model",
             "status": "editable",
@@ -2335,10 +2620,10 @@
             "parent_id": "character",
             "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
             "bbox": {
-              "x": 0.235,
-              "y": 0.44,
-              "w": 0.07500000000000001,
-              "h": 0.08000000000000002
+              "x": 0.24,
+              "y": 0.45,
+              "w": 0.08000000000000002,
+              "h": 0.07
             },
             "bbox_source": "model",
             "status": "editable",
@@ -2347,14 +2632,348 @@
           },
           {
             "id": "character.sword",
-            "name": "Glowing blue longsword",
+            "name": "Glowing longsword",
             "parent_id": "character",
-            "description": "Straight double-edged steel longsword with a simple crossguard and pommel, held in the right hand, blade angled upward and emitting bright blue magical energy.",
+            "description": "Straight double-edged steel longsword with a vibrant cyan-blue magical glow along the blade and ornate swirling blue patterns on the hilt, held in the right hand, blade angled upward.",
             "bbox": {
-              "x": 0.175,
-              "y": 0.048,
-              "w": 0.135,
-              "h": 0.5319999999999999
+              "x": 0.075,
+              "y": 0.046,
+              "w": 0.24,
+              "h": 0.5389999999999999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.shield",
+            "name": "Round blue shield",
+            "parent_id": "character",
+            "description": "Circular wooden shield painted deep blue with subtle wear marks, held in the left hand, edge facing forward.",
+            "bbox": {
+              "x": 0.59,
+              "y": 0.4,
+              "w": 0.20000000000000007,
+              "h": 0.29499999999999993
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment",
+            "name": "Landscape background",
+            "parent_id": null,
+            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.5
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.castle",
+            "name": "Stone castle",
+            "parent_id": "environment",
+            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
+            "bbox": {
+              "x": 0.695,
+              "y": 0.18,
+              "w": 0.21000000000000008,
+              "h": 0.21500000000000002
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.mountain",
+            "name": "Snow-capped mountain",
+            "parent_id": "environment",
+            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
+            "bbox": {
+              "x": 0.62,
+              "y": 0.045,
+              "w": 0.38,
+              "h": 0.275
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground",
+            "name": "Flower meadow",
+            "parent_id": null,
+            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.42,
+              "w": 1.0,
+              "h": 0.5800000000000001
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": {
+          "target_applied": true,
+          "target_comment": "The longsword has been transformed to emit icy magic, with a blue glow and magical symbols.",
+          "composition_score": 1.0,
+          "composition_comment": "The framing and composition remain consistent between the two images.",
+          "preserved": [],
+          "passed": true,
+          "warnings": []
+        },
+        "attempts": 1,
+        "warnings": [],
+        "masks": [],
+        "local_edit": {
+          "edit_mode": "local",
+          "mask_artifact_id": "7fd64895-a201-4302-902b-4341e86028a5",
+          "inpaint_options": {
+            "threshold": 0.5,
+            "fill_holes": false,
+            "dilate_px": 8,
+            "feather_sigma_px": 4.0,
+            "context_from_mask_extend_factor": 2.0,
+            "min_context_px": 16,
+            "model": "wanx2.1-imageedit",
+            "placement": "crop"
+          }
+        },
+        "stitcher": {
+          "schema_version": 1,
+          "source_size": [
+            1024,
+            1024
+          ],
+          "source_mode": "RGB",
+          "crop_rect": [
+            -352,
+            -228,
+            756,
+            880
+          ],
+          "paste_rect": [
+            0,
+            0,
+            756,
+            880
+          ],
+          "mask_bbox": [
+            78,
+            49,
+            327,
+            603
+          ],
+          "padding": [
+            352,
+            228,
+            0,
+            0
+          ],
+          "canvas_size": [
+            1108,
+            1108
+          ],
+          "model_size": [
+            1024,
+            1024
+          ],
+          "source_sha256": "43a85236ba52f0b64afae142993ec135a28b824e881080f59e080933c2501c2c",
+          "source_artifact_id": "56b8e2df-b36a-49c8-8f9c-3c30ce78ef25",
+          "parent_version_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+          "mask_artifact_id": "7fd64895-a201-4302-902b-4341e86028a5",
+          "blend_artifact_id": "a8d109d2-eeac-4559-9c5e-be2893668b2a",
+          "crop_artifact_id": "d03edbca-42dc-4a58-9c09-093531cfe05c",
+          "generation_mask_artifact_id": "23e2d566-bc4b-4125-84bf-9794429060cb",
+          "actual_output_size": [
+            1024,
+            1024
+          ],
+          "options": {
+            "threshold": 0.5,
+            "fill_holes": false,
+            "dilate_px": 8,
+            "feather_sigma_px": 4.0,
+            "context_from_mask_extend_factor": 2.0,
+            "min_context_px": 16,
+            "model": "wanx2.1-imageedit",
+            "placement": "crop"
+          }
+        },
+        "error": null,
+        "created_at": "2026-10-12T18:42:42.627248Z",
+        "updated_at": "2026-10-12T18:43:36.351522Z"
+      },
+      "2fc3f8da-a198-4483-9c25-69ac3904b83d": {
+        "id": "2fc3f8da-a198-4483-9c25-69ac3904b83d",
+        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+        "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "c98f667f-816f-4dac-a62e-a9bcdf14e770",
+        "width": 1024,
+        "height": 1024,
+        "instruction": "将武器替换为围绕着冰魔法的长剑",
+        "intent": {
+          "operation": "replace",
+          "target_entity_ids": [
+            "character.sword"
+          ],
+          "new_entity_name": "longsword with ice magic",
+          "location_hint": "in the character's right hand",
+          "change_description": "Replace the current longsword with a new longsword surrounded by swirling ice magic."
+        },
+        "compiled_prompt": "将武器替换为围绕着冰魔法的长剑仅修改框选区域，保持其余像素、油画笔触与光照一致。",
+        "prompt_style": "preserve",
+        "image_provider": "dashscope",
+        "image_model": "qwen-image-3.0-pro",
+        "reference_artifact_ids": [],
+        "sent_images": [
+          {
+            "role": "primary",
+            "artifact_id": "56b8e2df-b36a-49c8-8f9c-3c30ce78ef25",
+            "index": 1,
+            "label": "整图 + Wan 2.7 bbox (wan2.7-image-pro; [[81, 51, 317, 594]])",
+            "sent": true
+          }
+        ],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Young armored knight",
+            "parent_id": null,
+            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a glowing magical sword and shield.",
+            "bbox": {
+              "x": 0.23,
+              "y": 0.006,
+              "w": 0.55,
+              "h": 0.988
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
+            "bbox": {
+              "x": 0.43,
+              "y": 0.03,
+              "w": 0.11000000000000004,
+              "h": 0.13
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.",
+            "bbox": {
+              "x": 0.38,
+              "y": 0.006,
+              "w": 0.20999999999999996,
+              "h": 0.164
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.armor",
+            "name": "Plate armor",
+            "parent_id": "character",
+            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
+            "bbox": {
+              "x": 0.29,
+              "y": 0.16,
+              "w": 0.37000000000000005,
+              "h": 0.7799999999999999
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.skirt",
+            "name": "Rust-orange skirt",
+            "parent_id": "character",
+            "description": "Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist.",
+            "bbox": {
+              "x": 0.33,
+              "y": 0.45,
+              "w": 0.29,
+              "h": 0.18
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.belt",
+            "name": "Brown leather belt",
+            "parent_id": "character",
+            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
+            "bbox": {
+              "x": 0.42,
+              "y": 0.38,
+              "w": 0.15999999999999998,
+              "h": 0.07
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.gloves",
+            "name": "Leather gloves",
+            "parent_id": "character",
+            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
+            "bbox": {
+              "x": 0.23,
+              "y": 0.45,
+              "w": 0.09,
+              "h": 0.09000000000000002
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.sword",
+            "name": "Magical longsword",
+            "parent_id": "character",
+            "description": "Straight double-edged steel longsword enveloped in crackling blue-white magical energy, held in the right hand, blade angled upward.",
+            "bbox": {
+              "x": 0.07,
+              "y": 0.05,
+              "w": 0.25,
+              "h": 0.5599999999999999
             },
             "bbox_source": "model",
             "status": "editable",
@@ -2386,7 +3005,7 @@
               "x": 0.0,
               "y": 0.0,
               "w": 1.0,
-              "h": 0.45
+              "h": 0.5
             },
             "bbox_source": "model",
             "status": "editable",
@@ -2444,263 +3063,16 @@
         ],
         "verification": {
           "target_applied": true,
-          "target_comment": "The longsword has been replaced with one that emits ice magic effects.",
+          "target_comment": "The longsword has been replaced with a new one surrounded by swirling ice magic.",
           "composition_score": 1.0,
-          "composition_comment": "The framing and composition remain consistent between the images.",
-          "preserved": [
-            {
-              "entity_id": "environment",
-              "score": 1.0,
-              "comment": "The landscape background is unchanged and matches the reference."
-            },
-            {
-              "entity_id": "environment.castle",
-              "score": 1.0,
-              "comment": "The stone castle remains unchanged."
-            },
-            {
-              "entity_id": "environment.mountain",
-              "score": 1.0,
-              "comment": "The snow-capped mountain is unchanged."
-            },
-            {
-              "entity_id": "foreground",
-              "score": 1.0,
-              "comment": "The flower meadow is unchanged and matches the reference."
-            }
-          ],
+          "composition_comment": "The framing and composition remain consistent between the two images.",
+          "preserved": [],
           "passed": true,
           "warnings": []
         },
         "attempts": 1,
         "warnings": [],
-        "masks": [
-          {
-            "artifact_id": "2866b546-6f59-4c95-a5fb-27f59b30dd43",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "manual",
-            "score": null
-          },
-          {
-            "artifact_id": "05f78a99-8609-4166-95d6-ca814bb688c3",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "manual",
-            "score": null
-          },
-          {
-            "artifact_id": "41ac1b72-f565-4996-bfd6-f56cd0ee954d",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "manual",
-            "score": null
-          },
-          {
-            "artifact_id": "579dd18c-c930-465a-8d37-b6b5311c5b09",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9546725153923035
-          },
-          {
-            "artifact_id": "b30ae6fe-57a2-4987-95ea-cc7fae1bd3a7",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9576257467269897
-          },
-          {
-            "artifact_id": "02d89e9b-192a-494e-afe1-cf0fdaed9421",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.3025176525115967
-          },
-          {
-            "artifact_id": "494c5184-abee-478a-9e7b-3e926ae66728",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9546725153923035
-          },
-          {
-            "artifact_id": "bbfb16db-a5f2-4b78-b013-5ef38fd7de8e",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9576257467269897
-          },
-          {
-            "artifact_id": "a0514fca-1f74-4212-9601-944a101efe97",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.3025176525115967
-          },
-          {
-            "artifact_id": "2f07009c-3b81-4ad5-9e03-55cb01432d87",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9546725153923035
-          },
-          {
-            "artifact_id": "3be33c8a-4928-4122-963a-a5f74c693704",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9576257467269897
-          },
-          {
-            "artifact_id": "7c7030c4-7e88-4f3d-b678-c63454a4ced5",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.3025176525115967
-          },
-          {
-            "artifact_id": "4057cd4b-0fcd-401e-95e0-90c7ac38464c",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9546725153923035
-          },
-          {
-            "artifact_id": "1eb9f5ca-a322-4ed3-8c0e-d7022492add3",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9576257467269897
-          },
-          {
-            "artifact_id": "5d65882d-5fa5-4bd8-a838-d7f0ebab09c2",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.3025176525115967
-          },
-          {
-            "artifact_id": "36f44d6b-e2aa-4be5-ae65-61da3219aac4",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9546725153923035
-          },
-          {
-            "artifact_id": "1fb1606f-ea43-4763-9219-fa434d64de11",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9576257467269897
-          },
-          {
-            "artifact_id": "ff1b502c-ba99-4daf-aea6-899b075ff03a",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.3025176525115967
-          },
-          {
-            "artifact_id": "c0129534-134d-4455-87d9-7604935cbcdb",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9440972208976746
-          },
-          {
-            "artifact_id": "6f4b13bb-66b9-4408-a082-f6f715af26f6",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9449994564056396
-          },
-          {
-            "artifact_id": "5fbd37d5-6134-44c3-bf05-e3394c30d95d",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.34711748361587524
-          },
-          {
-            "artifact_id": "d1338c49-815e-4886-b4cc-ea78e23ec9c9",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "manual",
-            "score": null
-          },
-          {
-            "artifact_id": "1f6a1690-3725-4c36-b13b-9d3bdf6371a7",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9089022874832153
-          },
-          {
-            "artifact_id": "b14e5932-4c83-46d0-ba3f-3bad0bb7cc6a",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.9378504753112793
-          },
-          {
-            "artifact_id": "a8f1e369-5e46-4949-874e-030f53b95685",
-            "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-            "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-            "width": 1024,
-            "height": 1024,
-            "source": "sam2",
-            "score": 0.8374113440513611
-          }
-        ],
+        "masks": [],
         "local_edit": {
           "edit_mode": "auto",
           "mask_artifact_id": null,
@@ -2711,352 +3083,14 @@
             "feather_sigma_px": 4.0,
             "context_from_mask_extend_factor": 2.0,
             "min_context_px": 16,
-            "model": "wanx2.1-imageedit"
+            "model": "wanx2.1-imageedit",
+            "placement": "crop"
           }
         },
         "stitcher": null,
         "error": null,
-        "created_at": "2026-10-12T16:04:19.232206Z",
-        "updated_at": "2026-10-12T16:34:12.283540Z"
-      },
-      "e32991bd-2fe9-4b5f-9c6e-c8e9372da7fa": {
-        "id": "e32991bd-2fe9-4b5f-9c6e-c8e9372da7fa",
-        "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
-        "parent_id": "cf9d0660-7091-4ed0-8e47-0ff81d469de1",
-        "status": "succeeded",
-        "progress_step": null,
-        "image_artifact_id": "5769a9a8-25bd-4552-8c83-8f1f9e237ecf",
-        "width": 1024,
-        "height": 1024,
-        "instruction": "将武器替换为带有雷电属性的魔杖",
-        "intent": {
-          "operation": "replace",
-          "target_entity_ids": [
-            "character.sword"
-          ],
-          "new_entity_name": "magic wand with lightning attribute",
-          "location_hint": "in the character's right hand",
-          "change_description": "Replace the glowing blue longsword with a magic wand that has a lightning attribute."
-        },
-        "compiled_prompt": "将武器替换为带有雷电属性的魔杖",
-        "prompt_style": "target_only",
-        "image_provider": "dashscope",
-        "image_model": null,
-        "reference_artifact_ids": [],
-        "sent_images": [
-          {
-            "role": "crop",
-            "artifact_id": "b2a9dbbf-ce15-41df-8335-c04c274b1101",
-            "index": 1,
-            "label": "裁剪图（发给万相）",
-            "sent": true
-          },
-          {
-            "role": "mask",
-            "artifact_id": "50b6516e-144f-43b4-b13b-a40f9e06c9a0",
-            "index": null,
-            "label": "Mask（白=改 / 黑=留，发给万相）",
-            "sent": true
-          }
-        ],
-        "entities": [
-          {
-            "id": "character",
-            "name": "Young armored knight",
-            "parent_id": null,
-            "description": "A young person with shoulder-length reddish-blonde hair, fair skin, and a serious expression, wearing silver plate armor over a rust-orange skirt-like garment, brown leather belts and gloves, and holding a glowing blue sword and shield.",
-            "bbox": {
-              "x": 0.23,
-              "y": 0.006,
-              "w": 0.49,
-              "h": 0.99
-            },
-            "bbox_source": "model",
-            "status": "editable",
-            "anchor_version_id": null,
-            "anchor_artifact_id": null
-          },
-          {
-            "id": "character.face",
-            "name": "Face",
-            "parent_id": "character",
-            "description": "Fair-skinned face with light freckles, large brown eyes, slightly parted lips, and a calm, resolute expression.",
-            "bbox": {
-              "x": 0.43,
-              "y": 0.028,
-              "w": 0.11000000000000004,
-              "h": 0.132
-            },
-            "bbox_source": "model",
-            "status": "editable",
-            "anchor_version_id": null,
-            "anchor_artifact_id": null
-          },
-          {
-            "id": "character.hair",
-            "name": "Hair",
-            "parent_id": "character",
-            "description": "Shoulder-length wavy reddish-blonde hair, softly lit, framing the face and falling just past the shoulders.",
-            "bbox": {
-              "x": 0.38,
-              "y": 0.006,
-              "w": 0.20999999999999996,
-              "h": 0.164
-            },
-            "bbox_source": "model",
-            "status": "editable",
-            "anchor_version_id": null,
-            "anchor_artifact_id": null
-          },
-          {
-            "id": "character.armor",
-            "name": "Plate armor",
-            "parent_id": "character",
-            "description": "Polished silver-colored steel plate armor covering torso, shoulders, arms, and legs, with articulated joints and dark leather straps; includes pauldrons, vambraces, greaves, and cuisses.",
-            "bbox": {
-              "x": 0.28,
-              "y": 0.16,
-              "w": 0.4,
-              "h": 0.7999999999999999
-            },
-            "bbox_source": "model",
-            "status": "editable",
-            "anchor_version_id": null,
-            "anchor_artifact_id": null
-          },
-          {
-            "id": "character.skirt",
-            "name": "Rust-orange skirt",
-            "parent_id": "character",
-            "description": "Layered rust-orange fabric skirt with darker brown trim and leather belt attachments, worn beneath the armor at the waist.",
-            "bbox": {
-              "x": 0.33,
-              "y": 0.45,
-              "w": 0.29,
-              "h": 0.18
-            },
-            "bbox_source": "model",
-            "status": "editable",
-            "anchor_version_id": null,
-            "anchor_artifact_id": null
-          },
-          {
-            "id": "character.belt",
-            "name": "Brown leather belt",
-            "parent_id": "character",
-            "description": "Wide brown leather belt with metal buckle and hanging straps, cinching the armor at the waist over the skirt.",
-            "bbox": {
-              "x": 0.4,
-              "y": 0.38,
-              "w": 0.17999999999999994,
-              "h": 0.07
-            },
-            "bbox_source": "model",
-            "status": "editable",
-            "anchor_version_id": null,
-            "anchor_artifact_id": null
-          },
-          {
-            "id": "character.gloves",
-            "name": "Leather gloves",
-            "parent_id": "character",
-            "description": "Dark brown leather gauntlets with segmented fingers, worn on both hands under the armor sleeves.",
-            "bbox": {
-              "x": 0.23,
-              "y": 0.44,
-              "w": 0.09,
-              "h": 0.08000000000000002
-            },
-            "bbox_source": "model",
-            "status": "editable",
-            "anchor_version_id": null,
-            "anchor_artifact_id": null
-          },
-          {
-            "id": "character.sword",
-            "name": "Glowing blue longsword",
-            "parent_id": "character",
-            "description": "Straight double-edged steel longsword with an ornate golden hilt and pommel, held in the right hand, blade angled upward and emitting bright blue magical lightning energy.",
-            "bbox": {
-              "x": 0.18,
-              "y": 0.046,
-              "w": 0.135,
-              "h": 0.5339999999999999
-            },
-            "bbox_source": "model",
-            "status": "editable",
-            "anchor_version_id": null,
-            "anchor_artifact_id": null
-          },
-          {
-            "id": "character.shield",
-            "name": "Round blue shield",
-            "parent_id": "character",
-            "description": "Circular wooden shield painted deep blue with subtle wear marks and a metallic rim, held in the left hand, edge facing forward.",
-            "bbox": {
-              "x": 0.59,
-              "y": 0.4,
-              "w": 0.20000000000000007,
-              "h": 0.29999999999999993
-            },
-            "bbox_source": "model",
-            "status": "editable",
-            "anchor_version_id": null,
-            "anchor_artifact_id": null
-          },
-          {
-            "id": "environment",
-            "name": "Landscape background",
-            "parent_id": null,
-            "description": "Idyllic pastoral scene with rolling green hills dotted with wildflowers, distant forested slopes, snow-capped mountains, and a bright blue sky with soft white clouds.",
-            "bbox": {
-              "x": 0.0,
-              "y": 0.0,
-              "w": 1.0,
-              "h": 0.45
-            },
-            "bbox_source": "model",
-            "status": "editable",
-            "anchor_version_id": null,
-            "anchor_artifact_id": null
-          },
-          {
-            "id": "environment.castle",
-            "name": "Stone castle",
-            "parent_id": "environment",
-            "description": "Medieval stone castle with multiple conical-roofed towers (orange-tiled roofs), situated on a hill in the mid-background, partially obscured by haze.",
-            "bbox": {
-              "x": 0.7,
-              "y": 0.18,
-              "w": 0.21000000000000008,
-              "h": 0.21500000000000002
-            },
-            "bbox_source": "model",
-            "status": "editable",
-            "anchor_version_id": null,
-            "anchor_artifact_id": null
-          },
-          {
-            "id": "environment.mountain",
-            "name": "Snow-capped mountain",
-            "parent_id": "environment",
-            "description": "Large jagged mountain peak with snow-covered ridges and blue-gray rock faces, rising behind the castle under a partly cloudy sky.",
-            "bbox": {
-              "x": 0.62,
-              "y": 0.045,
-              "w": 0.38,
-              "h": 0.275
-            },
-            "bbox_source": "model",
-            "status": "editable",
-            "anchor_version_id": null,
-            "anchor_artifact_id": null
-          },
-          {
-            "id": "foreground",
-            "name": "Flower meadow",
-            "parent_id": null,
-            "description": "Vibrant green grassy field with scattered colorful wildflowers (white, yellow, red, blue) in the immediate foreground around the character’s feet.",
-            "bbox": {
-              "x": 0.0,
-              "y": 0.42,
-              "w": 1.0,
-              "h": 0.5800000000000001
-            },
-            "bbox_source": "model",
-            "status": "editable",
-            "anchor_version_id": null,
-            "anchor_artifact_id": null
-          }
-        ],
-        "verification": {
-          "target_applied": true,
-          "target_comment": "The glowing blue longsword has been replaced with a magic wand that has a lightning attribute.",
-          "composition_score": 1.0,
-          "composition_comment": "The framing, camera distance, and position of the main subject remain consistent between the two images.",
-          "preserved": [],
-          "passed": true,
-          "warnings": []
-        },
-        "attempts": 1,
-        "warnings": [],
-        "masks": [],
-        "local_edit": {
-          "edit_mode": "local",
-          "mask_artifact_id": "b14e5932-4c83-46d0-ba3f-3bad0bb7cc6a",
-          "inpaint_options": {
-            "threshold": 0.5,
-            "fill_holes": false,
-            "dilate_px": 8,
-            "feather_sigma_px": 4.0,
-            "context_from_mask_extend_factor": 2.0,
-            "min_context_px": 16,
-            "model": "wanx2.1-imageedit"
-          }
-        },
-        "stitcher": {
-          "schema_version": 1,
-          "source_size": [
-            1024,
-            1024
-          ],
-          "source_mode": "RGB",
-          "crop_rect": [
-            -304,
-            -234,
-            810,
-            880
-          ],
-          "paste_rect": [
-            0,
-            0,
-            810,
-            880
-          ],
-          "mask_bbox": [
-            180,
-            45,
-            327,
-            602
-          ],
-          "padding": [
-            304,
-            234,
-            0,
-            0
-          ],
-          "canvas_size": [
-            1114,
-            1114
-          ],
-          "model_size": [
-            1024,
-            1024
-          ],
-          "source_sha256": "6b0bb64ecaf60e6eafba6249e9599031fe6b960b65e8ecc3e1108cf12bd0df49",
-          "source_artifact_id": "3f51d901-bd5a-423d-a54f-32c0c31f3cba",
-          "parent_version_id": "cf9d0660-7091-4ed0-8e47-0ff81d469de1",
-          "mask_artifact_id": "b14e5932-4c83-46d0-ba3f-3bad0bb7cc6a",
-          "blend_artifact_id": "f0311b55-9264-4f3f-bf46-9b6485a2b773",
-          "crop_artifact_id": "b2a9dbbf-ce15-41df-8335-c04c274b1101",
-          "generation_mask_artifact_id": "50b6516e-144f-43b4-b13b-a40f9e06c9a0",
-          "actual_output_size": [
-            1024,
-            1024
-          ],
-          "options": {
-            "threshold": 0.5,
-            "fill_holes": false,
-            "dilate_px": 8,
-            "feather_sigma_px": 4.0,
-            "context_from_mask_extend_factor": 2.0,
-            "min_context_px": 16,
-            "model": "wanx2.1-imageedit"
-          }
-        },
-        "error": null,
-        "created_at": "2026-10-12T16:34:16.000573Z",
-        "updated_at": "2026-10-12T16:36:28.864964Z"
+        "created_at": "2026-10-12T18:44:12.947284Z",
+        "updated_at": "2026-10-12T18:45:03.701651Z"
       }
     },
     "5a2c1db0-9b19-4a6a-892e-9a3e6e885a4f": {

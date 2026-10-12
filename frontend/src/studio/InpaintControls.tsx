@@ -11,6 +11,7 @@ import { useArtifactUrl } from "./useArtifactUrl";
 export const DEFAULT_INPAINT_OPTIONS: InpaintOptions = {
   threshold: 0.5, fill_holes: false, dilate_px: 8, feather_sigma_px: 4,
   context_from_mask_extend_factor: 2, min_context_px: 16, model: "wanx2.1-imageedit",
+  placement: "crop",
 };
 export interface LocalSelection { versionId: string; maskId: string; options: InpaintOptions }
 interface Props {
@@ -71,9 +72,26 @@ export function InpaintControls({ sessionId, version, bbox, disabled, onSelectio
       onChange={e => {
         setEnabled(e.target.checked); onModeChange(version.id, e.target.checked);
         if (!e.target.checked) { clearSelection(); setCandidates([]); }
-      }} />局部 Mask 编辑（裁剪后重绘）</label>
+      }} />局部 Mask 编辑（万相）</label>
     {enabled && imageUrl && version.width && version.height ? <>
-      <p className="text-muted">只发送局部图与 Mask；最终羽化范围外保留原图。当前模型：万相 2.1。</p>
+      <p className="text-muted">
+        {options.placement === "fullframe"
+          ? "发送整图与源尺寸 Mask；Mask 外由模型约束保留。引擎：万相 2.1（Legacy Mask）。"
+          : "只发送局部图与 Mask；最终羽化范围外保留原图。引擎：万相 2.1（Legacy Mask）。"}
+        {" "}透明 PNG 输出请用 Qwen 整图或实验路径；本路径为不透明 inpaint，区外 alpha 仍可从父图保留。
+      </p>
+      <div className={panel}>
+        <label className="flex flex-col gap-1">发送方式
+          <select aria-label="发送方式" className="rounded border border-dashed border-line bg-transparent px-1"
+            value={options.placement} disabled={busy || disabled}
+            onChange={e => updateOptions({
+              ...options, placement: e.target.value as InpaintOptions["placement"],
+            })}>
+            <option value="crop">裁剪后发送（Crop / Stitch）</option>
+            <option value="fullframe">整图 + Mask（不裁剪）</option>
+          </select>
+        </label>
+      </div>
       <div className={panel}>
         <MaskEditor key={`${version.id}-${maskRevision}`} imageUrl={imageUrl} width={version.width} height={version.height}
           maskUrl={maskUrl} disabled={busy || disabled} onDirty={clearSelection}
@@ -122,8 +140,11 @@ export function InpaintControls({ sessionId, version, bbox, disabled, onSelectio
       <div className={`${panel} grid grid-cols-2 gap-2`}>
         {([
           ['threshold','阈值',0.01,1,0.05],['dilate_px','膨胀像素',0,128,1],
-          ['feather_sigma_px','羽化像素',0,64,1],['context_from_mask_extend_factor','上下文倍数',1,8,0.1],
-          ['min_context_px','最小上下文像素',0,512,1],
+          ['feather_sigma_px','羽化像素',0,64,1],
+          ...(options.placement === "crop"
+            ? [['context_from_mask_extend_factor','上下文倍数',1,8,0.1],
+               ['min_context_px','最小上下文像素',0,512,1]] as const
+            : []),
         ] as const).map(([name,label,min,max,step]) => <label key={name}>{label}<input className="w-full rounded border border-dashed border-line"
           type="number" min={min} max={max} step={step} value={options[name]} disabled={busy}
           onChange={e => { const value = Number(e.target.value); if(Number.isFinite(value) && value >= min && value <= max) updateOptions({...options,[name]:value}); }} /></label>)}
@@ -131,11 +152,19 @@ export function InpaintControls({ sessionId, version, bbox, disabled, onSelectio
       </div>
       <div className={panel}>
         <button type="button" className="rounded border border-dashed border-accent px-2 py-1 text-accent" disabled={!maskId || busy || disabled}
-          onClick={() => void run(() => previewInpaint(sessionId,version.id,maskId!,options), setPreview)}>预览裁剪与 Mask（不生成）</button>
+          onClick={() => void run(() => previewInpaint(sessionId,version.id,maskId!,options), setPreview)}>
+          {options.placement === "fullframe" ? "预览整图 Mask（不生成）" : "预览裁剪与 Mask（不生成）"}
+        </button>
         <p>{busy ? '处理中…' : maskId ? 'Mask 已确认；提交下方指令即可局部重绘。' : pendingCandidate ? '还有候选未选择。' : '请先确认 Mask。'}</p>
         {error ? <p role="alert" className="text-danger">{error}</p> : null}
-        {preview ? <div className="space-y-1 rounded border border-dashed border-line p-2"><p>裁剪坐标：{preview.stitcher.crop_rect.join(', ')} · 工作尺寸 {preview.stitcher.model_size.join('×')}</p>
-          <div className="grid grid-cols-3 gap-1">{([[cropUrl,'上下文裁剪'],[cropMaskUrl,'生成 Mask'],[blendUrl,'融合 Mask']] as const).map(([url,label]) => url ?
+        {preview ? <div className="space-y-1 rounded border border-dashed border-line p-2">
+          <p>{preview.placement === "fullframe" ? "整图发送" : `裁剪坐标：${preview.stitcher.crop_rect.join(', ')}`}
+            {" · "}工作尺寸 {preview.stitcher.model_size.join('×')}</p>
+          <div className="grid grid-cols-3 gap-1">{([
+            [cropUrl, preview.placement === "fullframe" ? "叠色预览" : "上下文裁剪"],
+            [cropMaskUrl, "生成 Mask"],
+            [blendUrl, preview.placement === "fullframe" ? "软 Mask" : "融合 Mask"],
+          ] as const).map(([url,label]) => url ?
             <figure key={label} className="rounded border border-dashed border-line p-1">
               {/* eslint-disable-next-line @next/next/no-img-element -- artifact preview */}
               <img src={url} alt={label} className="w-full" /><figcaption>{label}</figcaption>

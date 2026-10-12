@@ -108,10 +108,11 @@ def build_edit_mask(
 
 
 def uses_local_mask(intent: EditIntent, entities: Sequence[SceneEntity]) -> bool:
-    """Return True when the turn should use a small-object mask inpaint.
+    """Return True when the turn should use a small-object local edit path.
 
     Background, whole-subject, missing boxes, or large boxes stay on full-frame
-    instruction edit. Small ``character.*`` parts with boxes use the mask path.
+    instruction edit. Small ``character.*`` parts with boxes use the local path
+    (Wan 2.7 bbox by default, or legacy Wanx mask).
     """
     by_id = {entity.id: entity for entity in entities}
     targets = [entity_id for entity_id in intent.target_entity_ids if entity_id in by_id]
@@ -126,6 +127,30 @@ def uses_local_mask(intent: EditIntent, entities: Sequence[SceneEntity]) -> bool
         if _area(entity.bbox) > 0.25:
             return False
     return True
+
+
+def target_pixel_bboxes(
+    size: tuple[int, int],
+    entities: Sequence[SceneEntity],
+    target_ids: Sequence[str],
+    *,
+    max_boxes: int = 2,
+) -> list[list[int]]:
+    """Build Wan 2.7 ``[x1, y1, x2, y2]`` boxes for the largest target entities."""
+    width, height = size
+    by_id = {entity.id: entity for entity in entities}
+    scored: list[tuple[float, list[int]]] = []
+    for entity_id in target_ids:
+        entity = by_id.get(entity_id)
+        if entity is None or entity.bbox is None:
+            continue
+        left, top, right, bottom = padded_pixel_rect(size, entity.bbox, padding=0.0)
+        box = [left, top, min(right, width), min(bottom, height)]
+        if box[2] <= box[0] or box[3] <= box[1]:
+            continue
+        scored.append((_area(entity.bbox), box))
+    scored.sort(key=lambda item: item[0], reverse=True)
+    return [box for _, box in scored[: max(0, max_boxes)]]
 
 
 def _is_background_id(entity_id: str) -> bool:

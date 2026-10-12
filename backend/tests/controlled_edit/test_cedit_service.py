@@ -103,6 +103,54 @@ def test_local_turn_sends_crop_and_stitches_with_retry_feedback(
     asyncio.run(scenario())
 
 
+def test_local_fullframe_sends_source_image_without_stitch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Full-frame local placement sends the parent image and skips stitcher."""
+    from app.pipeline.image_providers.dashscope_wanx import DashScopeWanxProvider
+
+    calls: list[dict[str, Any]] = []
+
+    async def inpaint(self: Any, **kwargs: Any) -> bytes:
+        calls.append(kwargs)
+        assert Image.open(io.BytesIO(kwargs["image_bytes"])).size == (1920, 1080)
+        assert Image.open(io.BytesIO(kwargs["mask_bytes"])).size == (1920, 1080)
+        return _png(1920, 1080, (0, 255, 0))
+
+    monkeypatch.setattr(DashScopeWanxProvider, "inpaint", inpaint)
+
+    async def scenario() -> None:
+        service, _, _, scheduled = _build(tmp_path, [PASS])
+        session_id, root_id = await _session_with_locked_face(service)
+        mask = Image.new("L", (1920, 1080))
+        ImageDraw.Draw(mask).ellipse((20, 20, 100, 100), fill=255)
+        saved = await service.save_mask(OWNER, session_id, root_id, png_bytes(mask))
+        version = await service.submit_turn(
+            OWNER,
+            session_id,
+            EditTurnRequest(
+                parent_version_id=root_id,
+                instruction="Change the selected object to green",
+                edit_mode="local",
+                mask_artifact_id=saved.artifact_id,
+                inpaint_options=InpaintOptions(
+                    dilate_px=0, feather_sigma_px=0, placement="fullframe"
+                ),
+            ),
+        )
+        await scheduled.pop()
+        tree = await service.get_tree(OWNER, session_id)
+        result = next(v for v in tree.versions if v.id == version.id)
+        assert result.status == VersionStatus.SUCCEEDED
+        assert result.stitcher is None
+        assert {s.role for s in result.sent_images} >= {"primary", "mask"}
+        assert any("不裁剪" in (s.label or "") for s in result.sent_images)
+        assert len(calls) == 1
+
+    asyncio.run(scenario())
+
+
 def test_mask_binding_and_spatial_locks(tmp_path: Path) -> None:
     """Reject stale masks and masks that intersect a locked region after dilation."""
 

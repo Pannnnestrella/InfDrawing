@@ -34,7 +34,9 @@ function SentThumb({
         onClick={() => {
           if (url) onOpen(item, url);
         }}
-        className={`relative h-14 w-14 overflow-hidden rounded border bg-surface-1 disabled:opacity-40 ${
+        className={`relative h-14 w-14 overflow-hidden rounded border disabled:opacity-40 ${
+          item.role === "mask" ? "bg-black" : "bg-checkerboard"
+        } ${
           item.sent ? "border-line hover:border-accent" : "border-dashed border-faint opacity-80"
         }`}
         title={item.label || caption}
@@ -44,7 +46,7 @@ function SentThumb({
           <img
             src={url}
             alt={item.label || caption}
-            className={`h-full w-full ${item.role === "mask" ? "object-contain bg-black" : "object-cover"}`}
+            className={`h-full w-full ${item.role === "mask" ? "object-contain" : "object-cover"}`}
           />
         ) : null}
         {!item.sent ? (
@@ -111,8 +113,8 @@ function ImageLightbox({
         <img
           src={url}
           alt={item.label || "payload"}
-          className={`max-h-[80vh] max-w-[85vw] ${
-            item.role === "mask" ? "bg-black object-contain" : "object-contain"
+          className={`max-h-[80vh] max-w-[85vw] object-contain ${
+            item.role === "mask" ? "bg-black" : "bg-checkerboard"
           }`}
         />
       </div>

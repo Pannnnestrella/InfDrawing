@@ -7,6 +7,7 @@ import { Spinner } from "@/components/Spinner";
 import type { LockConflictEntity, SceneEntity } from "@/lib/controlled-edit-api";
 
 import {
+  imageOptionGroup,
   type ImageModelOption,
   type PromptStyleOption,
   promptStyleLabel,
@@ -21,10 +22,10 @@ interface EditComposerProps {
   promptStyle: PromptStyleOption;
   imageOption: ImageModelOption | null;
   imageOptions: ImageModelOption[];
-  /** When set, Studio routes this turn to Wanx and locks the model picker. */
+  /** When set, Studio routes this turn to a local engine and locks the picker. */
   localMaskModel: string | null;
-  /** Explicit crop/stitch Mask panel vs legacy small-object auto rectangle Mask. */
-  localMaskPath: "crop_stitch" | "auto_rect" | null;
+  /** Explicit Mask panel vs auto small-object (bbox or legacy rect mask). */
+  localMaskPath: "crop_stitch" | "fullframe_mask" | "auto_rect" | "auto_bbox" | null;
   onPromptStyleChange: (style: PromptStyleOption) => void;
   onImageOptionChange: (option: ImageModelOption) => void;
   onSubmit: (instruction: string) => Promise<boolean>;
@@ -67,14 +68,25 @@ export function EditComposer({
           {localMaskPath === "crop_stitch" ? (
             <>
               已开启局部 Mask 编辑，本轮实际使用{" "}
-              <span className="font-semibold text-warning">万相 {localMaskModel}</span>
-              （裁剪图 + 不规则 Mask）。下方「生图模型」已锁定，不会调用通义 Qwen / OpenAI。
-              关闭局部 Mask 编辑后可再选整图模型。
+              <span className="font-semibold text-warning">{localMaskModel}（Legacy Mask）</span>
+              （裁剪图 + 不规则 Mask）。下方「生图模型」已锁定。关闭 Mask 编辑后可再选整图模型。
+            </>
+          ) : localMaskPath === "fullframe_mask" ? (
+            <>
+              已开启局部 Mask 编辑，本轮实际使用{" "}
+              <span className="font-semibold text-warning">{localMaskModel}（Legacy Mask）</span>
+              （整图 + 不规则 Mask，不裁剪）。下方「生图模型」已锁定。
+            </>
+          ) : localMaskPath === "auto_bbox" ? (
+            <>
+              已选小物件局部目标，本轮实际使用{" "}
+              <span className="font-semibold text-warning">{localMaskModel}</span>
+              （整图 + bbox 框选）。下方「生图模型」已锁定；取消小物件点选后恢复。
             </>
           ) : (
             <>
               已选小物件局部目标，本轮实际使用{" "}
-              <span className="font-semibold text-warning">万相 {localMaskModel}</span>
+              <span className="font-semibold text-warning">{localMaskModel}（Legacy Mask）</span>
               （整图 + 矩形 Mask）。下方「生图模型」已锁定；取消小物件点选后恢复。
             </>
           )}
@@ -97,12 +109,12 @@ export function EditComposer({
           <span>生图模型{wanxRoute ? "（本轮锁定）" : ""}</span>
           {wanxRoute ? (
             <select
-              value="wanx"
+              value="local"
               disabled
               aria-label="本轮局部重绘模型"
               className="w-full rounded-md border border-dashed border-warning bg-warning/10 px-2 py-1.5 text-xs font-medium text-warning outline-none disabled:opacity-100"
             >
-              <option value="wanx">万相 {localMaskModel}</option>
+              <option value="local">{localMaskModel}</option>
             </select>
           ) : (
             <select
@@ -117,10 +129,22 @@ export function EditComposer({
               {imageOptions.length === 0 ? (
                 <option value="">暂无可用模型</option>
               ) : (
-                imageOptions.map((option) => (
-                  <option key={option.key} value={option.key}>
-                    {option.label}
-                  </option>
+                Array.from(
+                  imageOptions.reduce((groups, option) => {
+                    const group = imageOptionGroup(option);
+                    const list = groups.get(group) ?? [];
+                    list.push(option);
+                    groups.set(group, list);
+                    return groups;
+                  }, new Map<string, ImageModelOption[]>()),
+                ).map(([group, options]) => (
+                  <optgroup key={group} label={group}>
+                    {options.map((option) => (
+                      <option key={option.key} value={option.key}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))
               )}
             </select>

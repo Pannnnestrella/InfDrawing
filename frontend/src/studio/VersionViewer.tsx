@@ -68,7 +68,7 @@ export function VersionViewer({
         </label>
       </div>
 
-      <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl border border-line bg-surface-1">
+      <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl border border-line bg-checkerboard">
         {displayUrl ? (
           <div
             className="relative max-h-full max-w-full"

@@ -1,5 +1,15 @@
 # InfDrawing 任务状态
 
+## 2026-10-12 节点命名与推荐模型
+
+- `planned`：修改树节点标题；整图推荐 `qwen-image-3.0-pro`；流程描述改到当前默认模型
+- 规划：`.planning/20261012_cedit_node_title_recommended_models.md`
+
+## 2026-10-12 多轮编辑 RGBA
+
+- `done`：pad/restore/match_source_size 保 alpha；Wan/Wanx flatten + reattach；Qwen 透明提示；Studio 棋盘格；文档与测试
+- 规划：`.planning/20261012_cedit_rgba_support.md`
+
 ## 2026-10-11 API Key 显示 + 设置页
 
 - `done`：API Key / 环境状态弹层改为 `fixed`（`PopoverPanel`）

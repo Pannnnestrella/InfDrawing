@@ -16,6 +16,7 @@ class InpaintOptions(BaseModel):
     context_from_mask_extend_factor: float = Field(default=2, ge=1, le=8)
     min_context_px: int = Field(default=16, ge=0, le=512)
     model: Literal["wanx2.1-imageedit"] = "wanx2.1-imageedit"
+    placement: Literal["crop", "fullframe"] = "crop"
 
 
 class MaskRecord(BaseModel):

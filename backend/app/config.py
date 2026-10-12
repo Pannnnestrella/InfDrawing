@@ -62,8 +62,11 @@ class Settings(BaseSettings):
     cedit_scene_model: str = "qwen3-vl-plus"
     cedit_scene_bbox_format: str = "xyxy_1000"
     cedit_image_provider: str = "dashscope"
-    # qwen-image-edit-plus retired / unavailable on many keys; 2.0 is the working edit API.
-    cedit_image_model: str = "qwen-image-2.0"
+    # Full-frame default: Qwen Image 3.0 Pro (DashScope multimodal edit).
+    cedit_image_model: str = "qwen-image-3.0-pro"
+    # Auto small-object local path: wan27_bbox (default) or legacy wanx21_mask.
+    cedit_auto_local_engine: str = "wan27_bbox"
+    cedit_auto_local_model: str = "wan2.7-image-pro"
     cedit_lock_feather: float = 0.12
     cedit_lock_paste: bool = False
     cedit_prompt_style: str = "preserve"

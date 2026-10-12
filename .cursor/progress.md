@@ -1,5 +1,9 @@
 # 会话进展
 
+## 2026-10-12
+
+- 多轮编辑 RGBA：`alpha.py` / `qwen_mask_prompt.py`；sizing `keep_alpha`；service Qwen vs Wan/Wanx 分流；Studio `bg-checkerboard`；`docs/controlled_edit.md` 透明表；`tests/controlled_edit` 96 通过。
+
 ## 2026-10-11
 
 - 拆解偏移再修：根因是 tldraw `object-fit: cover` 对宽高比不一致的图层居中裁切；回贴前 `bakeLayerToShapeBox`，锚点几何不再与错误选中混用；后端 EXIF + 强制同尺寸。相关 vitest / `test_decompose` 通过。

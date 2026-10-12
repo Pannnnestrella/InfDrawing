@@ -34,13 +34,32 @@ function notifyChange(): void {
 }
 
 function optionLabel(provider: ImageProviderOption, model: string): string {
-  if (provider === "dashscope" && model.startsWith("qwen-image-2.1")) {
-    return `通义 ${model}（整图）`;
-  }
   if (provider === "dashscope") {
+    if (model.startsWith("qwen-image-3.0")) {
+      return `通义 ${model}（Qwen 3.0 整图）`;
+    }
+    if (model.startsWith("qwen-image-2.1")) {
+      return `通义 ${model}（Qwen 2.1 整图）`;
+    }
+    if (model.startsWith("qwen-image-2.0")) {
+      return `通义 ${model}（Qwen 2.0 整图）`;
+    }
+    if (model.startsWith("wan2.7")) {
+      return `通义 ${model}（万相 2.7 整图）`;
+    }
     return `通义 ${model}`;
   }
   return `OpenAI ${model}`;
+}
+
+/** Group heading for optgroup rendering in the Studio picker. */
+export function imageOptionGroup(option: ImageModelOption): string {
+  if (option.provider === "openai") return "OpenAI";
+  if (option.model.startsWith("qwen-image-3.0")) return "通义 Qwen 3.0";
+  if (option.model.startsWith("qwen-image-2.1")) return "通义 Qwen 2.1";
+  if (option.model.startsWith("qwen-image-2.0")) return "通义 Qwen 2.0";
+  if (option.model.startsWith("wan2.7")) return "通义 万相 2.7";
+  return "通义 其他";
 }
 
 /** Subscribe to prompt_style / image option session preference changes. */

@@ -377,12 +377,15 @@ def _controlled_edit_models(
         default_provider = "openai"
     if default_provider == "openai" and not openai_configured and dashscope_configured:
         default_provider = "dashscope"
+    from app.controlled_edit.image_models import DASHSCOPE_FULLFRAME_MODELS
+
     image_options: list[str] = []
     if dashscope_configured:
-        default_qwen = settings.cedit_image_model.strip() or "qwen-image-2.0"
-        image_options.append(f"dashscope|{default_qwen}")
-        if default_qwen != "qwen-image-2.1-pro":
-            image_options.append("dashscope|qwen-image-2.1-pro")
+        default_model = settings.cedit_image_model.strip() or "qwen-image-3.0-pro"
+        ordered = [default_model] + [
+            model for model in DASHSCOPE_FULLFRAME_MODELS if model != default_model
+        ]
+        image_options.extend(f"dashscope|{model}" for model in ordered)
     if openai_configured:
         image_options.append(f"openai|{settings.openai_image_model}")
     models: dict[str, str] = {
@@ -401,6 +404,8 @@ def _controlled_edit_models(
     if dashscope_configured:
         models["local_mask_model"] = settings.dashscope_edit_model
         models["local_mask_provider"] = "wanx"
+        models["auto_local_engine"] = settings.cedit_auto_local_engine
+        models["auto_local_model"] = settings.cedit_auto_local_model
     return models
 
 

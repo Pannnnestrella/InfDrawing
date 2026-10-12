@@ -31,11 +31,17 @@ describe("studio-turn-options", () => {
     expect(listener).toHaveBeenCalledTimes(2);
   });
 
-  it("lists qwen 2.1 as a distinct full-frame option", () => {
+  it("lists qwen 3.0 / 2.x / wan 2.7 as distinct full-frame options", () => {
     const options = parseImageOptions(
-      "dashscope|qwen-image-2.0;dashscope|qwen-image-2.1-pro",
+      "dashscope|qwen-image-3.0-pro;dashscope|qwen-image-2.0;dashscope|qwen-image-2.1-pro;dashscope|wan2.7-image-pro",
     );
-    expect(options.map((o) => o.model)).toEqual(["qwen-image-2.0", "qwen-image-2.1-pro"]);
-    expect(options[1].label).toContain("2.1");
+    expect(options.map((o) => o.model)).toEqual([
+      "qwen-image-3.0-pro",
+      "qwen-image-2.0",
+      "qwen-image-2.1-pro",
+      "wan2.7-image-pro",
+    ]);
+    expect(options[0].label).toContain("3.0");
+    expect(options[3].label).toContain("万相 2.7");
   });
 });

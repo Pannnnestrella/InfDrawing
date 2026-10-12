@@ -15,6 +15,8 @@ export interface InpaintOptions {
   context_from_mask_extend_factor: number;
   min_context_px: number;
   model: "wanx2.1-imageedit";
+  /** crop = Wanx crop/stitch; fullframe = whole image + source-space mask. */
+  placement: "crop" | "fullframe";
 }
 
 export interface MaskRecord {
@@ -29,6 +31,7 @@ export interface InpaintPreview {
   crop_artifact_id: string;
   mask_artifact_id: string;
   blend_artifact_id: string;
+  placement?: "crop" | "fullframe";
   stitcher: { crop_rect: number[]; model_size: number[]; mask_bbox: number[] };
 }
 

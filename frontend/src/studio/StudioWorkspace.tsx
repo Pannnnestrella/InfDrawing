@@ -217,21 +217,27 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
   );
   const defaultLocalMaskModel =
     capabilities?.features.controlled_edit?.models?.local_mask_model ?? "wanx2.1-imageedit";
+  const autoLocalEngine =
+    capabilities?.features.controlled_edit?.models?.auto_local_engine ?? "wan27_bbox";
+  const autoLocalModel =
+    capabilities?.features.controlled_edit?.models?.auto_local_model ?? "wan2.7-image-pro";
   const explicitLocalMask =
     current != null &&
     (localSelection?.versionId === current.id || localModeVersionId === current.id);
   const autoLocalMask =
     !explicitLocalMask && usesLocalMask(selectedTargets);
-  /** When set, EditComposer locks the model picker to Wanx for this turn. */
+  /** When set, EditComposer locks the model picker for this turn. */
   const localMaskModel = explicitLocalMask
     ? (localSelection?.options.model ?? defaultLocalMaskModel)
     : autoLocalMask
-      ? defaultLocalMaskModel
+      ? (autoLocalEngine === "wan27_bbox" ? autoLocalModel : defaultLocalMaskModel)
       : null;
   const localMaskPath = explicitLocalMask
-    ? ("crop_stitch" as const)
+    ? (localSelection?.options.placement === "fullframe"
+        ? ("fullframe_mask" as const)
+        : ("crop_stitch" as const))
     : autoLocalMask
-      ? ("auto_rect" as const)
+      ? (autoLocalEngine === "wan27_bbox" ? ("auto_bbox" as const) : ("auto_rect" as const))
       : null;
 
   const handleCreate = async (file: File, title: string) => {

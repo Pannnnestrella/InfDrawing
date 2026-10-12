@@ -54,12 +54,13 @@ def inpaint_capability(model: str) -> InpaintCapability:
     if model == "wanx2.1-imageedit":
         # Output sizing is not a documented guarantee; use a conservative square canvas.
         return InpaintCapability("binary_field", 512, 4096, 10_000_000, 1024**2, 1024**2, 1)
-    if model.startswith("qwen-image-2.0"):
+    if model.startswith("qwen-image-2.0") or model.startswith("qwen-image-3.0"):
         return InpaintCapability("unsupported", 1, 8000, 10_000_000, 512**2, 2048**2, 8, 16)
     if model in {"qwen-image-2.1-pro", "qwen-image-2.1-turbo"}:
         return InpaintCapability(
             "image_prompt", 1, 8000, 10_000_000, 512**2, 2048**2, 8, experimental=True
         )
     if model in {"wan2.7-image", "wan2.7-image-pro"}:
+        # Regional guidance uses bbox_list, not a binary mask field.
         return InpaintCapability("unsupported", 240, 8000, 20_000_000, 768**2, 2048**2, 8)
     raise ValueError(f"unknown local editing model: {model}")

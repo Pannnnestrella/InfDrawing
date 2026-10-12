@@ -37,17 +37,18 @@ import { SettingsDrawer, SettingsTrigger } from "@/settings/SettingsDrawer";
 import { EditComposer } from "./EditComposer";
 import { EntityPanel } from "./EntityPanel";
 import {
-  loadImageProvider,
+  loadImageOption,
   loadPromptStyle,
   parseImageOptions,
-  saveImageProvider,
+  saveImageOption,
   savePromptStyle,
   subscribeCeditOptions,
-  type ImageProviderOption,
+  type ImageModelOption,
   type PromptStyleOption,
 } from "./studio-turn-options";
 import { SPLIT_DEFAULTS, SPLIT_MIN, useSplitSize } from "./studio-split";
 import { UploadPanel } from "./UploadPanel";
+import { usesLocalMask } from "./uses-local-mask";
 import { VersionDetails } from "./VersionDetails";
 import { VersionTree } from "./VersionTree";
 import { VersionViewer } from "./VersionViewer";
@@ -79,7 +80,7 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
   const [savingBBox, setSavingBBox] = useState(false);
   const [selectedTargetIds, setSelectedTargetIds] = useState<string[]>([]);
   const [promptStyle, setPromptStyle] = useState<PromptStyleOption>("preserve");
-  const [imageProvider, setImageProvider] = useState<ImageProviderOption>("dashscope");
+  const [imageOption, setImageOption] = useState<ImageModelOption | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [enginePreference, setEnginePreference] = useState<EnginePreference>({
     mode: "auto",
@@ -142,7 +143,7 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
             ? models.image_provider
             : "dashscope";
         setPromptStyle(loadPromptStyle(style));
-        setImageProvider(loadImageProvider(options, provider));
+        setImageOption(loadImageOption(options, provider));
       })
       .catch(() => undefined);
     listSessions()
@@ -166,7 +167,7 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
           ? models.image_provider
           : "dashscope";
       setPromptStyle(loadPromptStyle(style));
-      setImageProvider(loadImageProvider(options, provider));
+      setImageOption(loadImageOption(options, provider));
     }
     return subscribeCeditOptions(syncFromStorage);
   }, [capabilities]);
@@ -210,6 +211,28 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
     () => parseImageOptions(capabilities?.features.controlled_edit?.models?.image_options),
     [capabilities],
   );
+  const selectedTargets = useMemo(
+    () => (current?.entities ?? []).filter((e) => selectedTargetIds.includes(e.id)),
+    [current, selectedTargetIds],
+  );
+  const defaultLocalMaskModel =
+    capabilities?.features.controlled_edit?.models?.local_mask_model ?? "wanx2.1-imageedit";
+  const explicitLocalMask =
+    current != null &&
+    (localSelection?.versionId === current.id || localModeVersionId === current.id);
+  const autoLocalMask =
+    !explicitLocalMask && usesLocalMask(selectedTargets);
+  /** When set, EditComposer locks the model picker to Wanx for this turn. */
+  const localMaskModel = explicitLocalMask
+    ? (localSelection?.options.model ?? defaultLocalMaskModel)
+    : autoLocalMask
+      ? defaultLocalMaskModel
+      : null;
+  const localMaskPath = explicitLocalMask
+    ? ("crop_stitch" as const)
+    : autoLocalMask
+      ? ("auto_rect" as const)
+      : null;
 
   const handleCreate = async (file: File, title: string) => {
     setCreating(true);
@@ -338,7 +361,12 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
     try {
       await submitTurn(tree.session.id, current.id, instruction, selectedTargetIds, {
         promptStyle,
-        imageProvider: localSelection?.versionId === current.id ? "dashscope" : imageProvider,
+        imageProvider:
+          localSelection?.versionId === current.id
+            ? "dashscope"
+            : (imageOption?.provider ?? "dashscope"),
+        imageModel:
+          localSelection?.versionId === current.id ? undefined : (imageOption?.model ?? undefined),
         ...(localSelection?.versionId === current.id ? {
           maskArtifactId: localSelection.maskId, inpaintOptions: localSelection.options,
         } : {}),
@@ -571,19 +599,19 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
                       }
                       submitting={submitting}
                       conflict={conflict}
-                      selectedTargets={current.entities.filter((e) =>
-                        selectedTargetIds.includes(e.id),
-                      )}
+                      selectedTargets={selectedTargets}
                       promptStyle={promptStyle}
-                      imageProvider={imageProvider}
+                      imageOption={imageOption}
                       imageOptions={imageOptions}
+                      localMaskModel={localMaskModel}
+                      localMaskPath={localMaskPath}
                       onPromptStyleChange={(style) => {
                         setPromptStyle(style);
                         savePromptStyle(style);
                       }}
-                      onImageProviderChange={(provider) => {
-                        setImageProvider(provider);
-                        saveImageProvider(provider);
+                      onImageOptionChange={(option) => {
+                        setImageOption(option);
+                        saveImageOption(option);
                       }}
                       onSubmit={handleSubmit}
                       onUnlockAndRetry={() => void handleUnlockAndRetry()}

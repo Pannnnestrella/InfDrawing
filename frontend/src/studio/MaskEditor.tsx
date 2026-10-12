@@ -138,14 +138,14 @@ export function MaskEditor({ imageUrl, width, height, maskUrl, disabled, onSave,
     output.toBlob(blob => { if (blob) onSave(blob); }, "image/png");
   }
   return <div className="space-y-2">
-    <div className="flex flex-wrap gap-1">
+    <div className="flex flex-wrap gap-1 rounded border border-dashed border-line p-1.5">
       {([['lasso','套索'],['polygon','多边形'],['brush','画笔'],['erase','橡皮'],['positive','SAM 正点'],['negative','SAM 负点']] as const).map(([value,label]) =>
         <button type="button" key={value} disabled={disabled} aria-pressed={tool === value}
-          className={`rounded border px-2 py-1 ${tool === value ? 'border-accent text-accent' : 'border-line'}`}
+          className={`rounded border border-dashed px-2 py-1 ${tool === value ? 'border-accent text-accent' : 'border-line'}`}
           onClick={() => { path.current = []; setTool(value); paint(); }}>{label}</button>)}
     </div>
-    <label>画笔大小（源图像素）<input aria-label="画笔大小" type="range" min="1" max="200" value={brush} onChange={e => setBrush(Number(e.target.value))} /></label>
-    <div className="relative w-full" style={{ aspectRatio: `${width}/${height}` }}>
+    <label className="block rounded border border-dashed border-line p-1.5">画笔大小（源图像素）<input aria-label="画笔大小" type="range" min="1" max="200" value={brush} onChange={e => setBrush(Number(e.target.value))} /></label>
+    <div className="relative w-full overflow-hidden rounded border border-dashed border-line" style={{ aspectRatio: `${width}/${height}` }}>
       {/* eslint-disable-next-line @next/next/no-img-element -- owned artifact blob */}
       <img src={imageUrl} alt="圈选编辑区域" className="absolute inset-0 h-full w-full" draggable={false} />
       <canvas ref={canvas} width={width} height={height} className="absolute inset-0 h-full w-full touch-none"
@@ -155,12 +155,12 @@ export function MaskEditor({ imageUrl, width, height, maskUrl, disabled, onSave,
         style={{ left:`${p.point.x / width * 100}%`,top:`${p.point.y / height * 100}%`,width:8,height:8,
           background:p.label ? '#22cc88' : '#ff5555',transform:'translate(-50%,-50%)' }} />)}
     </div>
-    <div className="flex flex-wrap gap-2">
-      <button type="button" disabled={disabled} onClick={finishPolygon}>闭合多边形</button>
-      <button type="button" disabled={!historySizes.undo || disabled} onClick={() => restore(true)}>撤销</button>
-      <button type="button" disabled={!historySizes.redo || disabled} onClick={() => restore(false)}>重做</button>
-      <button type="button" disabled={disabled} onClick={() => { checkpoint(); backing.current?.getContext('2d')?.clearRect(0,0,width,height); path.current=[]; setPoints([]); onPoints([],[]); paint(); }}>清空</button>
-      <button type="button" disabled={disabled} className="text-accent" onClick={save}>确认 Mask</button>
+    <div className="flex flex-wrap gap-2 rounded border border-dashed border-line p-1.5">
+      <button type="button" className="rounded border border-dashed border-line px-2 py-1" disabled={disabled} onClick={finishPolygon}>闭合多边形</button>
+      <button type="button" className="rounded border border-dashed border-line px-2 py-1" disabled={!historySizes.undo || disabled} onClick={() => restore(true)}>撤销</button>
+      <button type="button" className="rounded border border-dashed border-line px-2 py-1" disabled={!historySizes.redo || disabled} onClick={() => restore(false)}>重做</button>
+      <button type="button" className="rounded border border-dashed border-line px-2 py-1" disabled={disabled} onClick={() => { checkpoint(); backing.current?.getContext('2d')?.clearRect(0,0,width,height); path.current=[]; setPoints([]); onPoints([],[]); paint(); }}>清空</button>
+      <button type="button" disabled={disabled} className="rounded border border-dashed border-accent px-2 py-1 text-accent" onClick={save}>确认 Mask</button>
     </div>
   </div>;
 }

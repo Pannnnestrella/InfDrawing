@@ -90,6 +90,8 @@ def test_local_turn_sends_crop_and_stitches_with_retry_feedback(
         assert "修正上次问题" in calls[1]["prompt"]
         assert result.compiled_prompt == calls[1]["prompt"]
         assert result.reference_artifact_ids == []
+        assert {s.role for s in result.sent_images} >= {"crop", "mask"}
+        assert all(s.sent for s in result.sent_images if s.role in {"crop", "mask"})
         assert result.stitcher and result.stitcher.actual_output_size == (1024, 1024)
         data = await service._read_artifact(OWNER, result.image_artifact_id)
         output = Image.open(io.BytesIO(data))
@@ -215,7 +217,7 @@ def _build(
         repository=MemoryEditRepository(),
         artifacts=ArtifactService(MemoryArtifactRepository(), LocalArtifactStorage(tmp_path)),
         vision_factory=lambda: vision,
-        editor_factory=lambda _provider=None: editor,
+        editor_factory=lambda _provider=None, _model=None: editor,
         config=Settings(
             cedit_max_retries=1,
             cedit_preserve_threshold=0.7,
@@ -279,6 +281,10 @@ def test_turn_passes_first_try_and_records_node(tmp_path: Path) -> None:
         assert by_id["character.face"].status == EntityStatus.LOCKED
         assert by_id["environment.moon"].status == EntityStatus.EDITABLE
         assert child.warnings == []
+        assert [s.role for s in child.sent_images] == ["primary", "reference"]
+        assert child.sent_images[0].sent is True
+        assert child.sent_images[1].artifact_id == face.anchor_artifact_id
+        assert child.sent_images[1].sent is True
 
     asyncio.run(scenario())
 

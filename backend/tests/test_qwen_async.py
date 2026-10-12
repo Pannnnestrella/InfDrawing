@@ -23,34 +23,18 @@ def config() -> Settings:
 
 @pytest.mark.asyncio
 async def test_async_submit_poll_and_download() -> None:
-    """Submit once, poll pending/running, and decode the documented choices response."""
+    """Explicit async helper submits once, polls, and downloads the result."""
     requests = []
     polls = 0
 
     def reply(request: httpx.Request) -> httpx.Response:
         nonlocal polls
         requests.append(request)
-        if request.url.path.endswith("/uploads"):
-            assert request.url.params["model"] == "qwen-image-2.1-pro"
-            return httpx.Response(
-                200,
-                json={
-                    "data": {
-                        "upload_host": "https://upload.example.com",
-                        "upload_dir": "test",
-                        "oss_access_key_id": "upload-key",
-                        "signature": "signature",
-                        "policy": "policy",
-                    }
-                },
-            )
-        if request.url.host == "upload.example.com":
-            return httpx.Response(200)
         if request.method == "POST":
             assert request.url.path.endswith("/image-generation/generation")
             assert request.headers["X-DashScope-Async"] == "enable"
-            assert "X-DashScope-OssResourceResolve" not in request.headers
             body = json.loads(request.content)
+            assert body["model"] == "qwen-image-2.1-pro"
             assert body["parameters"]["n"] == 1
             assert len(body["input"]["messages"][0]["content"]) == 3
             assert body["input"]["messages"][0]["content"][0]["image"].startswith("data:")
@@ -83,11 +67,48 @@ async def test_async_submit_poll_and_download() -> None:
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(reply)) as client:
         provider = DashScopeQwenEditProvider(config(), client)
-        result = await provider.multi_image_edit(
+        task = await provider.submit_edit_task(
             image_bytes=b"source", reference_images=[b"mask"], prompt="recolor"
         )
+        assert task["task_id"] == "task-1"
+        result = await provider.wait_edit_task(task["task_id"])
     assert result == b"image-result"
     assert sum(r.method == "POST" and r.url.path.endswith("/generation") for r in requests) == 1
+
+
+@pytest.mark.asyncio
+async def test_studio_multi_image_edit_uses_sync_for_qwen_21() -> None:
+    """Studio turns prefer synchronous multimodal even for Qwen 2.1."""
+
+    def reply(request: httpx.Request) -> httpx.Response:
+        if request.method == "POST":
+            assert request.url.path.endswith("/multimodal-generation/generation")
+            assert "X-DashScope-Async" not in request.headers
+            body = json.loads(request.content)
+            assert body["model"] == "qwen-image-2.1-pro"
+            return httpx.Response(
+                200,
+                json={
+                    "output": {
+                        "choices": [
+                            {
+                                "message": {
+                                    "content": [{"image": "https://example.com/out.png"}],
+                                }
+                            }
+                        ]
+                    }
+                },
+            )
+        return httpx.Response(200, content=b"image")
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(reply)) as client:
+        assert (
+            await DashScopeQwenEditProvider(config(), client).multi_image_edit(
+                image_bytes=b"source", reference_images=[], prompt="edit"
+            )
+            == b"image"
+        )
 
 
 @pytest.mark.asyncio

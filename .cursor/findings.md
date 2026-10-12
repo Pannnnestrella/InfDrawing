@@ -67,6 +67,12 @@
 - 同一张骑士源图上，gpt-4o 的脸/剑/盾框明显偏；三个 Qwen 模型（qwen3-vl-plus / flash / qwen-vl-max）框都落在正确部位，坐标格式都是提示词要求的 `xyxy_1000`。
 - 默认选用 `qwen3-vl-plus`：源图 14 个实体、约 22s；flash 更快（约 15s）但框质量接近。对比图在 `data/logs/20261005_cedit_grounding/`。
 
+## 2026-10-12 Qwen 2.1 整图改探针
+
+- 官方：`qwen-image-2.1-pro` 支持指令整图/多参考图 I2I；API **无**专用 mask 字段（Mask 局部仍属万相）。
+- 实测整图改成功：DashScope **同步** `multimodal-generation/generation`，骑士图缩至 1024² Base64，约 62 s 出图。归档 `data/logs/20261012_qwen21_fullframe_probe/`。
+- 此前失败更像异步大包 Base64 提交超时；同步路径可跑通。Studio 若切 2.1，优先同步或异步+URL，避免默认大图 Base64 异步。
+
 ## 2026-10-05 多轮可控编辑
 
 - 没有 mask 时，OpenAI edits 会逐轮推近镜头、改表情；只靠 prompt 约束不够，需要 VLM 验收加修改树兜底。

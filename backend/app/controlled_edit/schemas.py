@@ -145,6 +145,18 @@ class VerificationResult(BaseModel):
     warnings: list[str] = Field(default_factory=list)
 
 
+class SentImage(BaseModel):
+    """One image related to a turn's model request, for UI transparency."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    role: Literal["primary", "reference", "mask", "crop"]
+    artifact_id: str
+    index: int | None = None
+    label: str = ""
+    sent: bool = True
+
+
 class EditVersion(BaseModel):
     """One node of the version tree."""
 
@@ -161,7 +173,9 @@ class EditVersion(BaseModel):
     compiled_prompt: str | None = None
     prompt_style: str | None = None
     image_provider: str | None = None
+    image_model: str | None = None
     reference_artifact_ids: list[str] = Field(default_factory=list)
+    sent_images: list[SentImage] = Field(default_factory=list)
     entities: list[SceneEntity] = Field(default_factory=list)
     verification: VerificationResult | None = None
     attempts: int = 0
@@ -203,6 +217,7 @@ class EditTurnRequest(LocalTurnFields):
     target_entity_ids: list[str] = Field(default_factory=list)
     prompt_style: Literal["preserve", "target_only"] | None = None
     image_provider: Literal["dashscope", "openai"] | None = None
+    image_model: str | None = Field(default=None, max_length=120)
 
 
 class EntityStatusUpdate(BaseModel):

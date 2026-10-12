@@ -75,6 +75,14 @@ export interface VerificationResult {
   warnings: string[];
 }
 
+export interface SentImage {
+  role: "primary" | "reference" | "mask" | "crop";
+  artifact_id: string;
+  index: number | null;
+  label: string;
+  sent: boolean;
+}
+
 export interface EditVersion {
   id: string;
   session_id: string;
@@ -89,9 +97,11 @@ export interface EditVersion {
   compiled_prompt: string | null;
   prompt_style: PromptStyle | null;
   image_provider: ImageProvider | null;
+  image_model?: string | null;
   masks?: MaskRecord[];
   stitcher?: InpaintPreview["stitcher"] & { actual_output_size?: number[] };
   reference_artifact_ids: string[];
+  sent_images?: SentImage[];
   entities: SceneEntity[];
   verification: VerificationResult | null;
   attempts: number;
@@ -190,6 +200,7 @@ export async function submitTurn(
   options: {
     promptStyle?: PromptStyle;
     imageProvider?: ImageProvider;
+    imageModel?: string;
     maskArtifactId?: string;
     inpaintOptions?: InpaintOptions;
   } = {},
@@ -201,6 +212,7 @@ export async function submitTurn(
       target_entity_ids: targetEntityIds,
       ...(options.promptStyle ? { prompt_style: options.promptStyle } : {}),
       ...(options.imageProvider ? { image_provider: options.imageProvider } : {}),
+      ...(options.imageModel ? { image_model: options.imageModel } : {}),
       ...(options.maskArtifactId ? {
         edit_mode: "local", mask_artifact_id: options.maskArtifactId,
         inpaint_options: options.inpaintOptions,

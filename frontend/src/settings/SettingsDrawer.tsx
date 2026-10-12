@@ -13,14 +13,14 @@ import {
 import type { EnginePreference } from "@/lib/engine-preference";
 import {
   imageProviderLabel,
-  loadImageProvider,
+  loadImageOption,
   loadPromptStyle,
   parseImageOptions,
   promptStyleLabel,
-  saveImageProvider,
+  saveImageOption,
   savePromptStyle,
   subscribeCeditOptions,
-  type ImageProviderOption,
+  type ImageModelOption,
   type PromptStyleOption,
 } from "@/studio/studio-turn-options";
 
@@ -46,7 +46,7 @@ export function SettingsDrawer({
   const [capsError, setCapsError] = useState<string | null>(null);
   const [capsLoading, setCapsLoading] = useState(false);
   const [promptStyle, setPromptStyle] = useState<PromptStyleOption>("preserve");
-  const [imageProvider, setImageProvider] = useState<ImageProviderOption>("dashscope");
+  const [imageOption, setImageOption] = useState<ImageModelOption | null>(null);
 
   const imageOptions = useMemo(
     () => parseImageOptions(caps?.features.controlled_edit?.models?.image_options),
@@ -74,7 +74,7 @@ export function SettingsDrawer({
           ? models.image_provider
           : "dashscope";
       setPromptStyle(loadPromptStyle(fallbackStyle));
-      setImageProvider(loadImageProvider(options, fallbackProvider));
+      setImageOption(loadImageOption(options, fallbackProvider));
     }
 
     syncCedit();
@@ -193,22 +193,23 @@ export function SettingsDrawer({
                 </select>
               </label>
               <label className="space-y-1 text-[10px] text-faint">
-                <span>生图提供商</span>
+                <span>整图生图模型</span>
                 <select
-                  value={imageProvider}
+                  value={imageOption?.key ?? ""}
                   disabled={imageOptions.length === 0}
                   onChange={(event) => {
-                    const provider = event.target.value as ImageProviderOption;
-                    setImageProvider(provider);
-                    saveImageProvider(provider);
+                    const next = imageOptions.find((option) => option.key === event.target.value);
+                    if (!next) return;
+                    setImageOption(next);
+                    saveImageOption(next);
                   }}
                   className="w-full rounded-md border border-line bg-surface-2 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent disabled:opacity-50"
                 >
                   {imageOptions.length === 0 ? (
-                    <option value={imageProvider}>暂无可用模型</option>
+                    <option value="">暂无可用模型</option>
                   ) : (
                     imageOptions.map((option) => (
-                      <option key={option.provider} value={option.provider}>
+                      <option key={option.key} value={option.key}>
                         {option.label}
                       </option>
                     ))

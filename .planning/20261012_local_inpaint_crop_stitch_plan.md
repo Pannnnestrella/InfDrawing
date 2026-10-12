@@ -5,37 +5,43 @@
 **影响范围**：见下文文件清单；本轮仅新增本规划并追加会话记录，不修改源代码、不安装依赖、不下载权重、不进行付费调用。
 **前置条件**：现有 controlled_edit 会话、版本树、ArtifactService 和万相 inpaint 可复用；实施须用户明确批准本规划。SAM 依赖安装和权重下载的具体清单在环境检查后呈报确认。
 **规划日期**：2026-10-12。
-**整体状态**：等待批准。
+**整体状态**：Stage 1–6 / Stage 8 代码与缩减验收已完成；Stage 7 代码完成但 Qwen 真实出图未成功。以下状态已于 2026-10-12 对照仓库源码复核（本轮不改代码）。
 
 ### Stage 1: 确认模型能力、环境与数据契约
 - **目标**：实现按 provider/model 区分的尺寸能力配置；确认 SAM 2.1 环境与权重；定义 Mask、CropResult、Stitcher 和局部编辑接口契约。
 - **成功标准**：离线契约测试覆盖输入边长、像素面积、宽高比、尺寸取整和不支持 Mask 的模型；输出依赖清单；历史会话能兼容新增可选字段。真实出图前明确记录文档能力与当前 Key 实测能力的区别。
-- **状态**：Not Started
+- **状态**：Complete（代码与契约）
+- **核实**：`inpaint_capabilities.py`、`inpaint_types.py`（MaskRecord / Stitcher / LocalTurnFields）、`requirements-segmentation.txt`、相关几何与契约测试均在仓库中。SAM 权重路径已配置（`data/models/sam2.1/...`，gitignore）；**当前工作区未见权重文件**，需本机存在才可真实分割。
 
 ### Stage 2: 实现不规则 Mask 获取与手工编辑
 - **目标**：SAM 2.1 使用实体框或正负点击点生成轮廓；前端支持套索/多边形圈选、画笔添加、橡皮擦除、撤销/重做和候选 Mask 选择。自动分割不可用时仍可手工完成流程。
 - **成功标准**：显示坐标正确映射到原图像素；缩放、留白、设备像素比不改变 Mask 位置；用户确认后保存 Mask artifact，与具体父版本绑定；切换版本清理未确认草稿。
-- **状态**：Not Started
+- **状态**：Complete（批准范围内）
+- **核实**：`MaskEditor.tsx` / `mask-edit.ts`、`sam2_segmenter.py`、`sam3_client.py`、`POST .../masks` 与 `.../segment` 已实现。SAM 3 仅为可配置 HTTP adapter；无独立服务时前端显示未配置。版本切换通过 `InpaintControls` 的 `key` 重挂载清理草稿。
 
 ### Stage 3: 实现 Mask 预处理与 Inpaint Crop
 - **目标**：实现阈值、可选封闭空洞填充、膨胀、有限羽化，计算联合 Bounding Box、上下文扩展、宽高比适配和统一空间变换；输出裁剪图、模型 Mask 和 Stitcher。
 - **成功标准**：合成图测试覆盖空 Mask、多块区域、细长区域、图像四边/四角、奇数尺寸和超界裁剪；不发生非等比拉伸；裁剪区域覆盖最终融合支持域；原图与 Mask 始终共用变换。
-- **状态**：Not Started
+- **状态**：Complete（首版万相正方形画布）
+- **核实**：`masks.py`、`inpaint_crop.py` 与 `test_inpaint_geometry.py` 覆盖空 Mask、多块联合框、边角/奇数尺寸、Mask 外不变性。当前工作画布固定约 1024×1024（万相保守策略）；未实现规划中的「可选最小连通域面积过滤」「远距离多块上下文浪费提示」。
 
 ### Stage 4: 接入局部生成与 Inpaint Stitch
 - **目标**：默认以万相 2.1 接收 crop + 二值 Mask；生成后逆变换并仅按融合 Mask 写回；在完整合成图上复用实体重解析与验收。增加实际请求提示词和重试反馈记录。
 - **成功标准**：通过 mock 验证生成请求中没有完整原图或额外身份参考图；无论模型如何修改上下文，最终 Mask 支持域外原图像素逐值一致；返回尺寸轻微取整能恢复，异常比例或生成构图变化有明确提示；失败不创建损坏结果。
-- **状态**：Not Started
+- **状态**：Complete（稳定路径 = 万相）
+- **核实**：`service.py` 显式 `edit_mode=local` 走 crop→万相→stitch；`prompt_compiler` / `retry_feedback` 接入；版本持久化 `stitcher`。`InpaintOptions.model` 仅允许 `wanx2.1-imageedit`；非 `binary_field` 模型在 crop 层拒绝。Qwen 2.1 不在 Studio 稳定局部路径。
 
 ### Stage 5: 集成多轮编辑 UI、持久化与演示
 - **目标**：浮窗内提供 Mask 编辑、裁剪预览、编辑区/羽化区/上下文区显示、参数调整、局部重绘模型选择和版本详情；完整结果可导入画布与分支回退。
 - **成功标准**：自然语言指令与用户 Mask 配合可执行；重启后原图、Mask、裁剪元信息和版本仍可关联；现有无 Mask 整图编辑不受影响；已有会话不需重建。
-- **状态**：Not Started
+- **状态**：Complete（有小缺口）
+- **核实**：`InpaintControls`（参数、离线预览、候选/历史 Mask）、`StudioWorkspace` 提交局部 turn、`VersionDetails` 展示 stitch 元信息、导入画布仍可用。缺口：UI 文案写死「万相 2.1」，无局部模型切换器；预览为裁剪图/生成 Mask/融合 Mask 三图，非原图上叠加「编辑区/羽化区/上下文区」分区标注；设置页无 SAM 专项配置入口。
 
 ### Stage 6: 真实样例验证与 Review Gate
 - **目标**：对照现有整图 Mask 路径和新 Crop/Stitch 路径，测试换剑、改手套、删除物件、边缘物件及多块 Mask；运行相关测试、lint、类型检查并完成代码审查。
 - **成功标准**：记录非编辑区域差异像素数为 0、尺寸保持、边缘接缝、人眼修改效果、延迟和实际调用成本；归档输入/输出尺寸与截图。审查明确给出正确性、规范一致性、测试、风险结论。
-- **状态**：Not Started
+- **状态**：Complete（用户缩减范围）
+- **核实**：离线测试与 Review Gate 结论见下文完成记录。真实样例以盾牌改色为主；换剑/手套/删除/换形状等未按原清单全跑。实验归档目录 `data/logs/20261012_local_inpaint_crop_stitch/` 与对照页 `frontend/public/inpaint-comparison/` 均在 `.gitignore`；**当前工作区未见这些产物**（需本机曾生成或另存）。
 
 ## 一、当前实现与历史风险
 
@@ -212,14 +218,16 @@ Crop 与 Stitch 是通用图像处理模块，不调用 Diffusion、不依赖 SA
 - 目标：增加官方异步 endpoint、任务 ID 保存、有限等待轮询与错误状态处理；Qwen 2.0 保持原路径。
 - 影响范围：`dashscope_qwen_edit.py`、provider 测试与对照脚本。
 - 成功标准：mock 覆盖提交、处理中、成功、失败与超时；真实调用取得可追踪任务 ID，不因原 180 秒同步等待丢失任务。
-- 状态：In Progress。
+- 状态：Complete（代码 / mock）；**真实出图未完成**。
+- **核实**：`submit_edit_task` / `wait_edit_task` / 可选 `upload_temporary_image` 与 `backend/tests/test_qwen_async.py` 在仓库中；Qwen 2.0 仍走同步。真实 Base64 异步提交曾 ReadTimeout 且无 task_id；临时存储上传按用户选择未启用、未验收。
 
 ### Stage 8：万相原图重绘与网页比较
 - 目标：相同原图、源坐标处理后 Mask、指令与 seed，不裁剪传给万相；保留原始模型输出并测其 Mask 外差异，另展示统一融合后的结果。Qwen 继续原 crop+mask，新增一张异步测试。
 - 影响范围：`scripts/cedit_crop_stitch_compare.py`、HTML 模板、实验归档与会话记录。
 - 成功标准：网页明确区别裁剪/整图输入及原始/融合指标，保留上次失败历史。
-- 状态：Not Started。
+- 状态：Complete（万相对照）；Qwen 异步真实输出仍失败（见 Stage 7）。
 - 费用：新增万相 1 张 ¥0.14、Qwen 2.1 Pro 1 张 ¥0.25，共约 ¥0.39（前次已核对北京单价）；每模型只提交一次，轮询不重复生成，失败不自动新增任务。用户当前明确测试请求沿用已说明模型与单价。
+- **核实**：脚本支持 `--followup`（`wanx_full` + `qwen_async`）；模板 `scripts/templates/inpaint_compare.html` 存在。对照页产物被 gitignore，当前工作区未见生成结果。
 
 ### Stage 7–8 执行记录与用户最新选择
 - Stage 8：Complete。万相原图与同区域源坐标 Mask，seed=7、相同指令，143.30 秒成功。原始输出 Mask 外变化 613,919 像素，最大通道差值 104；统一融合后两项均为 0。整图输入无上次白色大块，仍需检查风格与形状变化。
@@ -233,3 +241,66 @@ Crop 与 Stitch 是通用图像处理模块，不调用 Diffusion、不依赖 SA
 - 规范一致性：源文件按前后端目录放置；Python 虚拟环境隔离；公开类/函数类型与 docstring；Ruff/格式化通过。FastAPI Depends 默认参数沿用项目惯例，忽略 B008；无新增依赖复制或二进制提交。
 - 测试：几何、掩码、接口、编排、反馈重试、旧契约兼容、JSON 空间信息往返、SAM 3 mock 协议、前端请求与坐标映射覆盖。当前浏览器视觉验证针对实验页，画笔等交互尚未完成全面真人验收。
 - 风险与限制：SAM CPU 速度、Mask 质量、生成区域内风格和内容重排仍需实际使用评估；Alpha Blending 不保证所有边缘无接缝。SAM 3 实服务及 Qwen 真实输出未验证，不宣称已完成。npm 补齐已有依赖时报告历史依赖漏洞，未在本任务升级整个依赖树。
+
+## 2026-10-12 代码核实记录（只读，未改源码）
+
+对照仓库源码、测试与文档，复核规划交付物。结论：**主闭环（手工/SAM2 Mask → 预处理 → Crop → 万相 → Stitch → Studio UI）已实现**；若干规划细则与真实联调项仍开放。
+
+### 已实现（源码在仓库）
+
+| 规划项 | 证据 |
+|---|---|
+| Mask / Crop / Stitch 纯函数 | `masks.py`、`inpaint_crop.py`、`inpaint_stitch.py`、`inpaint_types.py` |
+| 模型能力表 | `pipeline/image_providers/inpaint_capabilities.py`（wanx binary / qwen2.0 unsupported / qwen2.1 experimental image_prompt / wan2.7 unsupported） |
+| SAM 2.1 懒加载 + SAM 3 HTTP adapter | `sam2_segmenter.py`、`sam3_client.py`、`segmentation.py`、`requirements-segmentation.txt` |
+| API：masks / segment / inpaint-preview / turns 局部字段 | `controlled_edit/api.py`、`schemas.py`、`service.py` |
+| 前端 Mask 编辑 + 局部控件 | `MaskEditor.tsx`（套索/多边形/画笔/橡皮/清空/撤销重做/正负点）、`InpaintControls.tsx`、`controlled-edit-api.ts` |
+| Studio 集成与版本元信息 | `StudioWorkspace.tsx`（显式 local turn）、`VersionDetails.tsx`（stitcher 摘要）、导入画布保留 |
+| 重试反馈进入下一轮提示词 | `prompt_compiler.py` + `verifier.retry_feedback`；service 测试覆盖 |
+| 文档 | `docs/controlled_edit.md` 已写 Local mask crop and stitch |
+| 对照脚本 | `scripts/cedit_crop_stitch_compare.py`、`scripts/templates/inpaint_compare.html` |
+| Qwen 2.1 异步 submit/poll（含可选临时上传代码） | `dashscope_qwen_edit.py`、`tests/test_qwen_async.py` |
+| 几何 / 分割 / 局部编排测试 | `test_inpaint_geometry.py`、`test_segmentation.py`、`test_cedit_service.py` 等 |
+
+### 部分实现 / 有偏差
+
+| 规划项 | 现状 |
+|---|---|
+| 工作画布尺寸适配 | 万相首版固定扩到正方形再缩到 1024×1024；非「按模型面积预算选任意合法 W×H」的完整通用实现 |
+| Stitcher 字段 | 有 crop/paste/padding/canvas/model/actual 等；规划草案中的独立 `content_rect` 名称未单独出现 |
+| 预览「编辑区/羽化区/上下文区」 | 离线预览展示裁剪图、生成 Mask、融合 Mask；非原图叠加三分区标注 |
+| 局部模型选择 | UI 写死万相；`InpaintOptions.model` Literal 仅 `wanx2.1-imageedit` |
+| 万相 provider 内部短边放大 | `dashscope_wanx.py` 仍保留短边不足 512 时的放大；局部路径送 1024 时通常不触发，但非「Crop 层独占缩放」 |
+| SAM 默认设备 | `cedit_sam2_device=cpu`；RTX 5070 Ti / CUDA 兼容性与速度未在本核实中验证 |
+| Stage 6 样例矩阵 | 按用户要求缩减；盾牌改色 + 整图万相对照有记录；删除/换形状等未全覆盖 |
+| 实验产物 | `data/logs/...`、`frontend/public/inpaint-comparison/`、`data/models/` 均 gitignore；**当前工作区目录缺失**，不能从仓库直接复开对照页或 SAM |
+
+### 未实现或未验收
+
+| 规划项 | 说明 |
+|---|---|
+| SAM embedding 按 owner+hash 缓存 | 代码中未见该缓存层 |
+| 可选最小连通域面积过滤 | `prepare_mask` 无此步骤 |
+| 远距离多块 Mask 的上下文浪费提示 | 前后端均无 |
+| SAM 3 真实推理 | 仅 adapter；`cedit_sam3_base_url` 默认空 |
+| Qwen 2.1 进入 Studio 局部稳定路径 | crop 拒绝非 binary_field；实验仅脚本 |
+| Qwen 真实成功出图 / 可追踪 task_id | 两次真实尝试均超时失败 |
+| Qwen 临时存储 URL 真实验收 | 代码可选，默认关闭；用户明确不上传 |
+| 设置页 SAM/权重配置 UI | 无专项入口（靠环境/配置字段） |
+| 画笔等交互全面真人验收 | Review Gate 已写明未完成 |
+| GPU 版 SAM 安装与测速 | 未作为已交付项 |
+
+### 阶段状态一览（核实后）
+
+| Stage | 状态 |
+|---|---|
+| 1 能力与契约 | Complete（代码）；权重需本机 |
+| 2 Mask / SAM | Complete（SAM3 仅 adapter） |
+| 3 预处理 + Crop | Complete（万相方画布首版） |
+| 4 生成 + Stitch | Complete（万相稳定路径） |
+| 5 UI / 持久化 | Complete（见部分实现缺口） |
+| 6 真实样例 + Review | Complete（缩减范围） |
+| 7 Qwen 异步 | 代码 Complete；真实出图未完成 |
+| 8 万相整图对照 | Complete（万相）；Qwen 侧仍失败 |
+
+本核实轮次**未修改任何源代码**，仅更新本规划文件中的状态与上述记录。

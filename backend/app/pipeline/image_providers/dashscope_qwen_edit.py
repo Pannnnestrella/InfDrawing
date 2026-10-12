@@ -34,13 +34,18 @@ class DashScopeQwenEditProvider(ImageProvider):
     prompt_image_layout = "primary_last"
 
     def __init__(
-        self, config: Settings = settings, client: httpx.AsyncClient | None = None
+        self,
+        config: Settings = settings,
+        client: httpx.AsyncClient | None = None,
+        *,
+        model: str | None = None,
     ) -> None:
         if not config.dashscope_api_key.strip():
             raise ImageProviderError("DashScope API key is not configured")
         config.validate_provider_url(config.dashscope_base_url)
         self._config = config
         self._client = client
+        self._model = (model or config.cedit_image_model).strip()
 
     async def txt2img(
         self,
@@ -89,19 +94,15 @@ class DashScopeQwenEditProvider(ImageProvider):
             on_progress: Optional progress hook.
         """
         del input_fidelity
+        # Prefer synchronous multimodal for Studio turns (2.1 async + large Base64 timed out
+        # in probes; sync 2.1-pro full-frame edit succeeded in ~60s).
         await emit_progress(on_progress, "cloud_submit")
-        if self._config.cedit_image_model.startswith("qwen-image-2.1-"):
-            task = await self.submit_edit_task(
-                image_bytes=image_bytes, reference_images=reference_images, prompt=prompt, size=size
-            )
-            await emit_progress(on_progress, f"cloud_task:{task['task_id']}")
-            return await self.wait_edit_task(task["task_id"], on_progress=on_progress)
         refs = reference_images[: MAX_INPUT_IMAGES - 1]
         content: list[dict[str, str]] = [{"image": _data_url(item)} for item in refs]
         content.append({"image": _data_url(image_bytes)})
         content.append({"text": prompt})
         payload = {
-            "model": self._config.cedit_image_model,
+            "model": self._model,
             "input": {"messages": [{"role": "user", "content": content}]},
             "parameters": {
                 "n": 1,
@@ -114,7 +115,13 @@ class DashScopeQwenEditProvider(ImageProvider):
             "Authorization": f"Bearer {self._config.dashscope_api_key}",
             "Content-Type": "application/json",
         }
-        data = await self._request("POST", QWEN_EDIT_PATH, headers=headers, json=payload)
+        data = await self._request(
+            "POST",
+            QWEN_EDIT_PATH,
+            headers=headers,
+            json=payload,
+            timeout=self._config.cloud_image_timeout_seconds,
+        )
         url = _extract_image_url(data)
         await emit_progress(on_progress, "cloud_download")
         return await self._download_bytes(url)
@@ -129,7 +136,7 @@ class DashScopeQwenEditProvider(ImageProvider):
         upload_images: bool = False,
     ) -> dict[str, str]:
         """Submit once and return trace identifiers for persistent polling."""
-        if not self._config.cedit_image_model.startswith("qwen-image-2.1-"):
+        if not self._model.startswith("qwen-image-2.1-"):
             raise ImageProviderError("asynchronous editing is enabled only for Qwen 2.1")
         images = [*reference_images[:2], image_bytes]
         urls = (
@@ -140,7 +147,7 @@ class DashScopeQwenEditProvider(ImageProvider):
         content = [{"image": url} for url in urls]
         content.append({"text": prompt})
         payload = {
-            "model": self._config.cedit_image_model,
+            "model": self._model,
             "input": {"messages": [{"role": "user", "content": content}]},
             "parameters": {
                 "n": 1,
@@ -171,12 +178,11 @@ class DashScopeQwenEditProvider(ImageProvider):
 
     async def upload_temporary_image(self, image: bytes) -> str:
         """Upload lossless PNG bytes to the model's free temporary storage."""
-        model = self._config.cedit_image_model
         data = await self._request(
             "GET",
             "/uploads",
             headers={"Authorization": f"Bearer {self._config.dashscope_api_key}"},
-            params={"action": "getPolicy", "model": model},
+            params={"action": "getPolicy", "model": self._model},
             timeout=30.0,
         )
         policy = data.get("data", {})

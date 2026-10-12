@@ -8,7 +8,6 @@ import type { LockConflictEntity, SceneEntity } from "@/lib/controlled-edit-api"
 
 import {
   type ImageModelOption,
-  type ImageProviderOption,
   type PromptStyleOption,
   promptStyleLabel,
 } from "./studio-turn-options";
@@ -20,10 +19,14 @@ interface EditComposerProps {
   submitting: boolean;
   conflict: { instruction: string; entities: LockConflictEntity[] } | null;
   promptStyle: PromptStyleOption;
-  imageProvider: ImageProviderOption;
+  imageOption: ImageModelOption | null;
   imageOptions: ImageModelOption[];
+  /** When set, Studio routes this turn to Wanx and locks the model picker. */
+  localMaskModel: string | null;
+  /** Explicit crop/stitch Mask panel vs legacy small-object auto rectangle Mask. */
+  localMaskPath: "crop_stitch" | "auto_rect" | null;
   onPromptStyleChange: (style: PromptStyleOption) => void;
-  onImageProviderChange: (provider: ImageProviderOption) => void;
+  onImageOptionChange: (option: ImageModelOption) => void;
   onSubmit: (instruction: string) => Promise<boolean>;
   onUnlockAndRetry: () => void;
   onDismissConflict: () => void;
@@ -36,16 +39,19 @@ export function EditComposer({
   selectedTargets,
   conflict,
   promptStyle,
-  imageProvider,
+  imageOption,
   imageOptions,
+  localMaskModel,
+  localMaskPath,
   onPromptStyleChange,
-  onImageProviderChange,
+  onImageOptionChange,
   onSubmit,
   onUnlockAndRetry,
   onDismissConflict,
 }: EditComposerProps) {
   const [text, setText] = useState("");
   const blocked = disabled || submitting;
+  const wanxRoute = Boolean(localMaskModel && localMaskPath);
 
   const submit = async () => {
     const instruction = text.trim();
@@ -56,6 +62,24 @@ export function EditComposer({
   return (
     <section className="space-y-2">
       <h2 className="text-xs font-semibold tracking-wide">编辑指令</h2>
+      {wanxRoute ? (
+        <p className="rounded-md border border-dashed border-warning/50 bg-warning/10 px-2 py-1.5 text-[10px] leading-relaxed text-ink">
+          {localMaskPath === "crop_stitch" ? (
+            <>
+              已开启局部 Mask 编辑，本轮实际使用{" "}
+              <span className="font-semibold text-warning">万相 {localMaskModel}</span>
+              （裁剪图 + 不规则 Mask）。下方「生图模型」已锁定，不会调用通义 Qwen / OpenAI。
+              关闭局部 Mask 编辑后可再选整图模型。
+            </>
+          ) : (
+            <>
+              已选小物件局部目标，本轮实际使用{" "}
+              <span className="font-semibold text-warning">万相 {localMaskModel}</span>
+              （整图 + 矩形 Mask）。下方「生图模型」已锁定；取消小物件点选后恢复。
+            </>
+          )}
+        </p>
+      ) : null}
       <div className="grid grid-cols-2 gap-2">
         <label className="space-y-1 text-[10px] text-faint">
           <span>提示词策略</span>
@@ -70,25 +94,37 @@ export function EditComposer({
           </select>
         </label>
         <label className="space-y-1 text-[10px] text-faint">
-          <span>生图模型</span>
-          <select
-            value={imageProvider}
-            disabled={blocked || imageOptions.length === 0}
-            onChange={(event) =>
-              onImageProviderChange(event.target.value as ImageProviderOption)
-            }
-            className="w-full rounded-md border border-line bg-surface-1 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent disabled:opacity-50"
-          >
-            {imageOptions.length === 0 ? (
-              <option value={imageProvider}>暂无可用模型</option>
-            ) : (
-              imageOptions.map((option) => (
-                <option key={option.provider} value={option.provider}>
-                  {option.label}
-                </option>
-              ))
-            )}
-          </select>
+          <span>生图模型{wanxRoute ? "（本轮锁定）" : ""}</span>
+          {wanxRoute ? (
+            <select
+              value="wanx"
+              disabled
+              aria-label="本轮局部重绘模型"
+              className="w-full rounded-md border border-dashed border-warning bg-warning/10 px-2 py-1.5 text-xs font-medium text-warning outline-none disabled:opacity-100"
+            >
+              <option value="wanx">万相 {localMaskModel}</option>
+            </select>
+          ) : (
+            <select
+              value={imageOption?.key ?? ""}
+              disabled={blocked || imageOptions.length === 0}
+              onChange={(event) => {
+                const next = imageOptions.find((option) => option.key === event.target.value);
+                if (next) onImageOptionChange(next);
+              }}
+              className="w-full rounded-md border border-line bg-surface-1 px-2 py-1.5 text-xs text-ink outline-none focus:border-accent disabled:opacity-50"
+            >
+              {imageOptions.length === 0 ? (
+                <option value="">暂无可用模型</option>
+              ) : (
+                imageOptions.map((option) => (
+                  <option key={option.key} value={option.key}>
+                    {option.label}
+                  </option>
+                ))
+              )}
+            </select>
+          )}
         </label>
       </div>
       <textarea

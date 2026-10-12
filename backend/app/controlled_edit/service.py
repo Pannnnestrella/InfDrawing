@@ -8,7 +8,7 @@ import hashlib
 import io
 import logging
 from collections.abc import Callable, Coroutine
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 import httpx
 from PIL import Image, ImageOps
@@ -52,6 +52,7 @@ from app.controlled_edit.schemas import (
     EditVersion,
     EntityStatus,
     SceneEntity,
+    SentImage,
     SessionTree,
     VerificationResult,
     VersionStatus,
@@ -170,7 +171,7 @@ class ControlledEditService:
         repository: EditRepository,
         artifacts: ArtifactService,
         vision_factory: Callable[[], JsonVisionModel],
-        editor_factory: Callable[[str | None], ImageEditor],
+        editor_factory: Callable[..., ImageEditor],
         config: Settings = settings,
         scheduler: Scheduler | None = None,
         scene_vision_factory: Callable[[], JsonVisionModel] | None = None,
@@ -271,6 +272,9 @@ class ControlledEditService:
             if request.edit_mode == "local"
             else request.image_provider or self._config.cedit_image_provider
         )
+        image_model = None if request.edit_mode == "local" else _resolve_image_model(
+            image_provider, request.image_model, self._config
+        )
         _assert_editor_available(image_provider, self._config)
         child = EditVersion(
             session_id=session_id,
@@ -280,6 +284,7 @@ class ControlledEditService:
             intent=intent,
             prompt_style=prompt_style,
             image_provider=image_provider,
+            image_model=image_model,
             width=parent.width,
             height=parent.height,
             entities=[e.model_copy() for e in parent.entities],
@@ -321,9 +326,16 @@ class ControlledEditService:
         await self._set_step(version, "preparing", VersionStatus.RUNNING)
         parent_bytes = await self._read_artifact(owner_key_id, parent.image_artifact_id)
         image_provider = version.image_provider or self._config.cedit_image_provider
+        image_model = version.image_model or (
+            self._config.cedit_image_model if image_provider == "dashscope" else None
+        )
         prompt_style = version.prompt_style or self._config.cedit_prompt_style
         explicit_local = bool(version.local_edit and version.local_edit.edit_mode == "local")
-        editor = None if explicit_local else self._editor_factory(image_provider)
+        editor = (
+            None
+            if explicit_local
+            else self._editor_factory(image_provider, image_model)
+        )
         vision = self._vision_factory()
         layout = getattr(editor, "prompt_image_layout", "primary_first")
         max_refs = self._max_references(layout)
@@ -371,14 +383,15 @@ class ControlledEditService:
             ]
             version.attempts = attempt
             version.compiled_prompt = compiled.prompt
+            lock_refs = [
+                e
+                for e in compiled.reference_entities
+                if e.anchor_artifact_id
+            ]
             version.reference_artifact_ids = (
                 []
                 if explicit_local
-                else [
-                    e.anchor_artifact_id
-                    for e in compiled.reference_entities
-                    if e.anchor_artifact_id
-                ]
+                else [e.anchor_artifact_id for e in lock_refs if e.anchor_artifact_id]
             )
             await self._set_step(version, "generating" if attempt == 1 else "retrying")
             padded = pad_to_supported(parent_bytes)
@@ -390,14 +403,6 @@ class ControlledEditService:
             if use_mask:
                 if "local_mask:wanx" not in version.warnings:
                     version.warnings.append("local_mask:wanx")
-                with Image.open(io.BytesIO(parent_bytes)) as parent_im:
-                    size = parent_im.size
-                mask = build_edit_mask(
-                    size,
-                    parent.entities,
-                    version.intent.target_entity_ids,
-                    unconstrained="keep",
-                )
                 from app.pipeline.image_providers.dashscope_wanx import (
                     DashScopeWanxProvider,
                 )
@@ -406,16 +411,53 @@ class ControlledEditService:
                 feedback_text = f"修正上次问题：{feedback[:300]}。" if feedback else ""
                 wanx_prompt = (feedback_text + base_prompt)[:800]
                 version.compiled_prompt = wanx_prompt
+                if crop and version.stitcher:
+                    mask_bytes = crop.mask
+                    image_bytes = crop.image
+                    primary_id = version.stitcher.crop_artifact_id or parent.image_artifact_id
+                    mask_id = version.stitcher.generation_mask_artifact_id
+                    primary_role_lit: Literal["primary", "crop"] = "crop"
+                    primary_label = "裁剪图（发给万相）"
+                else:
+                    with Image.open(io.BytesIO(parent_bytes)) as parent_im:
+                        size = parent_im.size
+                    mask = build_edit_mask(
+                        size,
+                        parent.entities,
+                        version.intent.target_entity_ids,
+                        unconstrained="keep",
+                    )
+                    mask_bytes = mask_png_bytes(mask)
+                    image_bytes = parent_bytes
+                    mask_artifact = await self._artifacts.create_image(
+                        owner_key_id, mask_bytes, "image/png"
+                    )
+                    primary_id = parent.image_artifact_id
+                    mask_id = mask_artifact.id
+                    primary_role_lit = "primary"
+                    primary_label = "整图 base_image（发给万相）"
+                version.sent_images = _wanx_sent_images(
+                    primary_id=primary_id or "",
+                    primary_role=primary_role_lit,
+                    primary_label=primary_label,
+                    mask_id=mask_id or "",
+                    lock_refs=lock_refs,
+                )
                 raw = await _with_transport_retries(
                     functools.partial(
                         DashScopeWanxProvider(self._config).inpaint,
-                        image_bytes=crop.image if crop else parent_bytes,
-                        mask_bytes=crop.mask if crop else mask_png_bytes(mask),
+                        image_bytes=image_bytes,
+                        mask_bytes=mask_bytes,
                         prompt=wanx_prompt,
                     )
                 )
             else:
                 assert editor is not None
+                version.sent_images = _fullframe_sent_images(
+                    parent_image_id=parent.image_artifact_id or "",
+                    lock_refs=lock_refs,
+                    image_layout=layout,
+                )
                 raw = await _with_transport_retries(
                     functools.partial(
                         editor.multi_image_edit,
@@ -837,6 +879,100 @@ def get_controlled_edit_service() -> ControlledEditService:
     return _service
 
 
+def _wanx_sent_images(
+    *,
+    primary_id: str,
+    primary_role: Literal["primary", "crop"],
+    primary_label: str,
+    mask_id: str,
+    lock_refs: list[SceneEntity],
+) -> list[SentImage]:
+    """Describe the Wanx payload plus lock anchors that were not sent."""
+    images = [
+        SentImage(
+            role=primary_role,
+            artifact_id=primary_id,
+            index=1,
+            label=primary_label,
+            sent=True,
+        ),
+        SentImage(
+            role="mask",
+            artifact_id=mask_id,
+            label="Mask（白=改 / 黑=留，发给万相）",
+            sent=True,
+        ),
+    ]
+    for entity in lock_refs:
+        if not entity.anchor_artifact_id:
+            continue
+        images.append(
+            SentImage(
+                role="reference",
+                artifact_id=entity.anchor_artifact_id,
+                label=f"锁定锚点 {entity.name}（未发送，仅身份/验收）",
+                sent=False,
+            )
+        )
+    return images
+
+
+def _fullframe_sent_images(
+    *,
+    parent_image_id: str,
+    lock_refs: list[SceneEntity],
+    image_layout: str,
+) -> list[SentImage]:
+    """Describe Qwen/OpenAI multi-image edit payloads with prompt numbering."""
+    images: list[SentImage] = []
+    if image_layout == "primary_last":
+        for index, entity in enumerate(lock_refs, start=1):
+            if not entity.anchor_artifact_id:
+                continue
+            images.append(
+                SentImage(
+                    role="reference",
+                    artifact_id=entity.anchor_artifact_id,
+                    index=index,
+                    label=f"参考图 {index} · {entity.name}",
+                    sent=True,
+                )
+            )
+        primary_index = len(lock_refs) + 1
+        images.append(
+            SentImage(
+                role="primary",
+                artifact_id=parent_image_id,
+                index=primary_index,
+                label=f"当前整图（图 {primary_index}，发给模型）",
+                sent=True,
+            )
+        )
+        return images
+    images.append(
+        SentImage(
+            role="primary",
+            artifact_id=parent_image_id,
+            index=1,
+            label="当前整图（图 1，发给模型）",
+            sent=True,
+        )
+    )
+    for index, entity in enumerate(lock_refs, start=2):
+        if not entity.anchor_artifact_id:
+            continue
+        images.append(
+            SentImage(
+                role="reference",
+                artifact_id=entity.anchor_artifact_id,
+                index=index,
+                label=f"参考图 {index} · {entity.name}",
+                sent=True,
+            )
+        )
+    return images
+
+
 def _wanx_mask_available(config: Settings) -> bool:
     return bool(config.dashscope_api_key.strip())
 
@@ -854,7 +990,30 @@ def _assert_editor_available(provider: str, config: Settings) -> None:
     raise EditorUnavailableError(f"不支持的生图后端：{provider}")
 
 
-def _cedit_editor_factory(provider: str | None = None) -> ImageEditor:
+def _resolve_image_model(
+    provider: str, requested: str | None, config: Settings
+) -> str | None:
+    """Normalize the per-turn image model for full-frame editors."""
+    if provider == "openai":
+        return (requested or config.openai_image_model).strip() or config.openai_image_model
+    if provider != "dashscope":
+        return None
+    model = (requested or config.cedit_image_model).strip()
+    allowed = {
+        config.cedit_image_model,
+        "qwen-image-2.0",
+        "qwen-image-2.0-pro",
+        "qwen-image-2.1-pro",
+        "qwen-image-2.1-turbo",
+    }
+    if model not in allowed:
+        raise EditorUnavailableError(f"不支持的通义整图模型：{model}")
+    return model
+
+
+def _cedit_editor_factory(
+    provider: str | None = None, model: str | None = None
+) -> ImageEditor:
     """Build an image editor for ``provider``, or the settings default."""
     from app.pipeline.image_providers.dashscope_qwen_edit import (
         DashScopeQwenEditProvider,
@@ -864,5 +1023,6 @@ def _cedit_editor_factory(provider: str | None = None) -> ImageEditor:
     chosen = provider or settings.cedit_image_provider
     _assert_editor_available(chosen, settings)
     if chosen == "dashscope":
-        return DashScopeQwenEditProvider()
+        resolved = _resolve_image_model("dashscope", model, settings)
+        return DashScopeQwenEditProvider(model=resolved)
     return OpenAIImageProvider()

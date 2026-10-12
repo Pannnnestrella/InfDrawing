@@ -1,6 +1,8 @@
 "use client";
 
-import type { EditVersion } from "@/lib/controlled-edit-api";
+import { useEffect, useState } from "react";
+
+import type { EditVersion, SentImage } from "@/lib/controlled-edit-api";
 
 import { imageProviderLabel, promptStyleLabel } from "./studio-turn-options";
 import { useArtifactUrl } from "./useArtifactUrl";
@@ -14,18 +16,107 @@ const OPERATION_LABELS: Record<string, string> = {
   other: "其他",
 };
 
-function ReferenceThumb({ artifactId, index }: { artifactId: string; index: number }) {
-  const url = useArtifactUrl(artifactId);
+function SentThumb({
+  item,
+  onOpen,
+}: {
+  item: SentImage;
+  onOpen: (item: SentImage, url: string) => void;
+}) {
+  const url = useArtifactUrl(item.artifact_id);
+  const caption =
+    item.index != null ? `图 ${item.index}` : item.role === "mask" ? "Mask" : item.role;
   return (
-    <figure className="w-14 shrink-0 text-center">
-      <div className="h-14 w-14 overflow-hidden rounded border border-line bg-surface-1">
+    <figure className="w-16 shrink-0 text-center">
+      <button
+        type="button"
+        disabled={!url}
+        onClick={() => {
+          if (url) onOpen(item, url);
+        }}
+        className={`relative h-14 w-14 overflow-hidden rounded border bg-surface-1 disabled:opacity-40 ${
+          item.sent ? "border-line hover:border-accent" : "border-dashed border-faint opacity-80"
+        }`}
+        title={item.label || caption}
+      >
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element -- blob URLs
-          <img src={url} alt={`参考图 ${index}`} className="h-full w-full object-cover" />
+          <img
+            src={url}
+            alt={item.label || caption}
+            className={`h-full w-full ${item.role === "mask" ? "object-contain bg-black" : "object-cover"}`}
+          />
         ) : null}
-      </div>
-      <figcaption className="mt-0.5 text-[9px] text-faint">图 {index}</figcaption>
+        {!item.sent ? (
+          <span className="absolute inset-x-0 bottom-0 bg-black/55 px-0.5 text-[8px] text-white">
+            未发送
+          </span>
+        ) : null}
+      </button>
+      <figcaption className="mt-0.5 line-clamp-2 text-[9px] text-faint" title={item.label}>
+        {caption}
+      </figcaption>
     </figure>
+  );
+}
+
+function ImageLightbox({
+  item,
+  url,
+  onClose,
+}: {
+  item: SentImage;
+  url: string;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={item.label || "发送图像预览"}
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="max-h-[90vh] max-w-[90vw] overflow-auto rounded-lg bg-surface-0 p-3 shadow-xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="mb-2 flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold text-ink">
+              {item.index != null ? `图 ${item.index} · ` : ""}
+              {item.label || item.role}
+            </p>
+            <p className="text-[10px] text-faint">
+              {item.sent ? "已发送给 API" : "未发送给生图 API（锁定锚点，供身份/验收）"}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded px-2 py-1 text-xs text-muted hover:bg-surface-2"
+          >
+            关闭
+          </button>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element -- blob URLs */}
+        <img
+          src={url}
+          alt={item.label || "payload"}
+          className={`max-h-[80vh] max-w-[85vw] ${
+            item.role === "mask" ? "bg-black object-contain" : "object-contain"
+          }`}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -56,12 +147,24 @@ function ScoreRow({
   );
 }
 
+function legacySentImages(version: EditVersion): SentImage[] {
+  return version.reference_artifact_ids.map((id, index) => ({
+    role: "reference",
+    artifact_id: id,
+    index: index + 2,
+    label: `参考图 ${index + 2}`,
+    sent: true,
+  }));
+}
+
 interface VersionDetailsProps {
   version: EditVersion;
   entityNames: Record<string, string>;
 }
 
 export function VersionDetails({ version, entityNames }: VersionDetailsProps) {
+  const [preview, setPreview] = useState<{ item: SentImage; url: string } | null>(null);
+
   if (!version.parent_id) {
     return (
       <section className="text-[11px] text-muted">
@@ -70,14 +173,24 @@ export function VersionDetails({ version, entityNames }: VersionDetailsProps) {
     );
   }
   const { intent, verification } = version;
+  const sent =
+    version.sent_images && version.sent_images.length > 0
+      ? version.sent_images
+      : legacySentImages(version);
+  const usedWanx = version.warnings.some((w) => w.includes("local_mask:wanx"));
 
   return (
     <section className="space-y-3 text-[11px]">
-      {version.stitcher ? <p className="text-muted">
-        局部 Crop/Stitch · 万相 2.1 · 裁剪 {version.stitcher.crop_rect.join(", ")}
-        {" · 工作尺寸 "}{version.stitcher.model_size.join("×")}
-        {version.stitcher.actual_output_size ? ` · 实际输出 ${version.stitcher.actual_output_size.join("×")}` : ""}
-      </p> : null}
+      {version.stitcher ? (
+        <p className="text-muted">
+          局部 Crop/Stitch · 万相 2.1 · 裁剪 {version.stitcher.crop_rect.join(", ")}
+          {" · 工作尺寸 "}
+          {version.stitcher.model_size.join("×")}
+          {version.stitcher.actual_output_size
+            ? ` · 实际输出 ${version.stitcher.actual_output_size.join("×")}`
+            : ""}
+        </p>
+      ) : null}
       <div>
         <h2 className="mb-1 text-xs font-semibold tracking-wide">本轮修改</h2>
         <p className="text-ink">{version.instruction}</p>
@@ -89,15 +202,17 @@ export function VersionDetails({ version, entityNames }: VersionDetailsProps) {
             {intent.change_description}
           </p>
         ) : null}
-        {version.prompt_style || version.image_provider ? (
+        {version.prompt_style || version.image_provider || usedWanx ? (
           <p className="mt-1 text-faint">
-            {version.prompt_style
-              ? `策略：${promptStyleLabel(version.prompt_style)}`
-              : null}
-            {version.prompt_style && version.image_provider ? " · " : null}
-            {version.image_provider
-              ? `模型：${imageProviderLabel(version.image_provider)}`
-              : null}
+            {version.prompt_style ? `策略：${promptStyleLabel(version.prompt_style)}` : null}
+            {version.prompt_style && (version.image_provider || usedWanx) ? " · " : null}
+            {usedWanx
+              ? "模型：万相 wanx2.1-imageedit（局部 Mask）"
+              : version.image_model
+                ? `模型：${version.image_model}`
+                : version.image_provider
+                  ? `模型：${imageProviderLabel(version.image_provider)}`
+                  : null}
           </p>
         ) : null}
       </div>
@@ -149,12 +264,17 @@ export function VersionDetails({ version, entityNames }: VersionDetailsProps) {
         </ul>
       ) : null}
 
-      {version.reference_artifact_ids.length ? (
+      {sent.length ? (
         <div>
-          <h3 className="mb-1 font-semibold">参考图锚定</h3>
+          <h3 className="mb-1 font-semibold">本轮发送的图像</h3>
+          <p className="mb-1.5 text-[10px] text-faint">点击缩略图可查看全图 / Mask</p>
           <div className="flex gap-1.5 overflow-x-auto">
-            {version.reference_artifact_ids.map((id, index) => (
-              <ReferenceThumb key={id} artifactId={id} index={index + 2} />
+            {sent.map((item) => (
+              <SentThumb
+                key={`${item.role}-${item.artifact_id}-${item.index ?? "x"}`}
+                item={item}
+                onOpen={(next, url) => setPreview({ item: next, url })}
+              />
             ))}
           </div>
         </div>
@@ -169,6 +289,10 @@ export function VersionDetails({ version, entityNames }: VersionDetailsProps) {
             {version.compiled_prompt}
           </pre>
         </details>
+      ) : null}
+
+      {preview ? (
+        <ImageLightbox item={preview.item} url={preview.url} onClose={() => setPreview(null)} />
       ) : null}
     </section>
   );

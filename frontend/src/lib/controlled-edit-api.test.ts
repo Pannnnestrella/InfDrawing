@@ -68,14 +68,16 @@ describe("controlled edit API client", () => {
     vi.stubGlobal("fetch", fetchMock);
     await submitTurn("s", "v1", "换剑", [], {
       promptStyle: "target_only",
-      imageProvider: "openai",
+      imageProvider: "dashscope",
+      imageModel: "qwen-image-2.1-pro",
     });
     expect(JSON.parse((fetchMock.mock.calls[0] as [string, RequestInit])[1].body as string)).toEqual({
       parent_version_id: "v1",
       instruction: "换剑",
       target_entity_ids: [],
       prompt_style: "target_only",
-      image_provider: "openai",
+      image_provider: "dashscope",
+      image_model: "qwen-image-2.1-pro",
     });
   });
 

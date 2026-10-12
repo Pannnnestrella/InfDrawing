@@ -379,10 +379,13 @@ def _controlled_edit_models(
         default_provider = "dashscope"
     image_options: list[str] = []
     if dashscope_configured:
-        image_options.append(f"dashscope|{settings.cedit_image_model}")
+        default_qwen = settings.cedit_image_model.strip() or "qwen-image-2.0"
+        image_options.append(f"dashscope|{default_qwen}")
+        if default_qwen != "qwen-image-2.1-pro":
+            image_options.append("dashscope|qwen-image-2.1-pro")
     if openai_configured:
         image_options.append(f"openai|{settings.openai_image_model}")
-    return {
+    models: dict[str, str] = {
         "scene": scene_model_name(settings),
         "vision": settings.cedit_vision_model,
         "image": (
@@ -395,6 +398,10 @@ def _controlled_edit_models(
         "lock_paste": "on" if settings.cedit_lock_paste else "off",
         "prompt_style": settings.cedit_prompt_style,
     }
+    if dashscope_configured:
+        models["local_mask_model"] = settings.dashscope_edit_model
+        models["local_mask_provider"] = "wanx"
+    return models
 
 
 def _txt2img_reason(

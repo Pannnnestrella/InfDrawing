@@ -17,10 +17,34 @@ from app.pipeline.image_providers.base import ImageProviderError
 from app.pipeline.image_providers.dashscope_decompose import (
     DashScopeDecomposeClient,
     dashscope_decompose_available,
+    is_named_decompose_prompt,
 )
 from app.storage.local import save_upload
 
 logger = logging.getLogger(__name__)
+
+
+def _store_named_layers(
+    task_id: str,
+    outputs_dir: Path,
+    named_layers: list[tuple[str, bytes]],
+) -> list[dict[str, str]]:
+    """Write named PNG layers and return canvas layer records, background first."""
+    stored: list[dict[str, str]] = []
+    for index, (label, png) in enumerate(named_layers):
+        raw_path = outputs_dir / f"{task_id}_named_{index}.png"
+        rgba_path = outputs_dir / f"{task_id}_layer_{index}.png"
+        raw_path.write_bytes(png)
+        ensure_rgba_on_disk(raw_path, rgba_path)
+        stored.append(
+            {
+                "label": label,
+                "image_url": f"/api/v1/files/outputs/{rgba_path.name}",
+            }
+        )
+    if not stored:
+        raise ImageProviderError("named decompose produced no layers")
+    return stored
 
 
 async def run_decompose_task(
@@ -35,22 +59,43 @@ async def run_decompose_task(
     async def _pipeline(task: TaskState) -> None:
         await task.emit_progress("segmenting")
         used_cloud = False
+        layers: list[dict[str, str]] = []
+        named = is_named_decompose_prompt(background_prompt)
         if dashscope_decompose_available(settings):
             try:
-                foreground, background = await DashScopeDecomposeClient().split_layers(
-                    image_bytes,
-                    on_progress=task.emit_progress,
-                )
-                fg_path = outputs_dir / f"{task.task_id}_layer_fg.png"
-                foreground.save(fg_path, format="PNG")
-                bg_rgba_path = outputs_dir / f"{task.task_id}_layer_bg.png"
-                bg_file = outputs_dir / f"{task.task_id}_erase.png"
-                bg_file.write_bytes(background)
-                ensure_rgba_on_disk(bg_file, bg_rgba_path)
+                if named:
+                    named_layers = await DashScopeDecomposeClient().split_named_layers(
+                        image_bytes,
+                        background_prompt,
+                        on_progress=task.emit_progress,
+                    )
+                    layers = _store_named_layers(task.task_id, outputs_dir, named_layers)
+                else:
+                    foreground, background = await DashScopeDecomposeClient().split_layers(
+                        image_bytes,
+                        on_progress=task.emit_progress,
+                    )
+                    fg_path = outputs_dir / f"{task.task_id}_layer_fg.png"
+                    foreground.save(fg_path, format="PNG")
+                    bg_rgba_path = outputs_dir / f"{task.task_id}_layer_bg.png"
+                    bg_file = outputs_dir / f"{task.task_id}_erase.png"
+                    bg_file.write_bytes(background)
+                    ensure_rgba_on_disk(bg_file, bg_rgba_path)
+                    layers = [
+                        {
+                            "label": "background",
+                            "image_url": f"/api/v1/files/outputs/{bg_rgba_path.name}",
+                        },
+                        {
+                            "label": "foreground",
+                            "image_url": f"/api/v1/files/outputs/{fg_path.name}",
+                        },
+                    ]
                 used_cloud = True
             except ImageProviderError as exc:
                 logger.warning("cloud decompose failed, falling back if possible: %s", exc)
-                if not rembg_available():
+                # A named request must not silently become a two-layer rembg split.
+                if named or not rembg_available():
                     raise
         if not used_cloud:
             if not rembg_available():
@@ -75,18 +120,25 @@ async def run_decompose_task(
                     outputs_dir=outputs_dir,
                 )
                 ensure_rgba_on_disk(bg_file, bg_rgba_path)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - keep a background if inpaint fails
                 # ComfyUI may be down; still return rembg FG + source as BG.
                 logger.warning("local inpaint failed, using source as background: %s", exc)
                 bg_file = outputs_dir / f"{task.task_id}_erase.png"
                 bg_file.write_bytes(image_bytes)
                 ensure_rgba_on_disk(bg_file, bg_rgba_path)
 
-        layers = [
-            {"label": "background", "image_url": f"/api/v1/files/outputs/{bg_rgba_path.name}"},
-            {"label": "foreground", "image_url": f"/api/v1/files/outputs/{fg_path.name}"},
-        ]
-        task.image_path = bg_rgba_path
+        if not used_cloud:
+            layers = [
+                {
+                    "label": "background",
+                    "image_url": f"/api/v1/files/outputs/{bg_rgba_path.name}",
+                },
+                {
+                    "label": "foreground",
+                    "image_url": f"/api/v1/files/outputs/{fg_path.name}",
+                },
+            ]
+        task.image_path = outputs_dir / Path(layers[0]["image_url"]).name
         await task.emit_complete(layers[0]["image_url"], layers=layers)
 
     return start_pipeline_task("decompose", _pipeline)

@@ -208,14 +208,17 @@ def build_features(
     if comfyui.ok and models.sd15_inpaint:
         local_inpaint.append("sd15")
 
-    cloud_backends: list[str] = []
-    if openai_configured:
-        cloud_backends.append("openai")
+    txt2img_cloud: list[str] = []
     if dashscope_configured:
-        cloud_backends.append("dashscope")
+        txt2img_cloud.append("dashscope")
+    if openai_configured:
+        txt2img_cloud.append("openai")
+    inpaint_cloud: list[str] = []
+    if openai_configured:
+        inpaint_cloud.append("openai")
 
-    txt2img_available = [*local_txt2img, *cloud_backends]
-    inpaint_available = [*local_inpaint, *cloud_backends]
+    txt2img_available = [*local_txt2img, *txt2img_cloud]
+    inpaint_available = [*local_inpaint, *inpaint_cloud]
     txt2img_backend = txt2img_available[0] if txt2img_available else None
     inpaint_backend = inpaint_available[0] if inpaint_available else None
     txt2img_enabled = bool(txt2img_available)
@@ -253,8 +256,13 @@ def build_features(
         else None
     )
 
-    image_edit_enabled = openai_configured
-    image_edit_backend = "openai" if image_edit_enabled else None
+    image_edit_backends: list[str] = []
+    if dashscope_configured:
+        image_edit_backends.append("dashscope")
+    if openai_configured:
+        image_edit_backends.append("openai")
+    image_edit_enabled = bool(image_edit_backends)
+    image_edit_backend = image_edit_backends[0] if image_edit_backends else None
 
     features: dict[str, FeatureCapability] = {
         "txt2img": FeatureCapability(
@@ -263,7 +271,8 @@ def build_features(
             available_backends=txt2img_available,
             reason=None
             if txt2img_enabled
-            else _txt2img_reason(comfyui, local_txt2img, cloud_backends),
+            else _txt2img_reason(comfyui, local_txt2img, txt2img_cloud),
+            models=_cloud_image_models(txt2img_backend),
         ),
         "inpaint": FeatureCapability(
             enabled=inpaint_enabled,
@@ -271,15 +280,17 @@ def build_features(
             available_backends=inpaint_available,
             reason=None
             if inpaint_enabled
-            else _inpaint_reason(comfyui, local_inpaint, cloud_backends),
+            else _inpaint_reason(comfyui, local_inpaint, inpaint_cloud),
+            models=_cloud_image_models(inpaint_backend),
         ),
         "image_edit": FeatureCapability(
             enabled=image_edit_enabled,
             backend=image_edit_backend,
-            available_backends=["openai"] if image_edit_enabled else [],
+            available_backends=image_edit_backends,
             reason=None
             if image_edit_enabled
-            else "未配置 INFD_OPENAI_API_KEY（指令改图仅支持 OpenAI）",
+            else "未配置通义或 OpenAI API Key",
+            models=_cloud_image_models(image_edit_backend),
         ),
         "controlled_edit": FeatureCapability(
             enabled=openai_configured,
@@ -409,6 +420,15 @@ def _controlled_edit_models(
     return models
 
 
+def _cloud_image_models(backend: str | None) -> dict[str, str]:
+    """Model id used when a sidebar image feature resolves to a cloud backend."""
+    if backend == "dashscope":
+        return {"image": settings.qwen_image_model}
+    if backend == "openai":
+        return {"image": settings.openai_image_model}
+    return {}
+
+
 def _txt2img_reason(
     comfyui: ServiceStatus,
     local_backends: list[str],
@@ -434,7 +454,8 @@ def _inpaint_reason(
         return "inpaint 不可用"
     if not comfyui.ok and not cloud_backends:
         return (
-            f"ComfyUI 不可达（{comfyui.url}），且未配置 OpenAI/DashScope 图像 API Key"
+            f"ComfyUI 不可达（{comfyui.url}），且未配置 OpenAI API Key"
+            "（带 Mask 的局部重绘不使用万相）"
         )
     if comfyui.ok and not local_backends:
         return "未安装 SD1.5 inpaint/Flux Fill，且未配置云端图像 API Key"

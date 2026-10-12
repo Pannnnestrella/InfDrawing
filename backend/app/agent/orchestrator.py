@@ -55,9 +55,9 @@ async def execute_plan(plan: IntentPlan, inputs: dict[str, Any]) -> TaskState:
     backend = str(params.pop("backend", "sd15"))
 
     if plan.intent == IntentType.IMAGE_EDIT:
-        # Instruction edit is OpenAI-only for this release.
+        backend = "dashscope" if settings.dashscope_api_key.strip() else "openai"
         return await run_cloud_image_edit_task(
-            backend="openai",
+            backend=backend,
             image_bytes=_required_bytes(params, "image_bytes"),
             prompt=plan.refined_prompt,
             negative_prompt=plan.negative_prompt,

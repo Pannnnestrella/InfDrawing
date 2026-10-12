@@ -17,7 +17,7 @@ export interface EnginePreference {
 
 const DEFAULT_PREFERENCE: EnginePreference = {
   mode: "auto",
-  cloudProvider: "openai",
+  cloudProvider: "dashscope",
 };
 
 export function loadEnginePreference(): EnginePreference {
@@ -26,7 +26,7 @@ export function loadEnginePreference(): EnginePreference {
   const cloudProvider = window.sessionStorage.getItem(CLOUD_PROVIDER_KEY);
   return {
     mode: isEngineMode(mode) ? mode : "auto",
-    cloudProvider: isCloudProvider(cloudProvider) ? cloudProvider : "openai",
+    cloudProvider: isCloudProvider(cloudProvider) ? cloudProvider : "dashscope",
   };
 }
 
@@ -82,7 +82,7 @@ export function backendDisplayLabel(backend: string | null | undefined): string 
       return "OpenAI Images";
     case "dashscope":
     case "dashscope_api":
-      return "万相 DashScope";
+      return "通义 Qwen";
     case "flux":
       return "Flux";
     case "sd15":

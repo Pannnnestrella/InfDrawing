@@ -13,7 +13,7 @@ import type { CapabilitiesResponse } from "@/lib/capabilities";
 import type { FlowCallbacks } from "./flow-types";
 import type { InpaintFlowInput } from "./useInpaintFlow";
 
-const DECOMPOSE_DEFAULT_PROMPT = "clean seamless background, high quality";
+const DECOMPOSE_EMPTY_LABEL = "（拆成主体和背景）";
 
 export interface ChatSubmitFlows {
   txt2img: { execute: (refinedPrompt: string) => Promise<void> };
@@ -77,14 +77,14 @@ export function useChatSubmit(options: UseChatSubmitOptions) {
     }
     if (busy) return;
 
-    const userText = text || (mode === "decompose" ? DECOMPOSE_DEFAULT_PROMPT : "");
+    const userText = text;
     // One user request → one dedicated session for later switching.
-    beginSession(mode, text || userText);
+    beginSession(mode, text || (mode === "decompose" ? "元素拆解" : userText));
     callbacks.appendMessage({
       id: createMessageId(),
       role: "user",
       mode,
-      text: text || (mode === "decompose" ? "（使用默认背景风格）" : userText),
+      text: text || (mode === "decompose" ? DECOMPOSE_EMPTY_LABEL : userText),
     });
     setMessage("");
     setBusy(true);
@@ -143,9 +143,11 @@ export function useChatSubmit(options: UseChatSubmitOptions) {
         return;
       }
 
-      callbacks.appendStatus(
-        `${MODE_LABELS[decision.intent]} · ${decision.refinedPrompt}`,
-      );
+      const shownPrompt =
+        decision.intent === "decompose" && !decision.refinedPrompt.trim()
+          ? "主体和背景"
+          : decision.refinedPrompt;
+      callbacks.appendStatus(`${MODE_LABELS[decision.intent]} · ${shownPrompt}`);
 
       if (decision.intent === "txt2img") {
         await flows.txt2img.execute(decision.refinedPrompt);

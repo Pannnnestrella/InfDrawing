@@ -2,6 +2,8 @@
 
 ## 2026-10-12
 
+- 元素拆解：空提示与历史默认句仍是两层；点名提示走场景模型识别，再逐个品红抠层并只擦这些物体补背景。侧栏留空不再提交默认英文背景句。`tests/test_decompose.py` 13 通过。
+- 修复右键偶发失效：关闭 tldraw `rightClickPanning`。抖动右键仍出菜单，中键平移仍可用。
 - 编辑工作流图：`controlled_edit/workflow/`（schema/graph/repo/export/runner/api）；`EditVersion.input_version_ids`；Studio「存为工作流」+ `/workflows`；`test_cedit_workflow` 8 通过；文档 Workflow 章节。
 - 多轮编辑 RGBA：`alpha.py` / `qwen_mask_prompt.py`；sizing `keep_alpha`；service Qwen vs Wan/Wanx 分流；Studio `bg-checkerboard`；`docs/controlled_edit.md` 透明表；`tests/controlled_edit` 96 通过。
 

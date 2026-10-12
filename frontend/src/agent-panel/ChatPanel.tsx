@@ -47,7 +47,7 @@ export function ChatPanel({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [enginePreference, setEnginePreference] = useState<EnginePreference>({
     mode: "auto",
-    cloudProvider: "openai",
+    cloudProvider: "dashscope",
   });
   const apiKeyConfigured = useSyncExternalStore(
     subscribeSessionApiKey,
@@ -103,6 +103,7 @@ export function ChatPanel({
     canvasHasMask,
     selectionHint,
     selectedShapeId,
+    selectedImage,
   } = useCanvasSync();
 
   const {
@@ -203,6 +204,7 @@ export function ChatPanel({
           modeEnabled={modeEnabled}
           modeDisabledReason={modeDisabledReason}
           selectionHint={selectionHint}
+          selectedImage={selectedImage}
           canvasReady={canvasReady}
           canvasHasSelection={canvasHasSelection}
           canvasHasMask={canvasHasMask}

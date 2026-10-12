@@ -46,6 +46,8 @@ class Settings(BaseSettings):
     dashscope_base_url: str = "https://dashscope.aliyuncs.com/api/v1"
     dashscope_t2i_model: str = "wanx2.1-t2i-turbo"
     dashscope_edit_model: str = "wanx2.1-imageedit"
+    # Sidebar txt2img and maskless instruction edit. Cheaper than gpt-image-1.
+    qwen_image_model: str = "qwen-image-3.0"
     cloud_image_timeout_seconds: float = 180.0
     cloud_image_poll_seconds: float = 2.0
 

@@ -12,6 +12,7 @@ import {
   INPAINT_CANVAS_SIZE,
   type CanvasContextSnapshot,
   type CanvasMaskPair,
+  type SelectedImageChip,
 } from "@/canvas/types";
 import {
   compositeLayersToDataUrl,
@@ -34,6 +35,7 @@ import {
 import { toTldrawCompatibleSrc } from "@/lib/tldraw-asset-src";
 
 export type { CanvasLayerInfo, LayerReorderDirection } from "@/lib/layer-model";
+export type { SelectedImageChip } from "@/canvas/types";
 
 const PASTE_OFFSET_PX = 24;
 const DEFAULT_BLANK_SIZE = 512;
@@ -147,6 +149,33 @@ export function getCanvasSelectionHint(): string | null {
   const selectedIds = editor.getSelectedShapeIds();
   if (selectedIds.length === 0) return "请在画布上选中一张图片";
   return "当前选中的不是图片图层";
+}
+
+/** Display name and thumbnail for the image the chat composer should show. */
+export function getSelectedImageChip(): SelectedImageChip | null {
+  const shape = getSelectedImageShape();
+  if (!shape) return null;
+  const layer = listImageLayers().find((item) => item.id === shape.id);
+  if (!layer) return null;
+  return { id: layer.id, name: layer.name, thumbSrc: layer.thumbSrc };
+}
+
+/** Fetchable preview URL, including tldraw `asset:` sources. */
+export async function resolveSelectedImageThumb(shapeId: string): Promise<string | null> {
+  const shape = getImageShapeById(shapeId);
+  if (!shape || !editor) return null;
+  const direct = imageThumbSrc(shape);
+  if (direct) return direct;
+  const assetId = shape.props.assetId;
+  if (!assetId) return null;
+  const asset = editor.getAsset(assetId);
+  const src = asset?.props.src;
+  if (!src || typeof src !== "string") return null;
+  try {
+    return await resolveAssetSrc(src, assetId);
+  } catch {
+    return null;
+  }
 }
 
 function imageThumbSrc(shape: TLImageShape): string | null {

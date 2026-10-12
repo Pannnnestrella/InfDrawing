@@ -60,6 +60,7 @@ describe("ChatComposer", () => {
       />,
     );
     expect(screen.getByText(/已选中图片/)).toBeInTheDocument();
+    expect(screen.getByText(/剑、盾/)).toBeInTheDocument();
     expect(screen.queryByText("请在画布上选中一张图片")).not.toBeInTheDocument();
   });
 
@@ -73,5 +74,25 @@ describe("ChatComposer", () => {
       />,
     );
     expect(screen.getByText("请在画布上选中一张图片")).toBeInTheDocument();
+  });
+
+  it("shows the selected image name and a hover thumbnail", () => {
+    const thumbSrc = "data:image/png;base64,abc";
+    render(
+      <ChatComposer
+        {...baseProps}
+        selectedImage={{ id: "shape:1", name: "骑士", thumbSrc }}
+      />,
+    );
+    const chip = screen.getByLabelText("骑士");
+    expect(chip).toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "骑士 预览" })).not.toBeInTheDocument();
+
+    fireEvent.mouseEnter(chip.parentElement ?? chip);
+    const preview = screen.getByRole("img", { name: "骑士 预览" });
+    expect(preview).toHaveAttribute("src", thumbSrc);
+
+    fireEvent.mouseLeave(chip.parentElement ?? chip);
+    expect(screen.queryByRole("img", { name: "骑士 预览" })).not.toBeInTheDocument();
   });
 });

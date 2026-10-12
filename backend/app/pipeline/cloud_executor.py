@@ -8,6 +8,7 @@ from pathlib import Path
 from app.config import settings
 from app.pipeline.executor import TaskState, start_pipeline_task
 from app.pipeline.image_providers import build_image_provider
+from app.pipeline.image_providers.factory import build_sidebar_image_provider
 
 
 async def run_cloud_txt2img_task(
@@ -21,7 +22,7 @@ async def run_cloud_txt2img_task(
     """Execute cloud txt2img and emit progress/complete events."""
     out_dir = outputs_dir or settings.outputs_dir
     out_dir.mkdir(parents=True, exist_ok=True)
-    provider = build_image_provider(backend)
+    provider = build_sidebar_image_provider(backend, "txt2img")
 
     async def _pipeline(task: TaskState) -> None:
         image_bytes = await provider.txt2img(
@@ -82,7 +83,7 @@ async def run_cloud_image_edit_task(
     """Execute maskless instruction image edit via a cloud provider."""
     out_dir = outputs_dir or settings.outputs_dir
     out_dir.mkdir(parents=True, exist_ok=True)
-    provider = build_image_provider(backend)
+    provider = build_sidebar_image_provider(backend, "image_edit")
 
     async def _pipeline(task: TaskState) -> None:
         result = await provider.image_edit(

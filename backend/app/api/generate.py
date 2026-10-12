@@ -104,9 +104,12 @@ async def generate_image_edit(
     seed: int = Form(42),
     principal: ApiPrincipal = Depends(current_principal),
 ) -> GenerateTaskResponse:
-    """Instruction-based image edit via OpenAI Images (no mask)."""
-    if not settings.openai_api_key.strip():
-        raise HTTPException(status_code=503, detail="OpenAI API key is not configured")
+    """Instruction-based image edit (Qwen by default, OpenAI if DashScope is unset)."""
+    if not settings.dashscope_api_key.strip() and not settings.openai_api_key.strip():
+        raise HTTPException(
+            status_code=503,
+            detail="Qwen or OpenAI API key is not configured",
+        )
     ensure_data_dirs()
     image_bytes = await image.read()
     validate_upload_image(image_bytes, image.content_type)
@@ -129,7 +132,7 @@ async def generate_image_edit(
 @router.post("/decompose", response_model=GenerateTaskResponse)
 async def generate_decompose(
     image: UploadFile = File(...),
-    background_prompt: str = Form("clean seamless background, high quality"),
+    background_prompt: str = Form(""),
     negative_prompt: str = Form("blurry, low quality, distorted, ugly"),
     principal: ApiPrincipal = Depends(current_principal),
 ) -> GenerateTaskResponse:

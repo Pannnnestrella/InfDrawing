@@ -74,8 +74,14 @@ def test_build_features_includes_cloud_backends() -> None:
         openai_configured=True,
     )
     assert features["txt2img"].enabled is True
-    assert features["txt2img"].available_backends == ["openai", "dashscope"]
-    assert features["inpaint"].available_backends == ["openai", "dashscope"]
+    assert features["txt2img"].backend == "dashscope"
+    assert features["txt2img"].available_backends == ["dashscope", "openai"]
+    assert features["txt2img"].models["image"] == "qwen-image-3.0"
+    assert features["inpaint"].available_backends == ["openai"]
+    assert features["inpaint"].backend == "openai"
+    assert features["inpaint"].models["image"] == "gpt-image-1"
+    assert features["image_edit"].backend == "dashscope"
+    assert features["image_edit"].models["image"] == "qwen-image-3.0"
     assert features["decompose"].enabled is True
     assert features["decompose"].backend == "dashscope_seg"
 

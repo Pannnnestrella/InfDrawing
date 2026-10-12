@@ -13,3 +13,10 @@ export interface CanvasContextSnapshot {
   imageWidth?: number;
   imageHeight?: number;
 }
+
+/** Image currently targeted by the chat composer. */
+export interface SelectedImageChip {
+  id: string;
+  name: string;
+  thumbSrc: string | null;
+}

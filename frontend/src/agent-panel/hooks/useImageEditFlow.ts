@@ -8,7 +8,7 @@ import { useGenerateFlow } from "./useGenerateFlow";
 export function useImageEditFlow(callbacks: FlowCallbacks) {
   return useGenerateFlow(callbacks, {
     submittedStatus: "指令改图任务已提交…",
-    runningStatus: "OpenAI 改图进行中…",
+    runningStatus: "通义改图进行中…",
     submit: async (prompt) => {
       const image = await exportSelectedImageFile();
       if (!image) {

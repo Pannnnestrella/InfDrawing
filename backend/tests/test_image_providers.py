@@ -11,9 +11,11 @@ import pytest
 from fastapi import HTTPException
 
 from app.config import Settings
+from app.pipeline.image_providers.dashscope_qwen_edit import DashScopeQwenEditProvider
 from app.pipeline.image_providers.dashscope_wanx import DashScopeWanxProvider
+from app.pipeline.image_providers.factory import build_sidebar_image_provider
 from app.pipeline.image_providers.openai_images import OpenAIImageProvider
-from app.pipeline.txt2img_router import resolve_image_backend
+from app.pipeline.txt2img_router import resolve_image_backend, resolve_inpaint_backend
 from app.system.schemas import (
     CapabilitiesResponse,
     FeatureCapability,
@@ -79,12 +81,12 @@ def test_resolve_auto_prefers_local_then_cloud() -> None:
         assert _run(resolve_image_backend("auto", feature="txt2img")) == "sd15"
 
 
-def test_resolve_auto_falls_back_to_openai() -> None:
+def test_resolve_auto_prefers_qwen_over_openai_for_txt2img() -> None:
     with patch(
         "app.pipeline.txt2img_router.gather_capabilities",
         new=AsyncMock(return_value=_caps(["openai", "dashscope"])),
     ):
-        assert _run(resolve_image_backend("auto", feature="txt2img")) == "openai"
+        assert _run(resolve_image_backend("auto", feature="txt2img")) == "dashscope"
 
 
 def test_resolve_local_requires_comfy_backend() -> None:
@@ -201,3 +203,57 @@ def test_dashscope_inpaint_sends_mask_function_and_data_urls() -> None:
     assert client.request.await_args_list[0].args[1].endswith(
         "/services/aigc/image2image/image-synthesis"
     )
+
+
+def test_resolve_masked_inpaint_ignores_dashscope() -> None:
+    with patch(
+        "app.pipeline.txt2img_router.gather_capabilities",
+        new=AsyncMock(return_value=_caps(["openai", "dashscope"])),
+    ):
+        assert _run(resolve_inpaint_backend("auto")) == "openai"
+        assert _run(resolve_inpaint_backend("dashscope")) == "openai"
+
+
+def test_sidebar_dashscope_txt2img_uses_qwen() -> None:
+    provider = build_sidebar_image_provider("dashscope", "txt2img", _settings())
+    assert isinstance(provider, DashScopeQwenEditProvider)
+    assert provider._model == "qwen-image-3.0"
+
+
+def test_qwen_txt2img_and_image_edit_payloads() -> None:
+    response = MagicMock()
+    response.status_code = 200
+    response.json.return_value = {
+        "output": {
+            "choices": [{"message": {"content": [{"image": "https://example.com/out.png"}]}}]
+        }
+    }
+    download = MagicMock()
+    download.status_code = 200
+    download.content = b"qwen-bytes"
+    download.raise_for_status = MagicMock()
+    client = AsyncMock(spec=httpx.AsyncClient)
+    client.request = AsyncMock(return_value=response)
+    client.get = AsyncMock(return_value=download)
+    client.aclose = AsyncMock()
+
+    provider = DashScopeQwenEditProvider(
+        config=_settings(),
+        client=client,
+        model="qwen-image-3.0",
+    )
+    assert _run(provider.txt2img(prompt="a cabin")) == b"qwen-bytes"
+    text_body = client.request.await_args.kwargs["json"]
+    assert text_body["model"] == "qwen-image-3.0"
+    assert text_body["input"]["messages"][0]["content"] == [{"text": "a cabin"}]
+
+    assert (
+        _run(provider.image_edit(image_bytes=b"img", prompt="make the sky blue"))
+        == b"qwen-bytes"
+    )
+    edit_body = client.request.await_args.kwargs["json"]
+    content = edit_body["input"]["messages"][0]["content"]
+    assert edit_body["model"] == "qwen-image-3.0"
+    assert content[0]["image"].startswith("data:image/png;base64,")
+    assert content[1] == {"text": "make the sky blue"}
+    assert "mask" not in edit_body

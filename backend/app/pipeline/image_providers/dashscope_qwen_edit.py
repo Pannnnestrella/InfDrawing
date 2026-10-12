@@ -24,7 +24,7 @@ MAX_INPUT_IMAGES = 3
 
 
 class DashScopeQwenEditProvider(ImageProvider):
-    """Call DashScope Qwen image-edit (default ``qwen-image-2.0``) with optional references.
+    """Call DashScope Qwen image-edit (default ``qwen-image-3.0``) with optional references.
 
     The Qwen API uses the last image's aspect ratio for the output, so references are
     sent first and the image being edited is sent last.
@@ -55,9 +55,31 @@ class DashScopeQwenEditProvider(ImageProvider):
         seed: int = 42,
         on_progress: ProgressCallback | None = None,
     ) -> bytes:
-        """Not used by controlled edit; Wanx remains the text-to-image backend."""
-        del prompt, negative_prompt, seed, on_progress
-        raise ImageProviderError("DashScopeQwenEditProvider does not implement txt2img")
+        """Generate an image with Qwen Image (text only, no mask)."""
+        del seed
+        return await self._multimodal(
+            [{"text": _with_avoid(prompt, negative_prompt)}],
+            size="1024*1024",
+            on_progress=on_progress,
+        )
+
+    async def image_edit(
+        self,
+        *,
+        image_bytes: bytes,
+        prompt: str,
+        negative_prompt: str = "",
+        seed: int = 42,
+        on_progress: ProgressCallback | None = None,
+    ) -> bytes:
+        """Instruction edit with no mask. Masked inpaint stays on OpenAI."""
+        del seed
+        return await self.multi_image_edit(
+            image_bytes=image_bytes,
+            reference_images=[],
+            prompt=_with_avoid(prompt, negative_prompt),
+            on_progress=on_progress,
+        )
 
     async def inpaint(
         self,
@@ -94,13 +116,25 @@ class DashScopeQwenEditProvider(ImageProvider):
             on_progress: Optional progress hook.
         """
         del input_fidelity
-        # Prefer synchronous multimodal for Studio turns (2.1 async + large Base64 timed out
-        # in probes; sync 2.1-pro full-frame edit succeeded in ~60s).
-        await emit_progress(on_progress, "cloud_submit")
         refs = reference_images[: MAX_INPUT_IMAGES - 1]
         content: list[dict[str, str]] = [{"image": _data_url(item)} for item in refs]
         content.append({"image": _data_url(image_bytes)})
         content.append({"text": prompt})
+        return await self._multimodal(
+            content,
+            size=size.replace("x", "*"),
+            on_progress=on_progress,
+        )
+
+    async def _multimodal(
+        self,
+        content: list[dict[str, str]],
+        *,
+        size: str,
+        on_progress: ProgressCallback | None,
+    ) -> bytes:
+        """Synchronous Qwen multimodal generation (text-only or image edit)."""
+        await emit_progress(on_progress, "cloud_submit")
         payload = {
             "model": self._model,
             "input": {"messages": [{"role": "user", "content": content}]},
@@ -108,7 +142,7 @@ class DashScopeQwenEditProvider(ImageProvider):
                 "n": 1,
                 "watermark": False,
                 "prompt_extend": False,
-                "size": size.replace("x", "*"),
+                "size": size,
             },
         }
         headers = {
@@ -316,6 +350,12 @@ class DashScopeQwenEditProvider(ImageProvider):
         finally:
             if owns_client:
                 await client.aclose()
+
+
+def _with_avoid(prompt: str, negative_prompt: str) -> str:
+    if negative_prompt.strip():
+        return f"{prompt}\n\nAvoid: {negative_prompt.strip()}"
+    return prompt
 
 
 def _data_url(image_bytes: bytes) -> str:

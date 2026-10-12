@@ -24,7 +24,7 @@ const MODE_OPTIONS: { id: EngineMode; label: string }[] = [
 
 const CLOUD_OPTIONS: { id: CloudProvider; label: string }[] = [
   { id: "openai", label: "OpenAI" },
-  { id: "dashscope", label: "万相" },
+  { id: "dashscope", label: "通义" },
 ];
 
 export function EngineSelect({

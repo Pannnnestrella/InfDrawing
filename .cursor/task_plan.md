@@ -1,5 +1,10 @@
 # InfDrawing 任务状态
 
+## 2026-10-12 元素拆解按提示分层
+
+- `done`：空提示维持主体/背景两层；有提示用场景模型识别并逐个抠层（最多 6 个）
+- 规划：`.planning/20261012_decompose_named_layers.md`
+
 ## 2026-10-12 编辑工作流图
 
 - `done`：Workflow DAG 模板 + export + runner（分叉/条件/合并）；Studio 导出；`/workflows` xyflow；文档与测试

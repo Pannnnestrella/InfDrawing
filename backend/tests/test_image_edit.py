@@ -31,6 +31,21 @@ def _settings(**overrides: object) -> Settings:
     return Settings(**base)  # type: ignore[arg-type]
 
 
+def test_build_features_image_edit_prefers_qwen() -> None:
+    comfyui = ServiceStatus(ok=False, url="http://127.0.0.1:8188")
+    models = ModelsCapability()
+    qwen_only = build_features(
+        "api_fallback",
+        comfyui,
+        models,
+        dashscope_configured=True,
+        openai_configured=False,
+    )
+    assert qwen_only["image_edit"].enabled is True
+    assert qwen_only["image_edit"].backend == "dashscope"
+    assert qwen_only["inpaint"].enabled is False
+
+
 def test_build_features_image_edit_requires_openai() -> None:
     comfyui = ServiceStatus(ok=True, url="http://127.0.0.1:8188")
     models = ModelsCapability(sd15_txt2img=True, sd15_inpaint=True)

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import {
   AlertIcon,
   BrushIcon,
@@ -10,6 +12,7 @@ import {
   SendIcon,
 } from "@/components/icons";
 import { Spinner } from "@/components/Spinner";
+import type { SelectedImageChip } from "@/canvas/types";
 import type { TextRegion } from "@/lib/api";
 import type { CapabilitiesResponse } from "@/lib/capabilities";
 
@@ -28,6 +31,7 @@ interface ChatComposerProps {
   modeEnabled: boolean;
   modeDisabledReason: string | null;
   selectionHint: string | null;
+  selectedImage?: SelectedImageChip | null;
   canvasReady: boolean;
   canvasHasSelection: boolean;
   canvasHasMask: boolean;
@@ -52,7 +56,7 @@ const PLACEHOLDERS: Record<ChatMode, string> = {
   txt2img: "描述你想生成的内容…",
   inpaint: "描述重绘区域要变成什么，例如：一颗鲜红的苹果",
   image_edit: "描述要如何修改选中图片，例如：把天空改成晚霞",
-  decompose: "可选：描述期望的背景风格，留空则使用默认",
+  decompose: "留空：拆成主体和背景。或写下要拆开的物体，例如「剑、盾」",
   text_edit: "输入替换后的新文字…",
 };
 
@@ -65,6 +69,7 @@ export function ChatComposer({
   modeEnabled,
   modeDisabledReason,
   selectionHint,
+  selectedImage = null,
   canvasReady,
   canvasHasSelection,
   canvasHasMask,
@@ -171,10 +176,10 @@ export function ChatComposer({
           {selectionHint
             ? selectionHint
             : mode === "image_edit"
-              ? "已选中图片，用文字描述修改需求（OpenAI）"
+              ? "已选中图片，用文字描述修改需求（通义 Qwen）"
               : mode === "text_edit"
                 ? "已选中图片，可检测并替换文字"
-                : "已选中图片，可描述背景风格后拆解（可留空）"}
+                : "已选中图片。留空拆成主体和背景；写下物体名称则逐个拆开，例如「剑、盾」"}
         </p>
       ) : null}
 
@@ -193,6 +198,11 @@ export function ChatComposer({
       ) : null}
 
       <div className="rounded-xl border border-line bg-surface-2 transition-colors focus-within:border-accent">
+        {selectedImage ? (
+          <div className="px-2.5 pt-2.5">
+            <SelectedImageChipView image={selectedImage} />
+          </div>
+        ) : null}
         <textarea
           className="min-h-[60px] w-full resize-none bg-transparent px-3 pt-2.5 text-sm text-ink placeholder:text-faint focus:outline-none disabled:opacity-50"
           placeholder={PLACEHOLDERS[mode]}
@@ -213,6 +223,45 @@ export function ChatComposer({
             {busy ? <Spinner size={14} className="border-white/30 border-t-white" /> : <SendIcon size={15} />}
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SelectedImageChipView({ image }: { image: SelectedImageChip }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div
+      className="relative inline-flex max-w-full"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      {open && image.thumbSrc ? (
+        <div className="pointer-events-none absolute bottom-full left-0 z-20 mb-2 w-48 overflow-hidden rounded-xl border border-line bg-surface-1 p-1 shadow-xl">
+          {/* Canvas selection preview; the chip already names the image. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={image.thumbSrc}
+            alt={`${image.name} 预览`}
+            className="h-44 w-full rounded-lg bg-surface-2 object-contain"
+          />
+        </div>
+      ) : null}
+      <div
+        className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-line bg-surface-1 py-1 pl-1 pr-2.5 text-[11px] text-muted"
+        aria-label={image.name}
+        title={image.name}
+      >
+        {image.thumbSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={image.thumbSrc} alt="" className="h-5 w-5 shrink-0 rounded-full object-cover" />
+        ) : (
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-3 text-faint">
+            <ImageIcon size={12} />
+          </span>
+        )}
+        <span className="max-w-[180px] truncate">{image.name}</span>
       </div>
     </div>
   );

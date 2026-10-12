@@ -9,23 +9,41 @@ from app.pipeline.image_providers.factory import CLOUD_BACKENDS, LOCAL_BACKENDS
 from app.system.capabilities import gather_capabilities
 
 LOCAL_PREFERENCE = ("sd15", "flux")
-CLOUD_PREFERENCE = ("openai", "dashscope")
+# Sidebar text-to-image prefers Qwen (wired as the dashscope backend) over OpenAI.
+TXT2IMG_CLOUD_PREFERENCE = ("dashscope", "openai")
+# Masked inpaint stays on OpenAI. Wanx 2.1 imageedit is not offered here.
+INPAINT_CLOUD_PREFERENCE = ("openai",)
 KNOWN_BACKENDS = frozenset(
     {"auto", "local", "sd15", "flux", "openai", "dashscope"}
 )
 
 
 async def resolve_txt2img_backend(requested: str) -> str:
-    """Resolve a txt2img backend (local ComfyUI or cloud provider)."""
-    return await resolve_image_backend(requested, feature="txt2img")
+    """Resolve a txt2img backend (local ComfyUI, Qwen, or OpenAI)."""
+    return await resolve_image_backend(
+        requested,
+        feature="txt2img",
+        cloud_preference=TXT2IMG_CLOUD_PREFERENCE,
+    )
 
 
 async def resolve_inpaint_backend(requested: str) -> str:
-    """Resolve an inpaint backend (local ComfyUI or cloud provider)."""
-    return await resolve_image_backend(requested, feature="inpaint")
+    """Resolve masked inpaint. Cloud requests use OpenAI, not Wanx."""
+    if requested == "dashscope":
+        requested = "openai"
+    return await resolve_image_backend(
+        requested,
+        feature="inpaint",
+        cloud_preference=INPAINT_CLOUD_PREFERENCE,
+    )
 
 
-async def resolve_image_backend(requested: str, *, feature: str) -> str:
+async def resolve_image_backend(
+    requested: str,
+    *,
+    feature: str,
+    cloud_preference: tuple[str, ...] = TXT2IMG_CLOUD_PREFERENCE,
+) -> str:
     """Pick a concrete backend from capabilities and an optional client hint."""
     if requested not in KNOWN_BACKENDS:
         raise HTTPException(status_code=400, detail=f"Unknown backend: {requested}")
@@ -43,7 +61,7 @@ async def resolve_image_backend(requested: str, *, feature: str) -> str:
         available = [feature_cap.backend]
 
     if requested == "auto":
-        resolved = _first_available(available, (*LOCAL_PREFERENCE, *CLOUD_PREFERENCE))
+        resolved = _first_available(available, (*LOCAL_PREFERENCE, *cloud_preference))
         if resolved is None:
             raise HTTPException(
                 status_code=503,

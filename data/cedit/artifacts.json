@@ -1139,6 +1139,26 @@
       "size_bytes": 2154184,
       "sha256": "4bd320c988c39dc8121d7297a81732038ee3ef9779cef0898780eef14517055c",
       "created_at": "2026-10-12T18:45:03.698880Z"
+    },
+    "c2df5e94-22b8-49ec-81b1-fe42965b3a57": {
+      "id": "c2df5e94-22b8-49ec-81b1-fe42965b3a57",
+      "owner_key_id": "development",
+      "job_id": null,
+      "storage_key": "artifacts/c2df5e94-22b8-49ec-81b1-fe42965b3a57.png",
+      "media_type": "image/png",
+      "size_bytes": 1750327,
+      "sha256": "662606e2ff1837ad7f8b70a59805d929f7b3e7c0e5f449d44a020b58364e873a",
+      "created_at": "2026-10-12T21:46:10.694871Z"
+    },
+    "988a10ee-ea94-41fd-b254-e653984901dc": {
+      "id": "988a10ee-ea94-41fd-b254-e653984901dc",
+      "owner_key_id": "development",
+      "job_id": null,
+      "storage_key": "artifacts/988a10ee-ea94-41fd-b254-e653984901dc.png",
+      "media_type": "image/png",
+      "size_bytes": 2557225,
+      "sha256": "33f586c6ad1aff4f2fa49c14aabe2c08d693ea2e19c2cee855e11c042360645d",
+      "created_at": "2026-10-12T21:46:41.568759Z"
     }
   }
 }

@@ -20,6 +20,10 @@ import {
 } from "@/lib/canvas-bridge";
 import { shapeVisibilityFromMeta } from "@/lib/layer-model";
 
+// A few pixels of movement during a right-click used to pan and cancel the menu.
+// Pan stays on middle-click and spacebar.
+const CANVAS_OPTIONS = { rightClickPanning: false };
+
 export function InfDrawingCanvas() {
   // Mount tldraw only after client hydration to avoid SSR/client tree mismatch.
   const [mounted, setMounted] = useState(false);
@@ -54,6 +58,7 @@ export function InfDrawingCanvas() {
         persistenceKey="infdrawing-canvas-v1"
         colorScheme="light"
         onMount={handleMount}
+        options={CANVAS_OPTIONS}
         components={components}
         getShapeVisibility={(shape) =>
           shapeVisibilityFromMeta(shape.meta as Record<string, unknown>)

@@ -1,6 +1,7 @@
 /** Human-readable labels for backend pipeline `step` events (single source). */
 export const STEP_LABELS: Record<string, string> = {
   generating: "生成中…",
+  recognizing: "识别要拆开的物体…",
   segmenting: "分割主体…",
   extracting: "提取前景…",
   inpainting: "补全背景…",

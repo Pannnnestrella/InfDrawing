@@ -1,5 +1,18 @@
 # 关键发现
 
+## 2026-10-12 元素拆解按提示分层
+
+- 侧栏留空时曾经自动提交 `clean seamless background, high quality`。若把任意非空句都当成点名，空发送会误走识别。这两句历史默认和空白都留在两层路径；接口缺省改为空字符串。
+- 原来的抠图要求不透明像素占 8%–92%。剑、盾往往更小，点名抠图改为至少 64 像素且不超过画面 90%。
+
+## 2026-10-12 右键菜单偶发不出现
+
+- 入口是 tldraw 5.1 默认 `rightClickPanning: true`（`InfDrawingCanvas` 未覆盖）。右键移动超过 `dragDistanceSquared`（16，约 4px）会平移，`pointerup` 不派发合成 `contextmenu`。
+- 原生 `contextmenu` 在 `button === 2` 时被 `useCanvasEvents` `preventDefault`，Radix 见 `defaultPrevented` 不再打开。静止松开才会出菜单。
+- 修复：`InfDrawingCanvas` 设置 `options.rightClickPanning: false`。中键拖拽与空格平移保留。浏览器验证：右键移动约 14px 仍打开菜单且相机不动；静止右键、菜单打开后再右键也能打开；中键拖拽仍平移。
+
+
+
 ## 2026-10-12 编辑工作流图
 
 - 模板 DAG 与执行树分层：不改 VersionTree 为 xyflow；runner 复用 `submit_turn(run_in_background=False)`。

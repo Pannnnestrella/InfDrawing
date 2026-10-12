@@ -35,6 +35,24 @@
       "current_version_id": "cd9d541c-3ae2-46d2-bf37-f77d6286c71e",
       "created_at": "2026-10-12T16:19:32.746107Z",
       "updated_at": "2026-10-12T16:19:32.746112Z"
+    },
+    "03bad38a-f7e5-4ab9-a464-916dfe3e5926": {
+      "id": "03bad38a-f7e5-4ab9-a464-916dfe3e5926",
+      "owner_key_id": "development",
+      "title": "canvas_image",
+      "root_version_id": "af6c8452-6db3-4cb0-8785-27ef65d844a7",
+      "current_version_id": "af6c8452-6db3-4cb0-8785-27ef65d844a7",
+      "created_at": "2026-10-12T21:46:22.045070Z",
+      "updated_at": "2026-10-12T21:46:22.045072Z"
+    },
+    "43c3664b-54c4-481c-9137-e8ea84851523": {
+      "id": "43c3664b-54c4-481c-9137-e8ea84851523",
+      "owner_key_id": "development",
+      "title": "canvas_image",
+      "root_version_id": "0d4822d7-f5ec-4e46-8a21-ccae28a6820b",
+      "current_version_id": "0d4822d7-f5ec-4e46-8a21-ccae28a6820b",
+      "created_at": "2026-10-12T21:46:59.015551Z",
+      "updated_at": "2026-10-12T21:46:59.015553Z"
     }
   },
   "versions": {
@@ -43,6 +61,7 @@
         "id": "031fc861-f91f-42a8-a029-95cf645f56aa",
         "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
         "parent_id": null,
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "56b8e2df-b36a-49c8-8f9c-3c30ce78ef25",
@@ -308,6 +327,7 @@
         "id": "af8aa254-47eb-4274-aabb-829cf20879e9",
         "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
         "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "804d801f-6afe-4170-9246-1780475c0fd0",
@@ -569,6 +589,7 @@
         "id": "9217b6d4-ec9a-41cf-a30d-70255784d77b",
         "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
         "parent_id": "af8aa254-47eb-4274-aabb-829cf20879e9",
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "ce681b9e-cdd7-4027-91a8-567e0cb0ac88",
@@ -830,6 +851,7 @@
         "id": "4f42fa26-a59f-46e0-a72e-3ffccd83dfaf",
         "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
         "parent_id": "9217b6d4-ec9a-41cf-a30d-70255784d77b",
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "b1faa28c-d735-40b0-87ee-95169d4a64c2",
@@ -1091,6 +1113,7 @@
         "id": "4830613d-627e-4b1a-a3ff-9f6c3329f1a2",
         "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
         "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "10bbdefd-fe88-4358-9b1a-7853018d28ce",
@@ -1352,6 +1375,7 @@
         "id": "11a52651-1b64-49ea-8bcf-f0201e166ee6",
         "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
         "parent_id": "4830613d-627e-4b1a-a3ff-9f6c3329f1a2",
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "c9ff1966-6c46-44bc-896b-2ac4500c6be3",
@@ -1627,6 +1651,7 @@
         "id": "4ec8551a-b661-41ef-827b-6dce930d3037",
         "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
         "parent_id": "11a52651-1b64-49ea-8bcf-f0201e166ee6",
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "82416c4d-3b3e-4d0c-b8d2-68afb24594e4",
@@ -1920,6 +1945,7 @@
         "id": "5ee4146d-3150-4c28-9294-68d19ab89703",
         "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
         "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "49cc85bc-548a-4034-a57b-b04fa25953c8",
@@ -2207,6 +2233,7 @@
         "id": "72567d68-05d2-47dd-9053-491a3b7cf60c",
         "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
         "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "b6689af9-7181-47b9-a738-f4205d987168",
@@ -2481,6 +2508,7 @@
         "id": "017f69bd-35f5-404c-8f16-42eafafa4464",
         "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
         "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "cab0b3b8-4f7c-453d-889d-b82161cdbbcd",
@@ -2822,6 +2850,7 @@
         "id": "2fc3f8da-a198-4483-9c25-69ac3904b83d",
         "session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
         "parent_id": "031fc861-f91f-42a8-a029-95cf645f56aa",
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "c98f667f-816f-4dac-a62e-a9bcdf14e770",
@@ -3098,6 +3127,7 @@
         "id": "6481e5ad-c868-4e46-9e7d-2a1463a50e42",
         "session_id": "5a2c1db0-9b19-4a6a-892e-9a3e6e885a4f",
         "parent_id": null,
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "49e92d6b-f96f-4d29-9372-69130aee0774",
@@ -3337,6 +3367,7 @@
         "id": "866dc31c-7336-4470-8ee3-065624209d17",
         "session_id": "ccaabf34-bace-4203-ab8d-5f0d8a646f00",
         "parent_id": null,
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "0904a870-7d3d-4b9f-8be8-0eb10025e6ce",
@@ -3464,6 +3495,7 @@
         "id": "cd9d541c-3ae2-46d2-bf37-f77d6286c71e",
         "session_id": "e209f8ab-876d-47fe-b37a-868c69203642",
         "parent_id": null,
+        "input_version_ids": [],
         "status": "succeeded",
         "progress_step": null,
         "image_artifact_id": "e7d9259f-ca6e-4362-a0ac-b48727908ac6",
@@ -3712,6 +3744,326 @@
         "error": null,
         "created_at": "2026-10-12T16:19:32.746176Z",
         "updated_at": "2026-10-12T16:19:32.746178Z"
+      }
+    },
+    "03bad38a-f7e5-4ab9-a464-916dfe3e5926": {
+      "af6c8452-6db3-4cb0-8785-27ef65d844a7": {
+        "id": "af6c8452-6db3-4cb0-8785-27ef65d844a7",
+        "session_id": "03bad38a-f7e5-4ab9-a464-916dfe3e5926",
+        "parent_id": null,
+        "input_version_ids": [],
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "c2df5e94-22b8-49ec-81b1-fe42965b3a57",
+        "width": 1024,
+        "height": 1024,
+        "instruction": null,
+        "intent": null,
+        "compiled_prompt": null,
+        "prompt_style": null,
+        "image_provider": null,
+        "image_model": null,
+        "reference_artifact_ids": [],
+        "sent_images": [],
+        "entities": [
+          {
+            "id": "environment",
+            "name": "Environment",
+            "parent_id": null,
+            "description": "A dark stormy night scene with heavy rain, turbulent ocean waves, and a sandy beach in the foreground.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 1.0
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.sky",
+            "name": "Sky",
+            "parent_id": "environment",
+            "description": "Dark, overcast sky filled with dense storm clouds, illuminated by a bright lightning strike on the right side.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.46
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.lightning",
+            "name": "Lightning",
+            "parent_id": "environment",
+            "description": "A vivid, branching white lightning bolt striking downward from the clouds into the ocean, with multiple fainter forks radiating outward.",
+            "bbox": {
+              "x": 0.7,
+              "y": 0.17,
+              "w": 0.17000000000000004,
+              "h": 0.29000000000000004
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.ocean",
+            "name": "Ocean",
+            "parent_id": "environment",
+            "description": "Dark, choppy sea with successive wave crests breaking near shore; white foam highlights the wave edges under low light.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.46,
+              "w": 1.0,
+              "h": 0.51
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.beach",
+            "name": "Beach",
+            "parent_id": "environment",
+            "description": "Wet, dark sand in the lower-left foreground, sloping gently upward, reflecting faint ambient light and rain streaks.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.55,
+              "w": 1.0,
+              "h": 0.44999999999999996
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "environment.rain",
+            "name": "Rain",
+            "parent_id": "environment",
+            "description": "Visible diagonal streaks of falling rain across the entire image, denser in the upper half, enhancing the stormy atmosphere.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.46
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": null,
+        "attempts": 0,
+        "warnings": [],
+        "masks": [],
+        "local_edit": null,
+        "stitcher": null,
+        "error": null,
+        "created_at": "2026-10-12T21:46:22.045093Z",
+        "updated_at": "2026-10-12T21:46:22.045093Z"
+      }
+    },
+    "43c3664b-54c4-481c-9137-e8ea84851523": {
+      "0d4822d7-f5ec-4e46-8a21-ccae28a6820b": {
+        "id": "0d4822d7-f5ec-4e46-8a21-ccae28a6820b",
+        "session_id": "43c3664b-54c4-481c-9137-e8ea84851523",
+        "parent_id": null,
+        "input_version_ids": [],
+        "status": "succeeded",
+        "progress_step": null,
+        "image_artifact_id": "988a10ee-ea94-41fd-b254-e653984901dc",
+        "width": 2728,
+        "height": 1536,
+        "instruction": null,
+        "intent": null,
+        "compiled_prompt": null,
+        "prompt_style": null,
+        "image_provider": null,
+        "image_model": null,
+        "reference_artifact_ids": [],
+        "sent_images": [],
+        "entities": [
+          {
+            "id": "character",
+            "name": "Character",
+            "parent_id": null,
+            "description": "A young woman with long dark hair styled in an elegant updo, adorned with a white flower and red ribbons; she wears a traditional white and red kimono with gold floral embroidery and black accents, and is focused on placing a Go stone.",
+            "bbox": {
+              "x": 0.275,
+              "y": 0.0,
+              "w": 0.725,
+              "h": 0.86
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.face",
+            "name": "Face",
+            "parent_id": "character",
+            "description": "Softly lit anime-style face with large brown eyes, gentle expression, subtle blush, and delicate features.",
+            "bbox": {
+              "x": 0.62,
+              "y": 0.14,
+              "w": 0.16000000000000003,
+              "h": 0.25
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hair",
+            "name": "Hair",
+            "parent_id": "character",
+            "description": "Long, wavy black hair with warm brown highlights, styled in a high bun with loose strands framing the face, decorated with a white flower, red ribbon, and ornamental pins.",
+            "bbox": {
+              "x": 0.575,
+              "y": 0.0,
+              "w": 0.32500000000000007,
+              "h": 0.41
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.kimono",
+            "name": "Kimono",
+            "parent_id": "character",
+            "description": "Traditional layered kimono: outer white robe with red trim and gold floral patterns, inner black garment with red floral motifs and gold embroidery; sleeves wide and flowing.",
+            "bbox": {
+              "x": 0.31,
+              "y": 0.32,
+              "w": 0.69,
+              "h": 0.53
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "character.hand",
+            "name": "Hand",
+            "parent_id": "character",
+            "description": "Right hand delicately holding a white Go stone above the board, fingers slender and well-defined, with soft lighting highlighting skin texture.",
+            "bbox": {
+              "x": 0.355,
+              "y": 0.67,
+              "w": 0.15500000000000003,
+              "h": 0.18999999999999995
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "go_board",
+            "name": "Go Board",
+            "parent_id": null,
+            "description": "Wooden Go board (goban) with light brown surface and visible grid lines, partially filled with black and white stones arranged in mid-game pattern.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.81,
+              "w": 0.81,
+              "h": 0.18999999999999995
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "go_stones",
+            "name": "Go Stones",
+            "parent_id": "go_board",
+            "description": "Smooth, glossy black and white circular stones scattered across the board; some clustered, others isolated, indicating active gameplay.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.83,
+              "w": 0.7,
+              "h": 0.15000000000000002
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "stone_bowl",
+            "name": "Stone Bowl",
+            "parent_id": null,
+            "description": "Dark ceramic bowl with gold floral patterns, containing white Go stones, placed on the right side of the board near the character’s elbow.",
+            "bbox": {
+              "x": 0.805,
+              "y": 0.72,
+              "w": 0.19499999999999995,
+              "h": 0.20000000000000007
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "foreground_flowers",
+            "name": "Foreground Flowers",
+            "parent_id": null,
+            "description": "Blurred red maple-like leaves in the bottom-right foreground, adding depth and seasonal atmosphere.",
+            "bbox": {
+              "x": 0.5,
+              "y": 0.73,
+              "w": 0.5,
+              "h": 0.27
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          },
+          {
+            "id": "background",
+            "name": "Background",
+            "parent_id": null,
+            "description": "Pure black background, providing strong contrast and focusing attention on the character and board.",
+            "bbox": {
+              "x": 0.0,
+              "y": 0.0,
+              "w": 1.0,
+              "h": 0.83
+            },
+            "bbox_source": "model",
+            "status": "editable",
+            "anchor_version_id": null,
+            "anchor_artifact_id": null
+          }
+        ],
+        "verification": null,
+        "attempts": 0,
+        "warnings": [],
+        "masks": [],
+        "local_edit": null,
+        "stitcher": null,
+        "error": null,
+        "created_at": "2026-10-12T21:46:59.015574Z",
+        "updated_at": "2026-10-12T21:46:59.015574Z"
       }
     }
   }

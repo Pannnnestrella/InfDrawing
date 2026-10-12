@@ -249,8 +249,14 @@ class ControlledEditService:
         owner_key_id: str,
         session_id: str,
         request: EditTurnRequest,
+        *,
+        run_in_background: bool = True,
+        extra_reference_artifact_ids: list[str] | None = None,
     ) -> EditVersion:
         """Parse the instruction, reject lock conflicts, and schedule generation.
+
+        When ``run_in_background`` is False the turn is awaited and the returned
+        version reflects the final status (used by workflow runner).
 
         Raises:
             SessionNotFoundError: Unknown session or parent version.
@@ -303,6 +309,7 @@ class ControlledEditService:
             width=parent.width,
             height=parent.height,
             entities=[e.model_copy() for e in parent.entities],
+            reference_artifact_ids=list(extra_reference_artifact_ids or []),
             local_edit=LocalTurnFields(
                 edit_mode=request.edit_mode,
                 mask_artifact_id=request.mask_artifact_id,
@@ -312,7 +319,48 @@ class ControlledEditService:
         await self._repository.add_version(child)
         session.current_version_id = child.id
         await self._repository.save_session(session)
-        self._schedule(self.run_turn(owner_key_id, session_id, child.id))
+        if run_in_background:
+            self._schedule(self.run_turn(owner_key_id, session_id, child.id))
+            return child
+        await self.run_turn(owner_key_id, session_id, child.id)
+        finished = await self._repository.get_version(session_id, child.id)
+        return finished if finished is not None else child
+
+    async def create_passthrough_version(
+        self,
+        owner_key_id: str,
+        session_id: str,
+        *,
+        parent_version_id: str,
+        input_version_ids: list[str],
+        reference_artifact_ids: list[str] | None = None,
+        instruction: str = "[workflow:merge]",
+    ) -> EditVersion:
+        """Create a succeeded version that reuses the primary parent's image.
+
+        Used by workflow merge nodes so the version tree stays singly-parented
+        while ``input_version_ids`` records every merge source.
+        """
+        session = await self._owned_session(owner_key_id, session_id)
+        parent = await self._ready_version(session_id, parent_version_id)
+        child = EditVersion(
+            session_id=session_id,
+            parent_id=parent.id,
+            input_version_ids=list(input_version_ids),
+            status=VersionStatus.SUCCEEDED,
+            image_artifact_id=parent.image_artifact_id,
+            width=parent.width,
+            height=parent.height,
+            instruction=instruction,
+            prompt_style=parent.prompt_style,
+            image_provider=parent.image_provider,
+            image_model=parent.image_model,
+            reference_artifact_ids=list(reference_artifact_ids or []),
+            entities=[e.model_copy(deep=True) for e in parent.entities],
+        )
+        await self._repository.add_version(child)
+        session.current_version_id = child.id
+        await self._repository.save_session(session)
         return child
 
     async def run_turn(self, owner_key_id: str, session_id: str, version_id: str) -> None:

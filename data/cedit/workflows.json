@@ -1,0 +1,420 @@
+{
+  "workflows": {
+    "d85fbcbb-e9a8-4033-b528-61f331a97b7b": {
+      "id": "d85fbcbb-e9a8-4033-b528-61f331a97b7b",
+      "owner_key_id": "development",
+      "title": "Two-branch knight workflow",
+      "nodes": [
+        {
+          "id": "9d958401-0680-4824-9362-e626b46814cb",
+          "type": "input",
+          "label": "Input",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "edit": null,
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "a5cfa7f2-ca1f-4015-9c06-694f4c3cb119",
+          "type": "edit",
+          "label": "把角色手里的剑换成一把弯曲的火焰弯刀，其余部分保持不变",
+          "position": {
+            "x": 220.0,
+            "y": 0.0
+          },
+          "edit": {
+            "instruction": "把角色手里的剑换成一把弯曲的火焰弯刀，其余部分保持不变",
+            "lock_roles": [],
+            "target_roles": [
+              "sword"
+            ],
+            "prompt_style": null,
+            "image_provider": null,
+            "image_model": null
+          },
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "1a93776e-6aa2-48f8-a5b5-8a8eb8095596",
+          "type": "edit",
+          "label": "把盾牌换成一面带骷髅纹样的黑铁圆盾，其余部分保持不变",
+          "position": {
+            "x": 440.0,
+            "y": 120.0
+          },
+          "edit": {
+            "instruction": "把盾牌换成一面带骷髅纹样的黑铁圆盾，其余部分保持不变",
+            "lock_roles": [
+              "character",
+              "face",
+              "hair",
+              "armor",
+              "skirt",
+              "belt",
+              "gloves",
+              "sword"
+            ],
+            "target_roles": [
+              "shield"
+            ],
+            "prompt_style": null,
+            "image_provider": null,
+            "image_model": null
+          },
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "c7184ea1-944f-4ac3-86e9-bb45ad631f72",
+          "type": "edit",
+          "label": "把盔甲换成暗金色哥特板甲，其余部分保持不变",
+          "position": {
+            "x": 660.0,
+            "y": 240.0
+          },
+          "edit": {
+            "instruction": "把盔甲换成暗金色哥特板甲，其余部分保持不变",
+            "lock_roles": [
+              "face"
+            ],
+            "target_roles": [
+              "armor"
+            ],
+            "prompt_style": null,
+            "image_provider": null,
+            "image_model": null
+          },
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "54d1b906-3cf2-41d7-9daf-72601b7c1576",
+          "type": "edit",
+          "label": "把发型改成及腰的金色长卷发，其余部分保持不变",
+          "position": {
+            "x": 220.0,
+            "y": 360.0
+          },
+          "edit": {
+            "instruction": "把发型改成及腰的金色长卷发，其余部分保持不变",
+            "lock_roles": [],
+            "target_roles": [
+              "hair"
+            ],
+            "prompt_style": null,
+            "image_provider": null,
+            "image_model": null
+          },
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "c07d9a80-dbaf-4802-b761-3eb349c25b2b",
+          "type": "edit",
+          "label": "给角色戴一顶带红色羽毛的宽檐帽，其余部分保持不变",
+          "position": {
+            "x": 440.0,
+            "y": 480.0
+          },
+          "edit": {
+            "instruction": "给角色戴一顶带红色羽毛的宽檐帽，其余部分保持不变",
+            "lock_roles": [
+              "face"
+            ],
+            "target_roles": [],
+            "prompt_style": null,
+            "image_provider": null,
+            "image_model": null
+          },
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "32fd04ec-a239-4893-973b-5cd6318159e3",
+          "type": "edit",
+          "label": "把背景换成黄昏时分的海边悬崖，其余部分保持不变",
+          "position": {
+            "x": 660.0,
+            "y": 600.0
+          },
+          "edit": {
+            "instruction": "把背景换成黄昏时分的海边悬崖，其余部分保持不变",
+            "lock_roles": [
+              "face"
+            ],
+            "target_roles": [
+              "environment"
+            ],
+            "prompt_style": null,
+            "image_provider": null,
+            "image_model": null
+          },
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "6ebbb6fd-c78e-4493-bf62-7bab3c3361e3",
+          "type": "edit",
+          "label": "改为一把散发着火元素魔法能量的长剑",
+          "position": {
+            "x": 220.0,
+            "y": 720.0
+          },
+          "edit": {
+            "instruction": "改为一把散发着火元素魔法能量的长剑",
+            "lock_roles": [],
+            "target_roles": [
+              "sword"
+            ],
+            "prompt_style": null,
+            "image_provider": null,
+            "image_model": null
+          },
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "5a33e38b-fe85-4682-820c-ba31b5827422",
+          "type": "edit",
+          "label": "将武器替换为围绕着冰魔法的长剑",
+          "position": {
+            "x": 220.0,
+            "y": 840.0
+          },
+          "edit": {
+            "instruction": "将武器替换为围绕着冰魔法的长剑",
+            "lock_roles": [],
+            "target_roles": [
+              "sword"
+            ],
+            "prompt_style": "preserve",
+            "image_provider": "dashscope",
+            "image_model": "qwen-image-3.0-pro"
+          },
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "7071172f-df9d-405a-96d9-a31002c05395",
+          "type": "edit",
+          "label": "把武器改为散发着寒冰魔法的长剑",
+          "position": {
+            "x": 220.0,
+            "y": 960.0
+          },
+          "edit": {
+            "instruction": "把武器改为散发着寒冰魔法的长剑",
+            "lock_roles": [],
+            "target_roles": [
+              "sword"
+            ],
+            "prompt_style": "preserve",
+            "image_provider": "dashscope",
+            "image_model": null
+          },
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "326af584-d7cc-49f8-bca9-fce07ff709a0",
+          "type": "edit",
+          "label": "将武器替换为围绕着冰魔法的长剑",
+          "position": {
+            "x": 220.0,
+            "y": 1080.0
+          },
+          "edit": {
+            "instruction": "将武器替换为围绕着冰魔法的长剑",
+            "lock_roles": [],
+            "target_roles": [
+              "sword"
+            ],
+            "prompt_style": "preserve",
+            "image_provider": "dashscope",
+            "image_model": "qwen-image-3.0-pro"
+          },
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "3cc56293-264c-4203-954b-5a7bd664dbbb",
+          "type": "output",
+          "label": "Output 1",
+          "position": {
+            "x": 880.0,
+            "y": 0.0
+          },
+          "edit": null,
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "5dc8879c-eea9-48ba-9d73-50cea0f71a21",
+          "type": "output",
+          "label": "Output 2",
+          "position": {
+            "x": 440.0,
+            "y": 120.0
+          },
+          "edit": null,
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "65b57eae-b72f-4438-85c8-632fee56fd9f",
+          "type": "output",
+          "label": "Output 3",
+          "position": {
+            "x": 440.0,
+            "y": 240.0
+          },
+          "edit": null,
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "39024037-48c0-4439-81d6-1b823e858bd5",
+          "type": "output",
+          "label": "Output 4",
+          "position": {
+            "x": 440.0,
+            "y": 360.0
+          },
+          "edit": null,
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "06ae666c-1d7c-4bc3-b2a2-f17a472d7f15",
+          "type": "output",
+          "label": "Output 5",
+          "position": {
+            "x": 440.0,
+            "y": 480.0
+          },
+          "edit": null,
+          "condition": null,
+          "merge": null
+        },
+        {
+          "id": "7659cb10-8957-4e19-be42-cda57e943585",
+          "type": "output",
+          "label": "Output 6",
+          "position": {
+            "x": 880.0,
+            "y": 600.0
+          },
+          "edit": null,
+          "condition": null,
+          "merge": null
+        }
+      ],
+      "edges": [
+        {
+          "id": "5499768b-17aa-4667-915b-28c58d2ef4dd",
+          "source": "9d958401-0680-4824-9362-e626b46814cb",
+          "target": "a5cfa7f2-ca1f-4015-9c06-694f4c3cb119",
+          "kind": "default"
+        },
+        {
+          "id": "fc2c04d7-486e-4a7d-806f-ddf55a9f5895",
+          "source": "a5cfa7f2-ca1f-4015-9c06-694f4c3cb119",
+          "target": "1a93776e-6aa2-48f8-a5b5-8a8eb8095596",
+          "kind": "default"
+        },
+        {
+          "id": "8cd24608-8e3c-4c64-87c0-b42373286622",
+          "source": "1a93776e-6aa2-48f8-a5b5-8a8eb8095596",
+          "target": "c7184ea1-944f-4ac3-86e9-bb45ad631f72",
+          "kind": "default"
+        },
+        {
+          "id": "b0355b8a-e568-4df1-969c-e41b6a060841",
+          "source": "9d958401-0680-4824-9362-e626b46814cb",
+          "target": "54d1b906-3cf2-41d7-9daf-72601b7c1576",
+          "kind": "default"
+        },
+        {
+          "id": "e1b5822e-335e-425a-ac13-8cee4a6aad32",
+          "source": "54d1b906-3cf2-41d7-9daf-72601b7c1576",
+          "target": "c07d9a80-dbaf-4802-b761-3eb349c25b2b",
+          "kind": "default"
+        },
+        {
+          "id": "4c1eb153-9748-446e-abe3-318668e96a31",
+          "source": "c07d9a80-dbaf-4802-b761-3eb349c25b2b",
+          "target": "32fd04ec-a239-4893-973b-5cd6318159e3",
+          "kind": "default"
+        },
+        {
+          "id": "7c865e71-ed70-4211-b31a-b7b26e9eb488",
+          "source": "9d958401-0680-4824-9362-e626b46814cb",
+          "target": "6ebbb6fd-c78e-4493-bf62-7bab3c3361e3",
+          "kind": "default"
+        },
+        {
+          "id": "8b505b4e-c153-45b2-acde-df80c4e38ed2",
+          "source": "9d958401-0680-4824-9362-e626b46814cb",
+          "target": "5a33e38b-fe85-4682-820c-ba31b5827422",
+          "kind": "default"
+        },
+        {
+          "id": "5f6d3737-61fe-4dcb-94b6-5c2b53c97362",
+          "source": "9d958401-0680-4824-9362-e626b46814cb",
+          "target": "7071172f-df9d-405a-96d9-a31002c05395",
+          "kind": "default"
+        },
+        {
+          "id": "fbfe4546-1cbb-411c-9e41-599e13c6b776",
+          "source": "9d958401-0680-4824-9362-e626b46814cb",
+          "target": "326af584-d7cc-49f8-bca9-fce07ff709a0",
+          "kind": "default"
+        },
+        {
+          "id": "27e6b237-7d48-47a6-b986-e79302dab23e",
+          "source": "c7184ea1-944f-4ac3-86e9-bb45ad631f72",
+          "target": "3cc56293-264c-4203-954b-5a7bd664dbbb",
+          "kind": "default"
+        },
+        {
+          "id": "6e4f38b5-256d-46ac-ba79-1810753e392b",
+          "source": "7071172f-df9d-405a-96d9-a31002c05395",
+          "target": "5dc8879c-eea9-48ba-9d73-50cea0f71a21",
+          "kind": "default"
+        },
+        {
+          "id": "4544d89e-0671-41a5-80d7-071ae62a5966",
+          "source": "5a33e38b-fe85-4682-820c-ba31b5827422",
+          "target": "65b57eae-b72f-4438-85c8-632fee56fd9f",
+          "kind": "default"
+        },
+        {
+          "id": "cd8eca1a-291f-4739-b464-5ee0bf4f4436",
+          "source": "326af584-d7cc-49f8-bca9-fce07ff709a0",
+          "target": "39024037-48c0-4439-81d6-1b823e858bd5",
+          "kind": "default"
+        },
+        {
+          "id": "3f21231f-f97d-4741-a9d5-5c7f691f0fb8",
+          "source": "6ebbb6fd-c78e-4493-bf62-7bab3c3361e3",
+          "target": "06ae666c-1d7c-4bc3-b2a2-f17a472d7f15",
+          "kind": "default"
+        },
+        {
+          "id": "22a77f22-3a33-4f2f-9e97-769d2e7ebc4b",
+          "source": "32fd04ec-a239-4893-973b-5cd6318159e3",
+          "target": "7659cb10-8957-4e19-be42-cda57e943585",
+          "kind": "default"
+        }
+      ],
+      "source_session_id": "3cefd7be-f60a-4b40-9b6e-774ee1ecf1bf",
+      "created_at": "2026-10-12T20:20:10.609761Z",
+      "updated_at": "2026-10-12T20:20:10.609764Z"
+    }
+  },
+  "runs": {}
+}

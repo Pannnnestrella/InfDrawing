@@ -13,6 +13,7 @@ import {
   checkoutVersion,
   createSession,
   deleteVersion,
+  exportSessionWorkflow,
   fetchArtifactBlobUrl,
   getSessionTree,
   isVersionBusy,
@@ -74,6 +75,8 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
   const [localSelection, setLocalSelection] = useState<LocalSelection | null>(null);
   const [localModeVersionId, setLocalModeVersionId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [exportSelectedIds, setExportSelectedIds] = useState<Set<string>>(() => new Set());
+  const [exportingWorkflow, setExportingWorkflow] = useState(false);
   const [pendingEntityId, setPendingEntityId] = useState<string | null>(null);
   const [hoveredEntityId, setHoveredEntityId] = useState<string | null>(null);
   const [boxEdit, setBoxEdit] = useState<{ versionId: string; entityId: string } | null>(null);
@@ -207,6 +210,35 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
   const canDeleteCurrent = Boolean(
     current?.parent_id && current && !isVersionBusy(current) && !deleting,
   );
+  const toggleExportSelect = useCallback((versionId: string) => {
+    setExportSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(versionId)) next.delete(versionId);
+      else next.add(versionId);
+      return next;
+    });
+  }, []);
+  const handleExportWorkflow = async () => {
+    if (!tree) return;
+    const ids =
+      exportSelectedIds.size > 0
+        ? [...exportSelectedIds]
+        : tree.versions.map((v) => v.id);
+    setExportingWorkflow(true);
+    setError(null);
+    try {
+      const workflow = await exportSessionWorkflow(
+        tree.session.id,
+        ids,
+        `${tree.session.title} workflow`,
+      );
+      window.open(`/workflows?id=${encodeURIComponent(workflow.id)}`, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setExportingWorkflow(false);
+    }
+  };
   const imageOptions = useMemo(
     () => parseImageOptions(capabilities?.features.controlled_edit?.models?.image_options),
     [capabilities],
@@ -276,6 +308,7 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
     setError(null);
     try {
       setTree(await getSessionTree(id));
+      setExportSelectedIds(new Set());
     } catch (err) {
       setError(errorMessage(err));
     }
@@ -542,30 +575,53 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
                   <div className="min-w-0">
                     <h2 className="text-xs font-semibold tracking-wide">修改树</h2>
                     <p className="truncate text-[10px] text-faint">
-                      点击节点切换预览；从旧节点继续编辑会形成分支
+                      点击预览；Ctrl+点击多选后可导出工作流
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    disabled={!canDeleteCurrent}
-                    title={
-                      !current.parent_id
-                        ? "原图根节点不能删除"
-                        : isVersionBusy(current)
-                          ? "生成中的版本不能删除"
-                          : "删除当前节点及其后续分支"
-                    }
-                    onClick={() => void handleDeleteCurrent()}
-                    className="shrink-0 rounded-md border border-danger/40 px-2 py-1 text-[10px] text-danger transition-colors hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    {deleting ? "删除中…" : "删除当前节点"}
-                  </button>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Link
+                      href="/workflows"
+                      className="rounded-md border border-line px-2 py-1 text-[10px] text-faint hover:bg-surface-2 hover:text-ink"
+                    >
+                      工作流
+                    </Link>
+                    <button
+                      type="button"
+                      disabled={exportingWorkflow || tree.versions.length === 0}
+                      title={
+                        exportSelectedIds.size
+                          ? `导出已选 ${exportSelectedIds.size} 个节点`
+                          : "未多选时导出整棵修改树"
+                      }
+                      onClick={() => void handleExportWorkflow()}
+                      className="rounded-md border border-line px-2 py-1 text-[10px] hover:bg-surface-2 disabled:opacity-40"
+                    >
+                      {exportingWorkflow ? "导出中…" : "存为工作流"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!canDeleteCurrent}
+                      title={
+                        !current.parent_id
+                          ? "原图根节点不能删除"
+                          : isVersionBusy(current)
+                            ? "生成中的版本不能删除"
+                            : "删除当前节点及其后续分支"
+                      }
+                      onClick={() => void handleDeleteCurrent()}
+                      className="rounded-md border border-danger/40 px-2 py-1 text-[10px] text-danger transition-colors hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {deleting ? "删除中…" : "删除当前节点"}
+                    </button>
+                  </div>
                 </header>
                 <div className="min-h-0 flex-1">
                   <VersionTree
                     versions={tree.versions}
                     currentVersionId={tree.session.current_version_id}
                     disabled={deleting}
+                    exportSelectedIds={exportSelectedIds}
+                    onToggleExportSelect={toggleExportSelect}
                     onSelect={(id) => void handleSelect(id)}
                   />
                 </div>

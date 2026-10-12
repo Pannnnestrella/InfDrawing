@@ -2,6 +2,7 @@
 
 ## 2026-10-12
 
+- 编辑工作流图：`controlled_edit/workflow/`（schema/graph/repo/export/runner/api）；`EditVersion.input_version_ids`；Studio「存为工作流」+ `/workflows`；`test_cedit_workflow` 8 通过；文档 Workflow 章节。
 - 多轮编辑 RGBA：`alpha.py` / `qwen_mask_prompt.py`；sizing `keep_alpha`；service Qwen vs Wan/Wanx 分流；Studio `bg-checkerboard`；`docs/controlled_edit.md` 透明表；`tests/controlled_edit` 96 通过。
 
 ## 2026-10-11

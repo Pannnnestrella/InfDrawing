@@ -1,4 +1,5 @@
 import { apiFetch } from "./api-client";
+import type { EditWorkflow } from "./workflow-api";
 
 const BASE = "/api/v1/controlled-edit";
 
@@ -90,6 +91,8 @@ export interface EditVersion {
   id: string;
   session_id: string;
   parent_id: string | null;
+  /** Extra merge parents; tree display still uses parent_id. */
+  input_version_ids?: string[];
   status: VersionStatus;
   progress_step: string | null;
   image_artifact_id: string | null;
@@ -307,6 +310,19 @@ export async function deleteVersion(
       `${BASE}/sessions/${encodeURIComponent(sessionId)}/versions/${encodeURIComponent(versionId)}`,
       { method: "DELETE" },
     ),
+  );
+}
+
+export async function exportSessionWorkflow(
+  sessionId: string,
+  versionIds: string[],
+  title = "Exported workflow",
+): Promise<EditWorkflow> {
+  return parseOrThrow(
+    await postJson(`/sessions/${encodeURIComponent(sessionId)}/export-workflow`, {
+      version_ids: versionIds,
+      title,
+    }),
   );
 }
 

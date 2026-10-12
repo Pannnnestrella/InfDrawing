@@ -9,6 +9,7 @@ from app.api import agent, artifacts, generate, jobs, system, vision, ws
 from app.assets import api as assets_api
 from app.config import settings
 from app.controlled_edit import api as controlled_edit_api
+from app.controlled_edit.workflow import api as controlled_edit_workflow_api
 from app.production.auth import require_scopes
 from app.production.http import (
     RedisRateLimitMiddleware,
@@ -70,6 +71,11 @@ app.include_router(
 app.include_router(ws.router, prefix="/api/v1")
 app.include_router(
     controlled_edit_api.router,
+    prefix="/api/v1",
+    dependencies=[Depends(require_scopes("controlled_edit"))],
+)
+app.include_router(
+    controlled_edit_workflow_api.router,
     prefix="/api/v1",
     dependencies=[Depends(require_scopes("controlled_edit"))],
 )

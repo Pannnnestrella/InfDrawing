@@ -1,5 +1,10 @@
 # InfDrawing 任务状态
 
+## 2026-10-12 编辑工作流图
+
+- `done`：Workflow DAG 模板 + export + runner（分叉/条件/合并）；Studio 导出；`/workflows` xyflow；文档与测试
+- 规划：`.planning/20261012_edit_workflow_graph.md`
+
 ## 2026-10-12 节点命名与推荐模型
 
 - `planned`：修改树节点标题；整图推荐 `qwen-image-3.0-pro`；流程描述改到当前默认模型

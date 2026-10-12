@@ -1,5 +1,11 @@
 # 关键发现
 
+## 2026-10-12 编辑工作流图
+
+- 模板 DAG 与执行树分层：不改 VersionTree 为 xyflow；runner 复用 `submit_turn(run_in_background=False)`。
+- 实体用 role（leaf id）重绑；merge 保持单 `parent_id`，多源进 `input_version_ids`。
+- merge 须等全部静态前驱完成，避免并行分支过早汇合。
+
 ## 2026-10-11 API Key 弹层裁切
 
 - 侧栏 `FloatingPanel` 的 `aside` 带 `overflow-hidden`；`ApiKeyControl` / `CapabilityStatus` 用 `absolute right-0` 时，弹层向左超出父级宽度会被裁掉，看起来像被白画布盖住一半。

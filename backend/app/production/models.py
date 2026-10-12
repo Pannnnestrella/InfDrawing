@@ -167,6 +167,18 @@ class EditVersionRow(Base, TimestampMixin):
     )
 
 
+class EditWorkflowRow(Base, TimestampMixin):
+    """Reusable controlled-edit workflow template; ``data`` holds ``EditWorkflow``."""
+
+    __tablename__ = "edit_workflows"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    owner_key_id: Mapped[str] = mapped_column(ForeignKey("api_keys.id"), index=True)
+    data: Mapped[dict[str, Any]] = mapped_column(JSON)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
 def create_engine(config: Settings = settings) -> AsyncEngine:
     """Create the production async database engine."""
     if not config.database_url:

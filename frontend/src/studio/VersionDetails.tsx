@@ -196,6 +196,11 @@ export function VersionDetails({ version, entityNames }: VersionDetailsProps) {
       <div>
         <h2 className="mb-1 text-xs font-semibold tracking-wide">本轮修改</h2>
         <p className="text-ink">{version.instruction}</p>
+        {version.input_version_ids && version.input_version_ids.length > 1 ? (
+          <p className="mt-1 text-faint">
+            合并来源 {version.input_version_ids.length} 个版本（树边仅显示主父节点）
+          </p>
+        ) : null}
         {intent ? (
           <p className="mt-1 text-muted">
             <span className="mr-1 rounded bg-surface-3 px-1 py-0.5 text-[10px]">

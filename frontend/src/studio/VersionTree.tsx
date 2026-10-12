@@ -15,7 +15,10 @@ interface VersionTreeProps {
   versions: EditVersion[];
   currentVersionId: string | null;
   disabled?: boolean;
+  /** Version ids selected for workflow export (Ctrl/Cmd-click to toggle). */
+  exportSelectedIds?: Set<string>;
   onSelect: (versionId: string) => void;
+  onToggleExportSelect?: (versionId: string) => void;
 }
 
 function nodeColor(version: EditVersion): string {
@@ -36,10 +39,17 @@ function nodeTitle(node: TreeNodeLayout): string {
         : version.warnings.length
           ? `${version.warnings.length} 条警告`
           : "验收通过";
-  return `v${node.ordinal} · ${head}\n${node.depth === 0 ? "" : status}`.trim();
+  return `v${node.ordinal} · ${head}\n${node.depth === 0 ? "" : status}\nCtrl+点击可选中导出`.trim();
 }
 
-export function VersionTree({ versions, currentVersionId, disabled, onSelect }: VersionTreeProps) {
+export function VersionTree({
+  versions,
+  currentVersionId,
+  disabled,
+  exportSelectedIds,
+  onSelect,
+  onToggleExportSelect,
+}: VersionTreeProps) {
   const layout = useMemo(() => layoutVersionTree(versions), [versions]);
   const path = useMemo(
     () => new Set(ancestryPath(versions, currentVersionId)),
@@ -77,6 +87,7 @@ export function VersionTree({ versions, currentVersionId, disabled, onSelect }: 
           const { version } = node;
           const current = version.id === currentVersionId;
           const busy = isVersionBusy(version);
+          const exportSelected = exportSelectedIds?.has(version.id) ?? false;
           return (
             <g
               key={version.id}
@@ -85,12 +96,23 @@ export function VersionTree({ versions, currentVersionId, disabled, onSelect }: 
               tabIndex={disabled ? -1 : 0}
               transform={`translate(${x(node.depth)} ${y(node.lane)})`}
               className={disabled ? "cursor-not-allowed" : "cursor-pointer"}
-              onClick={() => !disabled && onSelect(version.id)}
+              onClick={(event) => {
+                if (disabled) return;
+                if ((event.ctrlKey || event.metaKey) && onToggleExportSelect) {
+                  event.preventDefault();
+                  onToggleExportSelect(version.id);
+                  return;
+                }
+                onSelect(version.id);
+              }}
               onKeyDown={(event) => {
                 if (!disabled && (event.key === "Enter" || event.key === " ")) onSelect(version.id);
               }}
             >
               <title>{nodeTitle(node)}</title>
+              {exportSelected ? (
+                <circle r={RADIUS + 7} fill="none" stroke="var(--color-ink)" strokeWidth={1.5} strokeDasharray="3 2" />
+              ) : null}
               {current ? (
                 <circle r={RADIUS + 5} fill="none" stroke="var(--color-accent-hover)" strokeWidth={2} />
               ) : null}

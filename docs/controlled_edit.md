@@ -75,8 +75,33 @@ The preserve lists are generated deterministically from entity states; the langu
 | `POST` | `/sessions/{session_id}/checkout` | Move the current pointer to a version |
 | `DELETE` | `/sessions/{session_id}/versions/{version_id}` | Delete a version and all descendants (not the root; not while pending/running). Cursor moves to the parent when needed. Image artifacts on disk are kept. |
 | `GET` | `/artifacts/{artifact_id}` | Image bytes, restricted to the session owner |
+| `POST` | `/workflows` | Create a reusable edit workflow DAG |
+| `GET` | `/workflows` | List owned workflow templates |
+| `GET` / `PUT` / `DELETE` | `/workflows/{workflow_id}` | Read, update, or delete a template |
+| `POST` | `/sessions/{session_id}/export-workflow` | Export a connected version subgraph into a saved workflow |
+| `POST` | `/workflows/{workflow_id}/runs` | Upload an image and execute the workflow (202) |
+| `GET` | `/workflow-runs/{run_id}` | Poll one run |
+| `POST` | `/workflow-runs/{run_id}/resume` | Resume a run paused on a `manual` condition |
 
 Errors use the standard error envelope. Upstream model failures map to 502, missing resources to 404, and edits from a version that is still running to 409.
+
+## Edit workflow graphs
+
+Workflow **templates** are reusable DAGs. A **run** materializes a new `EditSession` version tree. The live Studio tree stays the execution history; the editor at `/workflows` edits templates with `@xyflow/react`.
+
+| Node type | Role |
+|---|---|
+| `input` | Entry image (exactly one per template) |
+| `edit` | One controlled-edit turn (`instruction`, `lock_roles`, `target_roles`, model options) |
+| `condition` | Gate: `target_applied`, `locked_score`, `entity_role_exists`, or `manual` (pauses the run) |
+| `merge` | Fan-in: `multi_ref` (primary + other branches as references) or `select_best` |
+| `output` | Terminal marker (one or more) |
+
+Entity binding uses **roles** (leaf id / name such as `face`), not absolute entity ids from the source session. Merge-produced versions keep a single `parent_id` for tree layout and record every source in `input_version_ids`.
+
+Studio: Ctrl/Cmd-click nodes on the version tree, then **存为工作流**, or export the whole tree. Open `/workflows` to edit, save, and run against a new image.
+
+Templates persist under `data/cedit/workflows.json` in memory mode (table `edit_workflows` when using Postgres).
 
 ## Configuration
 
@@ -104,6 +129,7 @@ Errors use the standard error envelope. Upstream model failures map to 502, miss
 | `INFD_CEDIT_LOCK_FEATHER` | `0.12` | Feather width when pasting locked or cropped boxes |
 | `INFD_CEDIT_SUBJECT_SHIFT_THRESHOLD` | `0.08` | Subject-center shift that fails framing before VLM review |
 | `INFD_CEDIT_SUBJECT_AREA_THRESHOLD` | `0.15` | Subject-area change that fails framing before VLM review |
+| `INFD_CEDIT_WORKFLOW_CONCURRENCY` | `2` | Max parallel edit nodes inside one workflow run |
 
 Sessions and versions are stored in `edit_sessions` / `edit_versions` (migration `0002_controlled_edit`) when a database is configured. In local `memory` mode they are written to `data/cedit/sessions.json` after every create or save, and artifact metadata is written to `data/cedit/artifacts.json`, so a backend restart keeps the version tree.
 

@@ -163,6 +163,7 @@ class EditVersion(BaseModel):
     id: str = Field(default_factory=new_id)
     session_id: str
     parent_id: str | None = None
+    input_version_ids: list[str] = Field(default_factory=list)
     status: VersionStatus = VersionStatus.PENDING
     progress_step: str | None = None
     image_artifact_id: str | None = None

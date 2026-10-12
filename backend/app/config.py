@@ -78,6 +78,7 @@ class Settings(BaseSettings):
     cedit_sam2_config: str = "configs/sam2.1/sam2.1_hiera_s.yaml"
     cedit_sam2_device: str = "cpu"
     cedit_sam3_base_url: str = ""
+    cedit_workflow_concurrency: int = 2
 
     persistence_backend: str = "memory"
     database_url: str = ""

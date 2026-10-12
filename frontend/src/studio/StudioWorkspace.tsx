@@ -51,6 +51,7 @@ import { UploadPanel } from "./UploadPanel";
 import { VersionDetails } from "./VersionDetails";
 import { VersionTree } from "./VersionTree";
 import { VersionViewer } from "./VersionViewer";
+import { InpaintControls, type LocalSelection } from "./InpaintControls";
 
 const POLL_MS = 2000;
 
@@ -69,6 +70,8 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [localSelection, setLocalSelection] = useState<LocalSelection | null>(null);
+  const [localModeVersionId, setLocalModeVersionId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [pendingEntityId, setPendingEntityId] = useState<string | null>(null);
   const [hoveredEntityId, setHoveredEntityId] = useState<string | null>(null);
@@ -118,6 +121,7 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate browser preferences after SSR
     setEnginePreference(loadEnginePreference());
   }, []);
 
@@ -239,6 +243,7 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
   };
 
   const handleOpen = async (id: string) => {
+    setLocalSelection(null); setLocalModeVersionId(null);
     setError(null);
     try {
       setTree(await getSessionTree(id));
@@ -249,6 +254,7 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
 
   const handleSelect = async (versionId: string) => {
     if (!tree || versionId === tree.session.current_version_id) return;
+    setLocalSelection(null); setLocalModeVersionId(null);
     setConflict(null);
     try {
       const session = await checkoutVersion(tree.session.id, versionId);
@@ -322,15 +328,23 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
 
   const handleSubmit = async (instruction: string): Promise<boolean> => {
     if (!tree || !current) return false;
+    if (localModeVersionId === current.id && localSelection?.versionId !== current.id) {
+      setError("请先确认局部编辑 Mask，或关闭局部编辑模式");
+      return false;
+    }
     setSubmitting(true);
     setError(null);
     setConflict(null);
     try {
       await submitTurn(tree.session.id, current.id, instruction, selectedTargetIds, {
         promptStyle,
-        imageProvider,
+        imageProvider: localSelection?.versionId === current.id ? "dashscope" : imageProvider,
+        ...(localSelection?.versionId === current.id ? {
+          maskArtifactId: localSelection.maskId, inpaintOptions: localSelection.options,
+        } : {}),
       });
       setSelectedTargetIds([]);
+      setLocalSelection(null);
       setTree(await getSessionTree(tree.session.id));
       return true;
     } catch (err) {
@@ -541,6 +555,11 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
                   label="调整实体列表高度"
                 >
                   <div className="panel-scroll h-full min-h-0 overflow-y-auto p-3">
+                    <InpaintControls key={`${tree.session.id}-${current.id}`}
+                      sessionId={tree.session.id} version={current}
+                      bbox={current.entities.find(e => selectedTargetIds.includes(e.id))?.bbox}
+                      disabled={!currentReady || submitting} onSelection={setLocalSelection}
+                      onModeChange={(id, enabled) => setLocalModeVersionId(enabled ? id : null)} />
                     <EditComposer
                       disabled={!currentReady || Boolean(featureDisabledReason)}
                       disabledReason={

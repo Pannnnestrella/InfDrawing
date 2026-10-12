@@ -10,7 +10,21 @@ Controlled Multi-turn Edit lets a user revise one image over many turns while ke
 | Frontend page | `/` (dock on the infinite canvas; `/studio` redirects home) |
 | Backend package | `backend/app/controlled_edit/` |
 
-The protection is semantic: the system records which entities must stay fixed and enforces this through prompt constraints, reference-image anchoring and automatic VLM verification. No pixel mask is used. Every turn produces a node in a version tree, so the user can always roll back or branch.
+The system records which entities must stay fixed and enforces this through prompt constraints,
+reference-image anchoring and automatic VLM verification. Explicit local edits also use pixel
+masks and deterministic crop/stitch blending. Every turn produces a node in a version tree,
+so the user can roll back or branch.
+
+Qwen 2.1 Pro/Turbo instruction edits use the asynchronous DashScope image-generation endpoint.
+Task submission is separate from result polling, with a 600-second polling deadline. Polling
+transport failures retry the same task; generation submission is never automatically retried.
+The experiment script persists task and request IDs before polling and supports `--resume`
+to query the saved task again. Qwen 2.0 keeps its synchronous endpoint.
+
+The review experiment can add the approved full-image Wanx comparison and Qwen async attempt
+with `scripts/cedit_crop_stitch_compare.py --followup`. The full-image test sends the original
+image and the same processed source-space mask, with the same instruction and seed. It records
+outside-mask differences for the raw model output separately from differences after blending.
 
 ## Concepts
 
@@ -103,3 +117,29 @@ backend/.venv/Scripts/python scripts/cedit_e2e.py --image path/to/source.png --o
 - Grounding uses Qwen-VL (`qwen3-vl-plus` by default). Boxes are tight enough for face, sword and shield on the 2026-10-05 comparison set; group boxes (character, environment) still cover extra background. A comparison script lives at `scripts/cedit_grounding_compare.py`.
 - Each turn re-encodes the full image, so texture quality can degrade over long chains. Branching from an earlier node is the recovery path.
 - Turns run inside the API process; a restart interrupts running turns. Session trees and artifact metadata persist in `data/cedit/` in local `memory` mode.
+# Local mask crop and stitch
+
+Explicit local edits accept a mask bound to the selected parent version and its image hash.
+The Studio mask panel supports freehand lasso, polygon, brush/erase, undo/redo, SAM 2.1
+box/point prompts, candidate selection, and an offline crop preview. Confirm the mask before
+submitting an edit. Switching versions clears the active selection.
+
+The crop stage thresholds the mask, optionally fills holes, dilates it, and prepares a
+finite-support feathered blending mask. It expands context and records padding and inverse
+geometry. The initial working canvas is 1024 square, a conservative policy rather than an
+API restriction. Wanx receives only the crop and its binary RGB mask. Stitch restores the
+source coordinates and changes only pixels inside blending-mask support. PNG output keeps
+all decoded source channels outside that support exactly unchanged.
+
+SAM 2.1 is optional and loaded lazily; the configured small checkpoint currently runs on
+CPU. SAM 3 requires a separately configured service implementing InfDrawing's POST /segment
+contract; no live SAM 3 service has been validated. Qwen 2.1 mask-as-reference editing is an
+experiment, separate from the default Wanx local-turn pipeline.
+
+Run `backend/.venv/Scripts/python scripts/cedit_crop_stitch_compare.py` from the repository
+root to prepare a real SAM mask and review page without cloud generation. The page is at
+`/inpaint-comparison/index.html` on the frontend. Only use `--generate` after cost approval;
+the script records an attempt before calling each model and never retries it automatically.
+Logs, masks, geometry, prompts, generated crops, stitched outputs, and pixel differences are
+saved under `data/logs/20261012_local_inpaint_crop_stitch/`. A zero outside-mask difference
+verifies preservation, not semantic edit quality or seamless boundaries.

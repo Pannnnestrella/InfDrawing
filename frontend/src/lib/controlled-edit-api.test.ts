@@ -19,6 +19,22 @@ describe("controlled edit API client", () => {
     vi.unstubAllGlobals();
   });
 
+  it("marks a confirmed source mask as an explicit local turn", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(202, { id: "local" }));
+    vi.stubGlobal("fetch", fetchMock);
+    await submitTurn("s", "v1", "recolor", [], {
+      imageProvider: "dashscope",
+      maskArtifactId: "mask-v1",
+    });
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(init.body as string)).toMatchObject({
+      parent_version_id: "v1",
+      edit_mode: "local",
+      mask_artifact_id: "mask-v1",
+      image_provider: "dashscope",
+    });
+  });
+
   it("posts turns as JSON to the session endpoint", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(202, { id: "v2" }));
     vi.stubGlobal("fetch", fetchMock);

@@ -10,6 +10,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.controlled_edit.inpaint_types import LocalTurnFields, MaskRecord, Stitcher
+
 ENTITY_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_]*(\.[a-z0-9][a-z0-9_]*)*$")
 BBOX_TOLERANCE = 0.02
 
@@ -164,6 +166,9 @@ class EditVersion(BaseModel):
     verification: VerificationResult | None = None
     attempts: int = 0
     warnings: list[str] = Field(default_factory=list)
+    masks: list[MaskRecord] = Field(default_factory=list)
+    local_edit: LocalTurnFields | None = None
+    stitcher: Stitcher | None = None
     error: str | None = None
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
@@ -188,7 +193,7 @@ class SessionTree(BaseModel):
     versions: list[EditVersion]
 
 
-class EditTurnRequest(BaseModel):
+class EditTurnRequest(LocalTurnFields):
     """Request body for one edit turn."""
 
     model_config = ConfigDict(extra="forbid")

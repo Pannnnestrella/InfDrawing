@@ -1,4 +1,4 @@
-﻿"""End-to-end service tests with fake vision and image models."""
+"""End-to-end service tests with fake vision and image models."""
 
 from __future__ import annotations
 
@@ -10,11 +10,13 @@ from typing import Any
 
 import httpx
 import pytest
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from app.config import Settings
 from app.controlled_edit.entities import InheritedLockError
+from app.controlled_edit.inpaint_types import InpaintOptions
 from app.controlled_edit.intent_parser import INTENT_SYSTEM_PROMPT
+from app.controlled_edit.masks import png_bytes
 from app.controlled_edit.repository import MemoryEditRepository
 from app.controlled_edit.schemas import (
     BBox,
@@ -43,6 +45,85 @@ def _png(width: int, height: int, color: tuple[int, int, int]) -> bytes:
     buffer = io.BytesIO()
     Image.new("RGB", (width, height), color).save(buffer, format="PNG")
     return buffer.getvalue()
+
+
+def test_local_turn_sends_crop_and_stitches_with_retry_feedback(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Local generation must never receive the full image or reference crops."""
+    from app.pipeline.image_providers.dashscope_wanx import DashScopeWanxProvider
+
+    calls: list[dict[str, Any]] = []
+
+    async def inpaint(self: Any, **kwargs: Any) -> bytes:
+        calls.append(kwargs)
+        assert Image.open(io.BytesIO(kwargs["image_bytes"])).size == (1024, 1024)
+        assert Image.open(io.BytesIO(kwargs["mask_bytes"])).size == (1024, 1024)
+        assert "reference_images" not in kwargs
+        return _png(1024, 1024, (0, 255, 0))
+
+    monkeypatch.setattr(DashScopeWanxProvider, "inpaint", inpaint)
+
+    async def scenario() -> None:
+        service, _, _, scheduled = _build(tmp_path, [FAIL, PASS])
+        session_id, root_id = await _session_with_locked_face(service)
+        mask = Image.new("L", (1920, 1080))
+        ImageDraw.Draw(mask).ellipse((20, 20, 100, 100), fill=255)
+        saved = await service.save_mask(OWNER, session_id, root_id, png_bytes(mask))
+        version = await service.submit_turn(
+            OWNER,
+            session_id,
+            EditTurnRequest(
+                parent_version_id=root_id,
+                instruction="Change the selected object to green",
+                edit_mode="local",
+                mask_artifact_id=saved.artifact_id,
+                inpaint_options=InpaintOptions(dilate_px=0, feather_sigma_px=0),
+            ),
+        )
+        await scheduled.pop()
+        tree = await service.get_tree(OWNER, session_id)
+        result = next(v for v in tree.versions if v.id == version.id)
+        assert result.status == VersionStatus.SUCCEEDED
+        assert result.attempts == 2
+        assert "修正上次问题" in calls[1]["prompt"]
+        assert result.compiled_prompt == calls[1]["prompt"]
+        assert result.reference_artifact_ids == []
+        assert result.stitcher and result.stitcher.actual_output_size == (1024, 1024)
+        data = await service._read_artifact(OWNER, result.image_artifact_id)
+        output = Image.open(io.BytesIO(data))
+        assert output.size == (1920, 1080)
+        assert output.getpixel((60, 60)) == (0, 255, 0)
+        assert output.getpixel((20, 20)) == (200, 180, 160)
+        assert output.getpixel((1800, 900)) == (200, 180, 160)
+
+    asyncio.run(scenario())
+
+
+def test_mask_binding_and_spatial_locks(tmp_path: Path) -> None:
+    """Reject stale masks and masks that intersect a locked region after dilation."""
+
+    async def scenario() -> None:
+        service, _, _, _ = _build(tmp_path, [PASS])
+        session_id, root_id = await _session_with_locked_face(service)
+        mask = Image.new("L", (1920, 1080))
+        ImageDraw.Draw(mask).rectangle((865, 165, 900, 190), fill=255)
+        record = await service.save_mask(OWNER, session_id, root_id, png_bytes(mask))
+        with pytest.raises(LockConflictError):
+            await service.prepare_local_crop(
+                OWNER, session_id, root_id, record.artifact_id, InpaintOptions()
+            )
+        with pytest.raises(VersionNotReadyError):
+            await service.prepare_local_crop(
+                OWNER, session_id, root_id, "not-this-version", InpaintOptions()
+            )
+        with pytest.raises(SessionNotFoundError):
+            await service.prepare_local_crop(
+                "other-owner", session_id, root_id, record.artifact_id, InpaintOptions()
+            )
+
+    asyncio.run(scenario())
 
 
 SCENE = {

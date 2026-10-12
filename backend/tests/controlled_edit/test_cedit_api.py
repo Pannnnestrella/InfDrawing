@@ -30,6 +30,42 @@ def _png() -> bytes:
     return buffer.getvalue()
 
 
+def test_mask_upload_preview_and_lock_conflict(harness: dict[str, Any]) -> None:
+    """Preview is local and checks both mask dimensions and locked entities."""
+    client = harness["client"]
+    tree = client.post(
+        "/api/v1/controlled-edit/sessions", files={"image": ("a.png", _png(), "image/png")}
+    ).json()
+    root = tree["versions"][0]
+    prefix = f"/api/v1/controlled-edit/sessions/{tree['session']['id']}/versions/{root['id']}"
+    buffer = io.BytesIO()
+    Image.new("L", (300, 200), 255).save(buffer, format="PNG")
+    saved = client.post(prefix + "/masks", files={"mask": ("mask.png", buffer.getvalue())})
+    assert saved.status_code == 200
+    body = {"mask_artifact_id": saved.json()["artifact_id"]}
+    preview = client.post(prefix + "/inpaint-preview", json=body)
+    assert preview.status_code == 200
+    assert preview.json()["stitcher"]["model_size"] == [1024, 1024]
+    assert not harness["scheduled"]
+    dim_mask = io.BytesIO()
+    Image.new("L", (300, 200), 60).save(dim_mask, format="PNG")
+    dim = client.post(prefix + "/masks", files={"mask": ("gray.png", dim_mask.getvalue())})
+    assert dim.status_code == 200
+    empty = client.post(
+        prefix + "/inpaint-preview",
+        json={"mask_artifact_id": dim.json()["artifact_id"], "options": {"threshold": 0.9}},
+    )
+    assert empty.status_code == 422
+    client.post(prefix + "/entities/character.face/status", json={"status": "locked"})
+    conflict = client.post(prefix + "/inpaint-preview", json=body)
+    assert conflict.status_code == 409
+    assert conflict.json()["error"]["code"] == "lock_conflict"
+    buffer = io.BytesIO()
+    Image.new("L", (20, 20), 255).save(buffer, format="PNG")
+    bad = client.post(prefix + "/masks", files={"mask": ("mask.png", buffer.getvalue())})
+    assert bad.status_code == 422
+
+
 class StubVision:
     def __init__(self) -> None:
         self.intent: dict[str, Any] = {

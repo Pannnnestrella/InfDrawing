@@ -73,6 +73,11 @@ export function VersionDetails({ version, entityNames }: VersionDetailsProps) {
 
   return (
     <section className="space-y-3 text-[11px]">
+      {version.stitcher ? <p className="text-muted">
+        局部 Crop/Stitch · 万相 2.1 · 裁剪 {version.stitcher.crop_rect.join(", ")}
+        {" · 工作尺寸 "}{version.stitcher.model_size.join("×")}
+        {version.stitcher.actual_output_size ? ` · 实际输出 ${version.stitcher.actual_output_size.join("×")}` : ""}
+      </p> : null}
       <div>
         <h2 className="mb-1 text-xs font-semibold tracking-wide">本轮修改</h2>
         <p className="text-ink">{version.instruction}</p>

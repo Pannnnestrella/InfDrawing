@@ -87,9 +87,7 @@ async def parse_scene(
     """
     user_text = "Parse this image."
     if previous:
-        summary = [
-            {"id": e.id, "name": e.name, "description": e.description} for e in previous
-        ]
+        summary = [{"id": e.id, "name": e.name, "description": e.description} for e in previous]
         user_text = REPARSE_INSTRUCTIONS.format(
             previous=json.dumps(summary, ensure_ascii=False, indent=1)
         )

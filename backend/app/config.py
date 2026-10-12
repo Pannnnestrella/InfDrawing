@@ -69,6 +69,12 @@ class Settings(BaseSettings):
     cedit_prompt_style: str = "preserve"
     cedit_subject_shift_threshold: float = 0.08
     cedit_subject_area_threshold: float = 0.15
+    cedit_sam2_checkpoint: str = str(
+        Path(__file__).resolve().parents[2] / "data/models/sam2.1/sam2.1_hiera_small.pt"
+    )
+    cedit_sam2_config: str = "configs/sam2.1/sam2.1_hiera_s.yaml"
+    cedit_sam2_device: str = "cpu"
+    cedit_sam3_base_url: str = ""
 
     persistence_backend: str = "memory"
     database_url: str = ""

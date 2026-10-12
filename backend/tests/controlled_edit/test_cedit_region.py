@@ -105,7 +105,9 @@ def test_build_edit_mask_locks_black_and_targets_white() -> None:
 
 
 def _intent(*targets: str) -> EditIntent:
-    return EditIntent(operation="replace", target_entity_ids=list(targets), change_description="edit")
+    return EditIntent(
+        operation="replace", target_entity_ids=list(targets), change_description="edit"
+    )
 
 
 def test_uses_local_mask_for_small_character_parts() -> None:

@@ -179,9 +179,7 @@ def _settings() -> Settings:
 def test_vision_client_sends_images_and_parses_json() -> None:
     response = MagicMock()
     response.status_code = 200
-    response.json.return_value = {
-        "choices": [{"message": {"content": json.dumps({"ok": True})}}]
-    }
+    response.json.return_value = {"choices": [{"message": {"content": json.dumps({"ok": True})}}]}
     client = AsyncMock(spec=httpx.AsyncClient)
     client.post = AsyncMock(return_value=response)
 

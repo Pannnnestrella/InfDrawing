@@ -155,8 +155,7 @@ class JsonEditRepository(MemoryEditRepository):
             self._path,
             {
                 "sessions": {
-                    key: session.model_dump(mode="json")
-                    for key, session in self._sessions.items()
+                    key: session.model_dump(mode="json") for key, session in self._sessions.items()
                 },
                 "versions": {
                     session_id: {

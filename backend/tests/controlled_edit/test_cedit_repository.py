@@ -235,9 +235,7 @@ def test_merge_keeps_manual_box_only_for_locked_entities() -> None:
     manual = BBox(x=0.4, y=0.05, w=0.15, h=0.12)
     parsed_box = BBox(x=0.1, y=0.1, w=0.2, h=0.2)
     previous = [
-        _entity(
-            "character.face", EntityStatus.LOCKED, bbox=manual, bbox_source=BBoxSource.MANUAL
-        ),
+        _entity("character.face", EntityStatus.LOCKED, bbox=manual, bbox_source=BBoxSource.MANUAL),
         _entity("character.hat", bbox=manual, bbox_source=BBoxSource.MANUAL),
     ]
     parsed = [

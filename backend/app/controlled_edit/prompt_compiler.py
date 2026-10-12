@@ -58,9 +58,7 @@ def compile_edit_prompt(
     """
     targets = set(intent.target_entity_ids)
     locked = [e for e in entities if e.status == EntityStatus.LOCKED and e.id not in targets]
-    approved = [
-        e for e in entities if e.status == EntityStatus.APPROVED and e.id not in targets
-    ]
+    approved = [e for e in entities if e.status == EntityStatus.APPROVED and e.id not in targets]
     references = [e for e in locked if e.anchor_artifact_id][:max_references]
     if image_layout == "primary_last":
         primary = f"the last image (image {len(references) + 1})"

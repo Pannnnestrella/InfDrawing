@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import httpx
 from fastapi import (
     APIRouter,
     Depends,
@@ -13,10 +14,14 @@ from fastapi import (
     status,
 )
 from fastapi.responses import JSONResponse, Response
+from PIL import UnidentifiedImageError
+from pydantic import BaseModel, Field
 
 from app.config import settings
 from app.controlled_edit.entities import InheritedLockError
+from app.controlled_edit.inpaint_types import InpaintOptions, MaskRecord
 from app.controlled_edit.intent_parser import IntentParseError
+from app.controlled_edit.sam2_segmenter import sam2_ready
 from app.controlled_edit.scene_parser import SceneParseError
 from app.controlled_edit.schemas import (
     CheckoutRequest,
@@ -26,6 +31,10 @@ from app.controlled_edit.schemas import (
     EntityBBoxUpdate,
     EntityStatusUpdate,
     SessionTree,
+)
+from app.controlled_edit.segmentation import (
+    SegmentationUnavailableError,
+    SegmentRequest,
 )
 from app.controlled_edit.service import (
     ControlledEditService,
@@ -61,14 +70,97 @@ def _service() -> ControlledEditService:
 def _translate(exc: Exception) -> HTTPException:
     if isinstance(exc, SessionNotFoundError):
         return HTTPException(status_code=404, detail=str(exc))
-    if isinstance(
-        exc, (VersionNotReadyError, VersionNotDeletableError, EditorUnavailableError)
-    ):
+    if isinstance(exc, (VersionNotReadyError, VersionNotDeletableError, EditorUnavailableError)):
         return HTTPException(status_code=409, detail=str(exc))
     return HTTPException(status_code=502, detail=f"{type(exc).__name__}: {exc}"[:500])
 
 
 _UPSTREAM_ERRORS = (VisionError, SceneParseError, IntentParseError, ImageProviderError)
+
+
+class PreviewRequest(BaseModel):
+    """Server-owned mask reference and local preprocessing options."""
+
+    mask_artifact_id: str
+    options: InpaintOptions = Field(default_factory=InpaintOptions)
+
+
+@router.get("/segmentation-capabilities")
+async def segmentation_capabilities(
+    principal: ApiPrincipal = Depends(current_principal),
+) -> dict[str, bool]:
+    """Report optional setup availability without claiming tested inference."""
+    return {"sam2": sam2_ready(settings), "sam3": bool(settings.cedit_sam3_base_url)}
+
+
+@router.post("/sessions/{session_id}/versions/{version_id}/masks", response_model=MaskRecord)
+async def upload_mask(
+    session_id: str,
+    version_id: str,
+    mask: UploadFile = File(...),
+    principal: ApiPrincipal = Depends(current_principal),
+    service: ControlledEditService = Depends(_service),
+) -> MaskRecord:
+    """Upload a source-resolution grayscale mask for a specific version."""
+    data = await mask.read(10_000_001)
+    if len(data) > 10_000_000:
+        raise HTTPException(413, "Mask 文件超过 10MB")
+    try:
+        return await service.save_mask(principal.key_id, session_id, version_id, data)
+    except (SessionNotFoundError, VersionNotReadyError) as exc:
+        raise _translate(exc) from exc
+    except (ValueError, UnidentifiedImageError, OSError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
+@router.post("/sessions/{session_id}/versions/{version_id}/segment")
+async def segment_mask(
+    session_id: str,
+    version_id: str,
+    prompt: SegmentRequest,
+    principal: ApiPrincipal = Depends(current_principal),
+    service: ControlledEditService = Depends(_service),
+) -> list[MaskRecord]:
+    """Produce selectable irregular masks through SAM 2 or a SAM 3 service."""
+    try:
+        return await service.segment_mask(principal.key_id, session_id, version_id, prompt)
+    except SegmentationUnavailableError as exc:
+        raise HTTPException(503, str(exc)) from exc
+    except httpx.HTTPError as exc:
+        raise HTTPException(502, f"SAM 服务请求失败：{type(exc).__name__}") from exc
+    except (SessionNotFoundError, VersionNotReadyError) as exc:
+        raise _translate(exc) from exc
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
+@router.post("/sessions/{session_id}/versions/{version_id}/inpaint-preview")
+async def inpaint_preview(
+    session_id: str,
+    version_id: str,
+    request: PreviewRequest,
+    http_request: Request,
+    principal: ApiPrincipal = Depends(current_principal),
+    service: ControlledEditService = Depends(_service),
+) -> JSONResponse:
+    """Prepare protected crop artifacts without invoking a generation model."""
+    try:
+        preview = await service.preview_local_crop(
+            principal.key_id, session_id, version_id, request.mask_artifact_id, request.options
+        )
+    except LockConflictError as exc:
+        return error_response(
+            getattr(http_request.state, "request_id", ""),
+            409,
+            "lock_conflict",
+            str(exc),
+            details={"entities": [{"id": e.id, "name": e.name} for e in exc.entities]},
+        )
+    except (SessionNotFoundError, VersionNotReadyError) as exc:
+        raise _translate(exc) from exc
+    except (ValueError, UnidentifiedImageError, OSError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    return JSONResponse(preview)
 
 
 @router.post(
@@ -86,9 +178,7 @@ async def create_session(
     """Upload a source image, parse its scene, and create the root version."""
     data = await image.read()
     try:
-        tree = await service.create_session(
-            principal.key_id, data, image.content_type or "", title
-        )
+        tree = await service.create_session(principal.key_id, data, image.content_type or "", title)
     except _UPSTREAM_ERRORS as exc:
         raise _translate(exc) from exc
     await record_audit(
@@ -147,6 +237,8 @@ async def submit_turn(
             str(exc),
             {"entities": [{"id": e.id, "name": e.name} for e in exc.entities]},
         )
+    except (ValueError, UnidentifiedImageError, OSError) as exc:
+        raise HTTPException(422, str(exc)) from exc
     except (
         SessionNotFoundError,
         VersionNotReadyError,

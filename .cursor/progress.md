@@ -72,3 +72,38 @@
 - 已完成单机 Compose、迁移门禁、secret 加载、Nginx、Prometheus/Grafana、部署/API/威胁模型/面试文档。
 - 质量门禁：后端 pytest 78 通过、Ruff 通过；前端 Vitest 27 通过、TypeScript/ESLint/build 通过、npm audit 0 漏洞。
 - 环境限制：本地 venv 为 Python 3.13.9；没有 Docker CLI，真实容器与 GPU 联调待目标主机验证。
+
+## 2026-10-11 本地部署启动
+- 前端 http://127.0.0.1:3000 HTTP 200；后端因缺少 SQLAlchemy 启动失败。现有虚拟环境 Python 3.13，不符合项目 3.11 要求。补齐方案见 .planning/20261011_local_deployment.md，依赖安装待批准。
+
+## 2026-10-12 本地部署完成
+- 用户批准环境补齐；使用 Python 3.11.15 重建 backend/.venv，旧环境保留。依赖安装与 pip check 通过。
+- 前后端与能力代理 HTTP 200，DeepSeek 连通正常，浏览器已打开；能力测试 9 passed。ComfyUI 未运行，当前 api_fallback。
+
+## 2026-10-12 编辑历史恢复
+- 按用户要求，将 data/data/cedit 的 sessions.json、artifacts.json 复制到 data/cedit；共享图片索引关联的 71 张图片复制到 data/artifacts，原文件保留，图片哈希一致。
+- 重启后端后，前端代理返回 3 个编辑会话，14 个版本图片全部 HTTP 200。
+
+## 2026-10-12 局部重绘规划
+- 已创建不规则 Mask、SAM 2.1/3、手工圈选与 Crop/Stitch 六阶段方案；本轮未修改代码、安装依赖或调用付费模型。
+- 等待用户批准：.planning/20261012_local_inpaint_crop_stitch_plan.md
+
+
+## 2026-10-12 局部重绘实现完成
+- 已按批准规划实现手工/SAM Mask 与 Crop/Stitch；安装 SAM 2.1 small 和 Ruff，补齐已有前端依赖。
+- 实验网页 /inpaint-comparison/index.html 已启动并打开。万相 116.6 秒成功，Mask 外差异为 0；盾牌出现白块且风格偏移。Qwen 2.1 单次 182.85 秒读取超时，未重试。
+- 后端 90 passed，前端相关 11 passed，TypeScript/ESLint/Ruff 通过；审查与限制见规划完成记录。
+
+
+## 2026-10-12 整图对照与 Qwen 异步修复执行
+- 用户明确要求原图万相重绘及 Qwen 2.1 修复，追加规划 Stage 7–8。
+- 已实现官方异步 endpoint、任务提交/轮询分离、任务 ID 持久化与同任务恢复；不重试生成提交。
+- 后端相关 105 项测试通过，Ruff 通过。网页已打开 HTTP 200，正在执行两次新增生成。
+
+- 后续结果：万相原图输入 143.3 秒成功，原始输出 Mask 外变化 613919 像素、最大差值104；融合后均为0。Qwen Base64 异步提交62.24秒超时，无任务ID。
+- 用户明确不希望临时存储上传，上传及追加生成未执行；默认传图仍为 Base64。已按要求重新打开网页展示现有万相对照。
+
+
+## 2026-10-12 GitHub 版本发布
+- 用户要求将当前版本推送 GitHub。发布范围为功能代码、测试、规划、文档及骑士当前会话指针；遗留图片删除、数据归档副本、本地服务状态、权重与实验大文件不纳入提交。
+- 验证：后端相关105项、前端相关11项测试通过，TypeScript、ESLint、Ruff及 Review Gate 通过。Qwen 实际生成仍未成功，临时存储上传未执行，默认仍使用Base64。

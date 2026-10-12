@@ -7,6 +7,31 @@ export type VersionStatus = "pending" | "running" | "succeeded" | "failed";
 export type PromptStyle = "preserve" | "target_only";
 export type ImageProvider = "dashscope" | "openai";
 
+export interface InpaintOptions {
+  threshold: number;
+  fill_holes: boolean;
+  dilate_px: number;
+  feather_sigma_px: number;
+  context_from_mask_extend_factor: number;
+  min_context_px: number;
+  model: "wanx2.1-imageedit";
+}
+
+export interface MaskRecord {
+  artifact_id: string;
+  width: number;
+  height: number;
+  source: "manual" | "sam2" | "sam3";
+  score: number | null;
+}
+
+export interface InpaintPreview {
+  crop_artifact_id: string;
+  mask_artifact_id: string;
+  blend_artifact_id: string;
+  stitcher: { crop_rect: number[]; model_size: number[]; mask_bbox: number[] };
+}
+
 export interface BBox {
   x: number;
   y: number;
@@ -64,6 +89,8 @@ export interface EditVersion {
   compiled_prompt: string | null;
   prompt_style: PromptStyle | null;
   image_provider: ImageProvider | null;
+  masks?: MaskRecord[];
+  stitcher?: InpaintPreview["stitcher"] & { actual_output_size?: number[] };
   reference_artifact_ids: string[];
   entities: SceneEntity[];
   verification: VerificationResult | null;
@@ -163,6 +190,8 @@ export async function submitTurn(
   options: {
     promptStyle?: PromptStyle;
     imageProvider?: ImageProvider;
+    maskArtifactId?: string;
+    inpaintOptions?: InpaintOptions;
   } = {},
 ): Promise<EditVersion> {
   return parseOrThrow(
@@ -172,8 +201,45 @@ export async function submitTurn(
       target_entity_ids: targetEntityIds,
       ...(options.promptStyle ? { prompt_style: options.promptStyle } : {}),
       ...(options.imageProvider ? { image_provider: options.imageProvider } : {}),
+      ...(options.maskArtifactId ? {
+        edit_mode: "local", mask_artifact_id: options.maskArtifactId,
+        inpaint_options: options.inpaintOptions,
+      } : {}),
     }),
   );
+}
+
+function versionPath(sessionId: string, versionId: string): string {
+  return `/sessions/${encodeURIComponent(sessionId)}/versions/${encodeURIComponent(versionId)}`;
+}
+
+export async function uploadEditMask(
+  sessionId: string, versionId: string, mask: Blob,
+): Promise<MaskRecord> {
+  const body = new FormData();
+  body.append("mask", mask, "mask.png");
+  return parseOrThrow(await apiFetch(`${BASE}${versionPath(sessionId, versionId)}/masks`, {
+    method: "POST", body,
+  }));
+}
+
+export async function previewInpaint(
+  sessionId: string, versionId: string, maskId: string, options: InpaintOptions,
+): Promise<InpaintPreview> {
+  return parseOrThrow(await postJson(`${versionPath(sessionId, versionId)}/inpaint-preview`, {
+    mask_artifact_id: maskId, options,
+  }));
+}
+
+export async function segmentEditMask(
+  sessionId: string, versionId: string,
+  prompt: { provider: "sam2" | "sam3"; bbox?: BBox; points: number[][]; labels: number[]; text?: string },
+): Promise<MaskRecord[]> {
+  return parseOrThrow(await postJson(`${versionPath(sessionId, versionId)}/segment`, prompt));
+}
+
+export async function segmentationCapabilities(): Promise<{ sam2: boolean; sam3: boolean }> {
+  return parseOrThrow(await apiFetch(`${BASE}/segmentation-capabilities`));
 }
 
 export async function updateEntityStatus(

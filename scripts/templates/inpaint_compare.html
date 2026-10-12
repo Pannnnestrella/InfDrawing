@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InfDrawing · 局部重绘对照</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#10131a;color:#e8edf5;font:15px/1.6 system-ui,sans-serif}
+main{max-width:1440px;margin:auto;padding:32px}h1{font-size:28px;margin:0}p{color:#aab7ca}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+figure,.card{margin:0;padding:16px;background:#1b2230;border:1px solid #303c50;border-radius:12px}
+figcaption{margin-bottom:12px;color:#b9c9e1}img{width:100%;max-height:460px;object-fit:contain;background:#0b0e14;border-radius:6px}
+section{margin-top:28px}h2{font-size:20px}strong{color:#84ddbb}.models{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.compare{position:relative;overflow:hidden;background:#0b0e14}.compare img{display:block;max-height:none;border-radius:0}
+.compare .after{position:absolute;inset:0;clip-path:inset(0 50% 0 0)}input[type=range]{width:100%;accent-color:#8faeff}
+button,a{color:#b8ccff}button{background:#24334d;border:1px solid #536a91;padding:8px 16px;border-radius:8px;cursor:pointer}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;color:#adbad0;font-size:13px}.badge{font-size:13px;color:#b8ccff}
+@media(max-width:720px){main{padding:20px}.models{grid-template-columns:1fr}}
+</style>
+<main>
+<h1>局部重绘 · 万相 / Qwen 2.1 对照</h1>
+<p id="summary">正在加载实验记录…</p>
+<button onclick="load()">刷新结果</button>
+<a href="/studio" style="margin-left:20px">返回多轮编辑工作台</a>
+<section><h2>共享输入</h2><p id="geometry"></p><div class="grid">
+<figure><figcaption>原图</figcaption><img src="source.png" alt="骑士原图"></figure>
+<figure><figcaption>SAM 不规则 Mask 叠加</figcaption><img src="overlay.png" alt="编辑区域"></figure>
+<figure><figcaption>裁剪并放大后的模型输入</figcaption><img src="crop.png" alt="裁剪图"></figure>
+<figure><figcaption>模型二值 Mask</figcaption><img src="crop_mask.png" alt="局部黑白 Mask"></figure>
+</div></section>
+<section><h2>模型结果</h2><p>滑动查看原图与拼接结果。差异图亮度放大 4 倍；像素指标只验证区域外不变，编辑效果需要看图判断。</p>
+<div class="models" id="models"></div></section>
+<section><details><summary>参数与实际提示词</summary><pre id="details"></pre></details></section>
+<p>各实验使用相同源图和编辑区域。万相原图实验不裁剪，其他实验使用相同 Crop。万相使用专用 Mask 字段；Qwen 将 Mask 作为普通参考图。每轮两张预计 ¥0.39，实际以账单与免费额度为准。本页每 5 秒检查实验状态。</p>
+</main>
+<script>
+let previous='';
+function element(tag,text){const el=document.createElement(tag);if(text)el.textContent=text;return el}
+function picture(file,label){const f=element('figure');f.append(element('figcaption',label));const im=element('img');im.src=file;im.alt=label;f.append(im);return f}
+async function load(){
+ try{
+ const r=await fetch('report.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('实验记录暂不可用');
+ const data=await r.json();const json=JSON.stringify(data,null,2);if(previous===json)return;previous=json;
+ document.getElementById('summary').textContent=data.instruction+' · '+data.scope;
+ document.getElementById('geometry').textContent='源图 '+data.source_size.join(' × ')+' · Crop ['+data.crop_rect.join(', ')+'] · 工作画布 '+data.model_size.join(' × ')+' · SAM 分数 '+data.sam_score.toFixed(3);
+ document.getElementById('details').textContent=json;const models=document.getElementById('models');models.replaceChildren();
+ for(const [id,m] of Object.entries(data.models)){
+ const card=element('article');card.className='card';card.append(element('h2',m.name));
+ const labels={pending:'待测试',running:'生成中',failed:'失败',complete:'完成'};
+ card.append(element('p',m.mask_mode+' · '+labels[m.status]));
+ if(m.task_id)card.append(element('pre','任务 ID：'+m.task_id));
+ if(m.input_image){card.append(picture(m.input_image,'本次实际输入'));card.append(picture(m.input_mask,'本次实际 Mask'));}
+ if(m.status==='failed')card.append(element('pre',m.error));
+ if(m.visual_review)card.append(element('p',m.visual_review));
+ if(m.status==='complete'){
+ card.append(element('strong','Mask 外变化像素：'+m.outside_changed_pixels+'；最大差值：'+m.outside_max_difference));
+ if(m.raw_outside_changed_pixels!==undefined)card.append(element('p','模型原始输出 Mask 外变化像素：'+m.raw_outside_changed_pixels+'；最大差值：'+m.raw_outside_max_difference+'（上方绿色指标为融合后）'));
+ card.append(element('p','输出 '+m.output_size.join(' × ')+' · 耗时 '+m.seconds+' 秒'));
+ card.append(picture(id+'_generated.png','模型原始输出（未经融合）'));
+ const wrap=element('div');wrap.className='compare';const before=element('img');before.src='source.png';before.alt='原图';
+ const after=element('img');after.src=id+'_final.png';after.alt='拼接结果';after.className='after';wrap.append(before,after);card.append(wrap);
+ const slider=element('input');slider.type='range';slider.min='0';slider.max='100';slider.value='50';slider.setAttribute('aria-label',m.name+' 原图与结果比较');
+ slider.addEventListener('input',()=>{after.style.clipPath='inset(0 '+(100-Number(slider.value))+'% 0 0)'});card.append(slider);
+ card.append(picture(id+'_difference.png','最终整图像素差异（×4）'));
+ const a=element('a','下载完整拼接结果');a.href=id+'_final.png';a.download=id+'_final.png';card.append(a);
+ }models.append(card);
+ }
+ }catch(e){document.getElementById('summary').textContent=e.message}
+}
+load();setInterval(load,5000);
+</script>
+</html>

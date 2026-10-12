@@ -150,3 +150,22 @@
 部署环境待验证：真实容器启动、GPU 推理和实际负载测试。
 
 规划来源：`.planning/20260902_production_ai_routing.md`
+
+## 2026-10-12 本地部署
+- done：环境检查、Python 3.11 虚拟环境与依赖安装、前后端启动、浏览器打开、健康检查和能力测试。
+- 规划：.planning/20261011_local_deployment.md
+
+## 2026-10-12 编辑历史恢复
+- done：历史会话及图片索引恢复、图片复制与哈希核对、后端重启和 API 验证（3 会话、14 版本图片）。
+
+## 2026-10-12 不规则 Mask 与 Crop/Stitch 规划
+- planned：官方 API 尺寸与 SAM 环境调研完成，实施等待批准。
+- 规划：.planning/20261012_local_inpaint_crop_stitch_plan.md
+
+
+## 2026-10-12 局部 Mask Crop/Stitch 实施
+- done：手工 Mask、SAM 2.1、Crop/Stitch、局部编排、预览与持久化。
+- done：对照网页已打开；万相成功、Qwen 单次超时，无重试。
+- done：后端 90 项、前端 11 项测试、类型检查及相关 lint 通过，Review Gate 已记录。
+- pending：SAM 3 真实服务、Qwen 有输出的实验及更广泛交互人工验收。
+- 规划：.planning/20261012_local_inpaint_crop_stitch_plan.md

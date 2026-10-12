@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import asyncio
 import functools
+import hashlib
 import io
 import logging
 from collections.abc import Callable, Coroutine
 from typing import Any, Protocol
 
 import httpx
-from PIL import Image
+from PIL import Image, ImageOps
 
 from app.config import Settings, settings
 from app.controlled_edit.anchors import crop_entity
@@ -21,7 +22,15 @@ from app.controlled_edit.entities import (
     with_manual_bbox,
     with_status,
 )
+from app.controlled_edit.inpaint_crop import CropResult, inpaint_crop
+from app.controlled_edit.inpaint_stitch import inpaint_stitch
+from app.controlled_edit.inpaint_types import (
+    InpaintOptions,
+    LocalTurnFields,
+    MaskRecord,
+)
 from app.controlled_edit.intent_parser import parse_intent
+from app.controlled_edit.masks import png_bytes, prepare_mask
 from app.controlled_edit.prompt_compiler import compile_edit_prompt
 from app.controlled_edit.region_ops import (
     build_edit_mask,
@@ -47,10 +56,12 @@ from app.controlled_edit.schemas import (
     VerificationResult,
     VersionStatus,
 )
+from app.controlled_edit.segmentation import SegmentRequest
 from app.controlled_edit.sizing import pad_to_supported, restore_original_frame
 from app.controlled_edit.verifier import retry_feedback, verify_edit
 from app.controlled_edit.vision import VisionError
 from app.pipeline.image_providers.base import ImageProviderError
+from app.pipeline.image_validation import validate_upload_image
 from app.production.artifacts import ArtifactService, get_artifact_service
 
 logger = logging.getLogger(__name__)
@@ -180,7 +191,12 @@ class ControlledEditService:
         title: str = "Untitled",
     ) -> SessionTree:
         """Store the uploaded image, parse its scene, and create the root version."""
-        artifact = await self._artifacts.create_image(owner_key_id, image_bytes, media_type)
+        validate_upload_image(image_bytes, media_type)
+        with Image.open(io.BytesIO(image_bytes)) as decoded:
+            normalized = ImageOps.exif_transpose(decoded)
+            normalized = normalized.convert("RGBA" if "A" in normalized.getbands() else "RGB")
+            image_bytes = png_bytes(normalized)
+        artifact = await self._artifacts.create_image(owner_key_id, image_bytes, "image/png")
         width, height = _image_size(image_bytes)
         entities = await parse_scene(
             self._scene_vision_factory(),
@@ -229,6 +245,18 @@ class ControlledEditService:
         """
         session = await self._owned_session(owner_key_id, session_id)
         parent = await self._ready_version(session_id, request.parent_version_id)
+        if request.edit_mode == "local":
+            if request.image_provider == "openai":
+                raise EditorUnavailableError("局部 Crop/Stitch 当前使用万相，请选择通义提供商")
+            if self._config.dashscope_edit_model != request.inpaint_options.model:
+                raise EditorUnavailableError("局部重绘模型与服务器配置不一致")
+            await self.prepare_local_crop(
+                owner_key_id,
+                session_id,
+                parent.id,
+                request.mask_artifact_id or "",
+                request.inpaint_options,
+            )
         intent = await parse_intent(self._vision_factory(), request.instruction, parent.entities)
         known = {entity.id for entity in parent.entities}
         chosen = [entity_id for entity_id in request.target_entity_ids if entity_id in known]
@@ -238,7 +266,11 @@ class ControlledEditService:
         if conflicts:
             raise LockConflictError(conflicts)
         prompt_style = request.prompt_style or self._config.cedit_prompt_style
-        image_provider = request.image_provider or self._config.cedit_image_provider
+        image_provider = (
+            "dashscope"
+            if request.edit_mode == "local"
+            else request.image_provider or self._config.cedit_image_provider
+        )
         _assert_editor_available(image_provider, self._config)
         child = EditVersion(
             session_id=session_id,
@@ -251,6 +283,11 @@ class ControlledEditService:
             width=parent.width,
             height=parent.height,
             entities=[e.model_copy() for e in parent.entities],
+            local_edit=LocalTurnFields(
+                edit_mode=request.edit_mode,
+                mask_artifact_id=request.mask_artifact_id,
+                inpaint_options=request.inpaint_options,
+            ),
         )
         await self._repository.add_version(child)
         session.current_version_id = child.id
@@ -285,7 +322,8 @@ class ControlledEditService:
         parent_bytes = await self._read_artifact(owner_key_id, parent.image_artifact_id)
         image_provider = version.image_provider or self._config.cedit_image_provider
         prompt_style = version.prompt_style or self._config.cedit_prompt_style
-        editor = self._editor_factory(image_provider)
+        explicit_local = bool(version.local_edit and version.local_edit.edit_mode == "local")
+        editor = None if explicit_local else self._editor_factory(image_provider)
         vision = self._vision_factory()
         layout = getattr(editor, "prompt_image_layout", "primary_first")
         max_refs = self._max_references(layout)
@@ -294,6 +332,30 @@ class ControlledEditService:
         feedback: str | None = None
         parsed_entities: list[SceneEntity] | None = None
         parse_warnings: list[str] = []
+        crop = None
+        if explicit_local and version.local_edit:
+            crop = await self.prepare_local_crop(
+                owner_key_id,
+                version.session_id,
+                parent.id,
+                version.local_edit.mask_artifact_id or "",
+                version.local_edit.inpaint_options,
+            )
+            crop_artifact = await self._artifacts.create_image(
+                owner_key_id, crop.image, "image/png"
+            )
+            gen_mask = await self._artifacts.create_image(owner_key_id, crop.mask, "image/png")
+            blend = await self._artifacts.create_image(owner_key_id, crop.blend, "image/png")
+            version.stitcher = crop.stitcher.model_copy(
+                update={
+                    "source_artifact_id": parent.image_artifact_id,
+                    "parent_version_id": parent.id,
+                    "mask_artifact_id": version.local_edit.mask_artifact_id,
+                    "crop_artifact_id": crop_artifact.id,
+                    "generation_mask_artifact_id": gen_mask.id,
+                    "blend_artifact_id": blend.id,
+                }
+            )
         for attempt in range(1, max_attempts + 1):
             compiled = compile_edit_prompt(
                 version.intent,
@@ -309,13 +371,21 @@ class ControlledEditService:
             ]
             version.attempts = attempt
             version.compiled_prompt = compiled.prompt
-            version.reference_artifact_ids = [
-                e.anchor_artifact_id for e in compiled.reference_entities if e.anchor_artifact_id
-            ]
+            version.reference_artifact_ids = (
+                []
+                if explicit_local
+                else [
+                    e.anchor_artifact_id
+                    for e in compiled.reference_entities
+                    if e.anchor_artifact_id
+                ]
+            )
             await self._set_step(version, "generating" if attempt == 1 else "retrying")
             padded = pad_to_supported(parent_bytes)
-            use_mask = uses_local_mask(version.intent, parent.entities) and _wanx_mask_available(
-                self._config
+            use_mask = explicit_local or (
+                not (version.local_edit and version.local_edit.edit_mode == "full")
+                and uses_local_mask(version.intent, parent.entities)
+                and _wanx_mask_available(self._config)
             )
             if use_mask:
                 if "local_mask:wanx" not in version.warnings:
@@ -332,16 +402,20 @@ class ControlledEditService:
                     DashScopeWanxProvider,
                 )
 
-                wanx_prompt = (version.instruction or compiled.prompt)[:800]
+                base_prompt = version.instruction or version.intent.change_description
+                feedback_text = f"修正上次问题：{feedback[:300]}。" if feedback else ""
+                wanx_prompt = (feedback_text + base_prompt)[:800]
+                version.compiled_prompt = wanx_prompt
                 raw = await _with_transport_retries(
                     functools.partial(
                         DashScopeWanxProvider(self._config).inpaint,
-                        image_bytes=parent_bytes,
-                        mask_bytes=mask_png_bytes(mask),
+                        image_bytes=crop.image if crop else parent_bytes,
+                        mask_bytes=crop.mask if crop else mask_png_bytes(mask),
                         prompt=wanx_prompt,
                     )
                 )
             else:
+                assert editor is not None
                 raw = await _with_transport_retries(
                     functools.partial(
                         editor.multi_image_edit,
@@ -353,6 +427,13 @@ class ControlledEditService:
                     )
                 )
             candidate = raw if use_mask else restore_original_frame(raw, padded)
+            if crop and version.stitcher:
+                candidate = await asyncio.to_thread(
+                    inpaint_stitch, parent_bytes, raw, crop.blend, version.stitcher
+                )
+                version.stitcher = version.stitcher.model_copy(
+                    update={"actual_output_size": _image_size(raw)}
+                )
             if self._config.cedit_lock_paste and not use_mask:
                 candidate = lock_composite(
                     parent_bytes,
@@ -471,6 +552,131 @@ class ControlledEditService:
                 f"entity {entity_id} inherits a lock from its parent; unlock the parent first"
             ) from exc
         return await self._repository.save_version(version)
+
+    async def save_mask(
+        self,
+        owner: str,
+        session_id: str,
+        version_id: str,
+        data: bytes,
+        source: str = "manual",
+        score: float | None = None,
+    ) -> MaskRecord:
+        """Validate and persist a mask bound to this exact owned parent version."""
+        await self._owned_session(owner, session_id)
+        version = await self._ready_version(session_id, version_id)
+        original = await self._read_artifact(owner, version.image_artifact_id)
+        with Image.open(io.BytesIO(original)) as decoded:
+            size = ImageOps.exif_transpose(decoded).size
+        validate_upload_image(data, None)
+        with Image.open(io.BytesIO(data)) as decoded:
+            if decoded.size != size:
+                raise ValueError("mask dimensions must match the source image")
+            mask_image = decoded.convert("L")
+        if mask_image.getbbox() is None:
+            raise ValueError("mask is empty")
+        artifact = await self._artifacts.create_image(owner, png_bytes(mask_image), "image/png")
+        record = MaskRecord(
+            artifact_id=artifact.id,
+            source_artifact_id=version.image_artifact_id,
+            source_sha256=hashlib.sha256(original).hexdigest(),
+            width=size[0],
+            height=size[1],
+            source=source,
+            score=score,
+        )
+        version.masks.append(record)
+        await self._repository.save_version(version)
+        return record
+
+    async def prepare_local_crop(
+        self,
+        owner: str,
+        session_id: str,
+        version_id: str,
+        mask_id: str,
+        options: InpaintOptions,
+    ) -> CropResult:
+        """Prepare a crop and reject stale masks or spatial lock conflicts."""
+        await self._owned_session(owner, session_id)
+        parent = await self._ready_version(session_id, version_id)
+        record = next((m for m in parent.masks if m.artifact_id == mask_id), None)
+        if record is None:
+            raise VersionNotReadyError("Mask 不属于当前父版本，请重新圈选或分割")
+        original = await self._read_artifact(owner, parent.image_artifact_id)
+        if hashlib.sha256(original).hexdigest() != record.source_sha256:
+            raise VersionNotReadyError("Mask 的源图已变化，请重新确认")
+        mask = await self._read_artifact(owner, mask_id)
+        crop = await asyncio.to_thread(inpaint_crop, original, mask, options)
+        prepared = prepare_mask(mask, crop.stitcher.source_size, options)
+        width, height = crop.stitcher.source_size
+        conflicts = []
+        for entity in parent.entities:
+            if entity.status != EntityStatus.LOCKED or entity.bbox is None:
+                continue
+            b = entity.bbox
+            region = (
+                int(b.x * width),
+                int(b.y * height),
+                int((b.x + b.w) * width + 0.999),
+                int((b.y + b.h) * height + 0.999),
+            )
+            if prepared.hard.crop(region).getbbox():
+                conflicts.append(entity)
+        if conflicts:
+            raise LockConflictError(conflicts)
+        return crop
+
+    async def segment_mask(
+        self,
+        owner: str,
+        session_id: str,
+        version_id: str,
+        prompt: SegmentRequest,
+    ) -> list[MaskRecord]:
+        """Generate and persist candidate masks with an optional segmenter."""
+        from app.controlled_edit.sam2_segmenter import segment_sam2
+        from app.controlled_edit.sam3_client import segment_sam3
+
+        await self._owned_session(owner, session_id)
+        parent = await self._ready_version(session_id, version_id)
+        image = await self._read_artifact(owner, parent.image_artifact_id)
+        if prompt.provider == "sam2":
+            candidates = await asyncio.to_thread(segment_sam2, image, prompt, self._config)
+        else:
+            candidates = await segment_sam3(image, prompt, self._config)
+        records = []
+        for data, score in candidates:
+            with Image.open(io.BytesIO(data)) as decoded:
+                if decoded.convert("L").getbbox() is None:
+                    continue
+            records.append(
+                await self.save_mask(owner, session_id, version_id, data, prompt.provider, score)
+            )
+        if not records:
+            raise ValueError("分割未产生有效 Mask，请调整框或提示点")
+        return records
+
+    async def preview_local_crop(
+        self,
+        owner: str,
+        session_id: str,
+        version_id: str,
+        mask_id: str,
+        options: InpaintOptions,
+    ) -> dict[str, Any]:
+        """Create owned preview artifacts without making a generation request."""
+        crop = await self.prepare_local_crop(owner, session_id, version_id, mask_id, options)
+        artifacts = [
+            await self._artifacts.create_image(owner, data, "image/png")
+            for data in (crop.image, crop.mask, crop.blend)
+        ]
+        return {
+            "crop_artifact_id": artifacts[0].id,
+            "mask_artifact_id": artifacts[1].id,
+            "blend_artifact_id": artifacts[2].id,
+            "stitcher": crop.stitcher.model_dump(mode="json"),
+        }
 
     async def update_entity_bbox(
         self,

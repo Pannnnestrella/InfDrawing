@@ -36,6 +36,8 @@ class EditRepository(Protocol):
 
     async def delete_versions(self, session_id: str, version_ids: set[str]) -> None: ...
 
+    async def delete_session(self, session_id: str) -> None: ...
+
 
 class MemoryEditRepository:
     """Lock-protected in-memory repository for tests and local development."""
@@ -117,6 +119,14 @@ class MemoryEditRepository:
             for version_id in version_ids:
                 versions.pop(version_id, None)
 
+    async def delete_session(self, session_id: str) -> None:
+        """Remove a session and all of its versions."""
+        async with self._lock:
+            if session_id not in self._sessions:
+                raise KeyError(f"session not found: {session_id}")
+            self._sessions.pop(session_id, None)
+            self._versions.pop(session_id, None)
+
 
 def _atomic_write_json(path: Path, payload: object) -> None:
     """Write JSON by replacing a temp file so a crash cannot leave a half-written store."""
@@ -194,6 +204,11 @@ class JsonEditRepository(MemoryEditRepository):
     async def delete_versions(self, session_id: str, version_ids: set[str]) -> None:
         """Remove versions and flush the store."""
         await super().delete_versions(session_id, version_ids)
+        self._persist()
+
+    async def delete_session(self, session_id: str) -> None:
+        """Remove a session and flush the store."""
+        await super().delete_session(session_id)
         self._persist()
 
 
@@ -306,6 +321,19 @@ class SqlEditRepository:
             )
             for row in rows:
                 await db.delete(row)
+
+    async def delete_session(self, session_id: str) -> None:
+        """Delete a session row and every version belonging to it."""
+        async with self.sessions.begin() as db:
+            session_row = await db.get(EditSessionRow, session_id)
+            if session_row is None:
+                raise KeyError(f"session not found: {session_id}")
+            version_rows = await db.scalars(
+                select(EditVersionRow).where(EditVersionRow.session_id == session_id)
+            )
+            for row in version_rows:
+                await db.delete(row)
+            await db.delete(session_row)
 
 
 _repository: EditRepository | None = None

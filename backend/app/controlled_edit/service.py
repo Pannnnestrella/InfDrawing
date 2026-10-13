@@ -118,6 +118,10 @@ class VersionNotDeletableError(ValueError):
     """Raised when a version cannot be deleted (root, busy, or unknown)."""
 
 
+class SessionNotDeletableError(ValueError):
+    """Raised when a session cannot be deleted (busy versions)."""
+
+
 class EditorUnavailableError(ValueError):
     """Raised when the requested image editor cannot be constructed."""
 
@@ -1044,6 +1048,48 @@ class ControlledEditService:
             raise SessionNotFoundError(f"version not found: {version_id}")
         session.current_version_id = version_id
         return await self._repository.save_session(session)
+
+    async def rename_version(
+        self, owner_key_id: str, session_id: str, version_id: str, title: str
+    ) -> EditVersion:
+        """Set or clear the display title of one version node.
+
+        Empty / whitespace titles clear the custom name so the UI falls back to
+        ``原图`` or the instruction summary.
+        """
+        await self._owned_session(owner_key_id, session_id)
+        version = await self._repository.get_version(session_id, version_id)
+        if version is None:
+            raise SessionNotFoundError(f"version not found: {version_id}")
+        cleaned = title.strip()[:40]
+        version.title = cleaned or None
+        return await self._repository.save_version(version)
+
+    async def rename_session(self, owner_key_id: str, session_id: str, title: str) -> EditSession:
+        """Rename an owned session."""
+        session = await self._owned_session(owner_key_id, session_id)
+        cleaned = title.strip()[:120]
+        if not cleaned:
+            raise ValueError("会话标题不能为空")
+        session.title = cleaned
+        return await self._repository.save_session(session)
+
+    async def delete_session(self, owner_key_id: str, session_id: str) -> None:
+        """Delete a session and all of its version records.
+
+        Image artifacts on disk are kept (same policy as version deletion).
+        Pending or running versions block deletion.
+
+        Raises:
+            SessionNotFoundError: Unknown session.
+            SessionNotDeletableError: A version is still pending or running.
+        """
+        await self._owned_session(owner_key_id, session_id)
+        versions = await self._repository.list_versions(session_id)
+        for version in versions:
+            if version.status in {VersionStatus.PENDING, VersionStatus.RUNNING}:
+                raise SessionNotDeletableError("生成中的会话不能删除，请等待完成或失败后再删")
+        await self._repository.delete_session(session_id)
 
     async def delete_version(
         self, owner_key_id: str, session_id: str, version_id: str

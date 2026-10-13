@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 
 import { ChatComposer } from "@/agent-panel/ChatComposer";
 import { useCanvasSync } from "@/agent-panel/hooks/useCanvasSync";
@@ -20,6 +21,7 @@ import { SessionSwitcher } from "@/agent-panel/SessionSwitcher";
 import type { ChatMode } from "@/agent-panel/types";
 import { MaskTool } from "@/canvas/MaskTool";
 import { CapabilityStatus } from "@/components/CapabilityStatus";
+import { DraggableWindow } from "@/components/DraggableWindow";
 import {
   getSessionApiKey,
   subscribeSessionApiKey,
@@ -157,13 +159,25 @@ export function ChatPanel({
 
   return (
     <>
-      {maskEditorOpen && maskPreviewUrl ? (
-        <MaskTool
-          imageUrl={maskPreviewUrl}
-          onComplete={(mask) => void handleMaskComplete(mask)}
-          onCancel={closeMaskEditor}
-        />
-      ) : null}
+      {maskEditorOpen && maskPreviewUrl
+        ? createPortal(
+            <DraggableWindow
+              title="Mask 重绘"
+              onClose={closeMaskEditor}
+              initialWidth={760}
+              initialHeight={840}
+              minWidth={520}
+              minHeight={640}
+            >
+              <MaskTool
+                imageUrl={maskPreviewUrl}
+                onComplete={(mask) => void handleMaskComplete(mask)}
+                onCancel={closeMaskEditor}
+              />
+            </DraggableWindow>,
+            document.body,
+          )
+        : null}
 
       <div className="flex h-full flex-col text-ink">
         <header className="flex shrink-0 items-start justify-between gap-2 border-b border-line px-4 py-3">

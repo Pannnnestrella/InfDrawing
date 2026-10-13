@@ -629,6 +629,12 @@ NEXT_PUBLIC_API_BASE=http://127.0.0.1:8001
 
 **可忽略**：Console 中 `webpack-hmr` WebSocket 失败（dev 热更新），一般不影响生图功能。
 
+### Q9：Studio 多轮编辑「场景解析」报 `请求失败：500`，历史里却出现了新会话
+
+**原因**：Next.js 把 `/api/v1/*` 转发到后端时默认 30 秒超时。场景解析（`qwen3-vl-plus`）经常超过这个时间，代理先返回 500，后端仍会写完会话。
+
+**解决**：`frontend/next.config.ts` 已把 `experimental.proxyTimeout` 设为 180 秒。改完后需重启 `npm run dev`。若仍超时，先看后端日志是否已 `POST /sessions` 201，再到历史列表打开刚创建的会话。
+
 ---
 
 ## 10. 验收清单

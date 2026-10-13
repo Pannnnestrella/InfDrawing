@@ -30,7 +30,9 @@ from app.controlled_edit.schemas import (
     EditVersion,
     EntityBBoxUpdate,
     EntityStatusUpdate,
+    SessionTitleUpdate,
     SessionTree,
+    VersionTitleUpdate,
 )
 from app.controlled_edit.segmentation import (
     SegmentationUnavailableError,
@@ -40,6 +42,7 @@ from app.controlled_edit.service import (
     ControlledEditService,
     EditorUnavailableError,
     LockConflictError,
+    SessionNotDeletableError,
     SessionNotFoundError,
     VersionNotDeletableError,
     VersionNotReadyError,
@@ -70,7 +73,15 @@ def _service() -> ControlledEditService:
 def _translate(exc: Exception) -> HTTPException:
     if isinstance(exc, SessionNotFoundError):
         return HTTPException(status_code=404, detail=str(exc))
-    if isinstance(exc, (VersionNotReadyError, VersionNotDeletableError, EditorUnavailableError)):
+    if isinstance(
+        exc,
+        (
+            VersionNotReadyError,
+            VersionNotDeletableError,
+            SessionNotDeletableError,
+            EditorUnavailableError,
+        ),
+    ):
         return HTTPException(status_code=409, detail=str(exc))
     return HTTPException(status_code=502, detail=f"{type(exc).__name__}: {exc}"[:500])
 
@@ -209,6 +220,61 @@ async def get_session(
     """Return a session with its full version tree."""
     try:
         return await service.get_tree(principal.key_id, session_id)
+    except SessionNotFoundError as exc:
+        raise _translate(exc) from exc
+
+
+@router.patch("/sessions/{session_id}", response_model=EditSession)
+async def rename_session(
+    session_id: str,
+    body: SessionTitleUpdate,
+    principal: ApiPrincipal = Depends(current_principal),
+    service: ControlledEditService = Depends(_service),
+) -> EditSession:
+    """Rename an owned session."""
+    try:
+        return await service.rename_session(principal.key_id, session_id, body.title)
+    except SessionNotFoundError as exc:
+        raise _translate(exc) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.delete("/sessions/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_session(
+    session_id: str,
+    principal: ApiPrincipal = Depends(current_principal),
+    service: ControlledEditService = Depends(_service),
+) -> None:
+    """Delete a session and all of its version records (artifacts kept on disk)."""
+    try:
+        await service.delete_session(principal.key_id, session_id)
+    except (SessionNotFoundError, SessionNotDeletableError) as exc:
+        raise _translate(exc) from exc
+    await record_audit(
+        principal.key_id,
+        "controlled_edit.delete_session",
+        "edit_session",
+        session_id,
+    )
+
+
+@router.patch(
+    "/sessions/{session_id}/versions/{version_id}",
+    response_model=EditVersion,
+)
+async def rename_version(
+    session_id: str,
+    version_id: str,
+    body: VersionTitleUpdate,
+    principal: ApiPrincipal = Depends(current_principal),
+    service: ControlledEditService = Depends(_service),
+) -> EditVersion:
+    """Set or clear the display title of one version node."""
+    try:
+        return await service.rename_version(
+            principal.key_id, session_id, version_id, body.title
+        )
     except SessionNotFoundError as exc:
         raise _translate(exc) from exc
 

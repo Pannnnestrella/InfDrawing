@@ -1,5 +1,20 @@
 # 关键发现
 
+## 2026-10-13 Studio 创建会话 500
+
+- Next.js rewrite 默认 `proxyTimeout` 30s。场景解析常超过该时间，前端收到 500 / socket hang up，后端仍会 201 并写入 `data/cedit/sessions.json`。
+- 修复：`experimental.proxyTimeout = 180_000`；创建失败时仍刷新历史列表。
+
+## 2026-10-13 节点/会话改名删除
+
+- `EditVersion.title` 可选字段，旧会话缺字段仍可打开；空标题回退「原图」或指令摘要。
+- 删会话只清元数据，不回收 `data/cedit` 图片文件（与删版本一致）；忙碌版本时 409。
+
+## 2026-10-13 局部重绘窗口被侧栏裁切
+
+- `FloatingPanel` 的 `aside` 使用 `backdrop-blur`。`backdrop-filter` 会成为 `position: fixed` 的包含块，所以 MaskTool 的全屏遮罩实际只盖住约 368px 宽的侧栏。
+- 独立窗口必须 portal 到 `document.body`，不能留在侧栏子树里。
+
 ## 2026-10-12 元素拆解按提示分层
 
 - 侧栏留空时曾经自动提交 `clean seamless background, high quality`。若把任意非空句都当成点名，空发送会误走识别。这两句历史默认和空白都留在两层路径；接口缺省改为空字符串。

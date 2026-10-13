@@ -69,7 +69,10 @@ The preserve lists are generated deterministically from entity states; the langu
 | `POST` | `/sessions` | Multipart upload (`image`, optional `title`); parses the scene and returns the tree (201) |
 | `GET` | `/sessions` | List the caller's sessions |
 | `GET` | `/sessions/{session_id}` | Session with all versions |
+| `PATCH` | `/sessions/{session_id}` | Rename the session (`{"title"}`, max 120) |
+| `DELETE` | `/sessions/{session_id}` | Delete the session and all version records (409 while any version is pending/running). Image artifacts on disk are kept. |
 | `POST` | `/sessions/{session_id}/turns` | `{"parent_version_id", "instruction", "target_entity_ids"?, "prompt_style"?, "image_provider"?}`; returns the pending version (202) or 409 `lock_conflict` / editor unavailable |
+| `PATCH` | `/sessions/{session_id}/versions/{version_id}` | Rename a version node (`{"title"}`, max 40; empty clears the custom name) |
 | `POST` | `/sessions/{session_id}/versions/{version_id}/entities/{entity_id}/status` | Set `locked` / `approved` / `editable`; locking stores an anchor crop |
 | `PUT` | `/sessions/{session_id}/versions/{version_id}/entities/{entity_id}/bbox` | Save a manual box `{x, y, w, h}` in normalized image units |
 | `POST` | `/sessions/{session_id}/checkout` | Move the current pointer to a version |

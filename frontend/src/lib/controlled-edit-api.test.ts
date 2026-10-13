@@ -2,9 +2,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   ControlledEditApiError,
+  deleteSession,
   deleteVersion,
+  renameSession,
+  renameVersion,
   submitTurn,
   updateEntityStatus,
+  versionDisplayName,
 } from "./controlled-edit-api";
 
 function jsonResponse(status: number, body: unknown): Response {
@@ -113,6 +117,43 @@ describe("controlled edit API client", () => {
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toBe("/api/v1/controlled-edit/sessions/s%201/versions/v%209");
     expect(init.method).toBe("DELETE");
+  });
+
+  it("renames a version with PATCH", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(200, { id: "v1", title: "开场" }));
+    vi.stubGlobal("fetch", fetchMock);
+    const version = await renameVersion("s 1", "v 9", "开场");
+    expect(version.title).toBe("开场");
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("/api/v1/controlled-edit/sessions/s%201/versions/v%209");
+    expect(init.method).toBe("PATCH");
+    expect(JSON.parse(init.body as string)).toEqual({ title: "开场" });
+  });
+
+  it("renames and deletes a session", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(200, { id: "s", title: "新名" }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(renameSession("s 1", "新名")).resolves.toMatchObject({ title: "新名" });
+    await expect(deleteSession("s 1")).resolves.toBeUndefined();
+    expect((fetchMock.mock.calls[0] as [string, RequestInit])[1].method).toBe("PATCH");
+    expect((fetchMock.mock.calls[1] as [string, RequestInit])[0]).toBe(
+      "/api/v1/controlled-edit/sessions/s%201",
+    );
+    expect((fetchMock.mock.calls[1] as [string, RequestInit])[1].method).toBe("DELETE");
+  });
+
+  it("falls back version display names", () => {
+    expect(versionDisplayName({ title: "A", instruction: "long" } as never, true)).toBe("A");
+    expect(versionDisplayName({ title: null, instruction: null } as never, true)).toBe("原图");
+    expect(
+      versionDisplayName(
+        { title: null, instruction: "abcdefghijklmnopqrstuvwxyz" } as never,
+        false,
+      ),
+    ).toBe("abcdefghijklmnop…");
   });
 
   it("explains missing scope on 403", async () => {

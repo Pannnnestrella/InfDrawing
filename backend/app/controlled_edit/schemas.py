@@ -169,6 +169,7 @@ class EditVersion(BaseModel):
     image_artifact_id: str | None = None
     width: int | None = None
     height: int | None = None
+    title: str | None = Field(default=None, max_length=40)
     instruction: str | None = None
     intent: EditIntent | None = None
     compiled_prompt: str | None = None
@@ -243,3 +244,19 @@ class CheckoutRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     version_id: str
+
+
+class VersionTitleUpdate(BaseModel):
+    """Request body for renaming one version node."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    title: str = Field(default="", max_length=40)
+
+
+class SessionTitleUpdate(BaseModel):
+    """Request body for renaming a session."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    title: str = Field(min_length=1, max_length=120)

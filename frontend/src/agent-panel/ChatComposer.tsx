@@ -160,7 +160,7 @@ export function ChatComposer({
             onClick={onOpenMaskEditor}
           >
             <BrushIcon size={14} className="text-accent-hover" />
-            {mode === "auto" ? "准备局部重绘 Mask（可选）" : "刷选 Mask（画布）"}
+            {mode === "auto" ? "打开 Mask 重绘（可选）" : "打开 Mask 重绘"}
           </button>
           {canvasHasMask ? (
             <p className="flex items-center gap-1.5 text-[11px] text-success">

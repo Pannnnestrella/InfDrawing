@@ -98,6 +98,8 @@ export interface EditVersion {
   image_artifact_id: string | null;
   width: number | null;
   height: number | null;
+  /** Optional display name; empty/null falls back to 原图 or instruction. */
+  title?: string | null;
   instruction: string | null;
   intent: EditIntent | null;
   compiled_prompt: string | null;
@@ -311,6 +313,48 @@ export async function deleteVersion(
       { method: "DELETE" },
     ),
   );
+}
+
+export async function renameVersion(
+  sessionId: string,
+  versionId: string,
+  title: string,
+): Promise<EditVersion> {
+  return parseOrThrow(
+    await apiFetch(`${BASE}${versionPath(sessionId, versionId)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
+    }),
+  );
+}
+
+export async function renameSession(sessionId: string, title: string): Promise<EditSession> {
+  return parseOrThrow(
+    await apiFetch(`${BASE}/sessions/${encodeURIComponent(sessionId)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
+    }),
+  );
+}
+
+export async function deleteSession(sessionId: string): Promise<void> {
+  const response = await apiFetch(`${BASE}/sessions/${encodeURIComponent(sessionId)}`, {
+    method: "DELETE",
+  });
+  if (response.status === 204) return;
+  await parseOrThrow(response);
+}
+
+/** Label shown under a tree node / in tooltips when no custom title is set. */
+export function versionDisplayName(version: EditVersion, isRoot: boolean): string {
+  const custom = version.title?.trim();
+  if (custom) return custom;
+  if (isRoot) return "原图";
+  const instruction = version.instruction?.trim() ?? "";
+  if (!instruction) return "未命名";
+  return instruction.length > 16 ? `${instruction.slice(0, 16)}…` : instruction;
 }
 
 export async function exportSessionWorkflow(

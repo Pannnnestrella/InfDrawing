@@ -14,6 +14,8 @@ interface UploadPanelProps {
   onCreate: (file: File, title: string) => void;
   onCreateFromCanvas?: () => void;
   onOpen: (sessionId: string) => void;
+  onRenameSession?: (sessionId: string, title: string) => Promise<void> | void;
+  onDeleteSession?: (sessionId: string) => Promise<void> | void;
 }
 
 export function UploadPanel({
@@ -24,15 +26,55 @@ export function UploadPanel({
   onCreate,
   onCreateFromCanvas,
   onOpen,
+  onRenameSession,
+  onDeleteSession,
 }: UploadPanelProps) {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [dragging, setDragging] = useState(false);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [draftTitle, setDraftTitle] = useState("");
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const pick = (candidate: File | undefined) => {
     if (!candidate || !candidate.type.startsWith("image/")) return;
     setFile(candidate);
     if (!title) setTitle(candidate.name.replace(/\.[^.]+$/, ""));
+  };
+
+  const startRename = (session: EditSession) => {
+    setRenamingId(session.id);
+    setDraftTitle(session.title);
+  };
+
+  const commitRename = async (sessionId: string) => {
+    if (!onRenameSession) {
+      setRenamingId(null);
+      return;
+    }
+    const next = draftTitle.trim();
+    if (!next) {
+      setRenamingId(null);
+      return;
+    }
+    setBusyId(sessionId);
+    try {
+      await onRenameSession(sessionId, next);
+      setRenamingId(null);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleDelete = async (session: EditSession) => {
+    if (!onDeleteSession) return;
+    if (!window.confirm(`删除会话「${session.title}」及其全部版本？此操作不可撤销。`)) return;
+    setBusyId(session.id);
+    try {
+      await onDeleteSession(session.id);
+    } finally {
+      setBusyId(null);
+    }
   };
 
   return (
@@ -109,20 +151,64 @@ export function UploadPanel({
         <div>
           <h2 className="mb-2 text-xs font-semibold text-muted">历史会话</h2>
           <ul className="space-y-1">
-            {sessions.map((session) => (
-              <li key={session.id}>
-                <button
-                  type="button"
-                  onClick={() => onOpen(session.id)}
-                  className="flex w-full justify-between rounded-lg px-3 py-2 text-left text-xs hover:bg-surface-2"
+            {sessions.map((session) => {
+              const busy = busyId === session.id;
+              const renaming = renamingId === session.id;
+              return (
+                <li
+                  key={session.id}
+                  className="flex items-center gap-1 rounded-lg px-2 py-1.5 hover:bg-surface-2"
                 >
-                  <span className="truncate">{session.title}</span>
-                  <span className="shrink-0 text-faint">
+                  {renaming ? (
+                    <input
+                      autoFocus
+                      value={draftTitle}
+                      maxLength={120}
+                      disabled={busy}
+                      onChange={(event) => setDraftTitle(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") void commitRename(session.id);
+                        if (event.key === "Escape") setRenamingId(null);
+                      }}
+                      onBlur={() => void commitRename(session.id)}
+                      className="min-w-0 flex-1 rounded border border-accent bg-surface-1 px-2 py-1 text-xs outline-none"
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={busy || disabled}
+                      onClick={() => onOpen(session.id)}
+                      className="min-w-0 flex-1 truncate text-left text-xs disabled:opacity-40"
+                    >
+                      {session.title}
+                    </button>
+                  )}
+                  <span className="shrink-0 text-[10px] text-faint">
                     {new Date(session.updated_at).toLocaleString()}
                   </span>
-                </button>
-              </li>
-            ))}
+                  {onRenameSession ? (
+                    <button
+                      type="button"
+                      disabled={busy || disabled || renaming}
+                      onClick={() => startRename(session)}
+                      className="shrink-0 rounded px-1.5 py-0.5 text-[10px] text-muted hover:bg-surface-3 hover:text-ink disabled:opacity-40"
+                    >
+                      改名
+                    </button>
+                  ) : null}
+                  {onDeleteSession ? (
+                    <button
+                      type="button"
+                      disabled={busy || disabled}
+                      onClick={() => void handleDelete(session)}
+                      className="shrink-0 rounded px-1.5 py-0.5 text-[10px] text-danger hover:bg-danger/10 disabled:opacity-40"
+                    >
+                      {busy ? "…" : "删除"}
+                    </button>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
         </div>
       ) : null}

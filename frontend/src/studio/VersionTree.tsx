@@ -2,14 +2,19 @@
 
 import { useMemo } from "react";
 
-import { isVersionBusy, type EditVersion } from "@/lib/controlled-edit-api";
+import {
+  isVersionBusy,
+  versionDisplayName,
+  type EditVersion,
+} from "@/lib/controlled-edit-api";
 
 import { ancestryPath, layoutVersionTree, type TreeNodeLayout } from "./version-tree-layout";
 
-const COL = 72;
-const ROW = 52;
+const COL = 88;
+const ROW = 68;
 const PAD = 28;
 const RADIUS = 15;
+const LABEL_MAX = 10;
 
 interface VersionTreeProps {
   versions: EditVersion[];
@@ -28,9 +33,15 @@ function nodeColor(version: EditVersion): string {
   return "var(--color-success)";
 }
 
+function shortLabel(text: string): string {
+  return text.length > LABEL_MAX ? `${text.slice(0, LABEL_MAX)}…` : text;
+}
+
 function nodeTitle(node: TreeNodeLayout): string {
   const { version } = node;
-  const head = node.depth === 0 ? "原图" : (version.instruction ?? "");
+  const isRoot = node.depth === 0;
+  const name = versionDisplayName(version, isRoot);
+  const head = isRoot ? "原图" : (version.instruction ?? "");
   const status =
     version.status === "failed"
       ? "失败"
@@ -39,7 +50,13 @@ function nodeTitle(node: TreeNodeLayout): string {
         : version.warnings.length
           ? `${version.warnings.length} 条警告`
           : "验收通过";
-  return `v${node.ordinal} · ${head}\n${node.depth === 0 ? "" : status}\nCtrl+点击可选中导出`.trim();
+  const lines = [
+    `v${node.ordinal} · ${name}`,
+    version.title?.trim() && head ? `指令：${head}` : null,
+    isRoot ? null : status,
+    "Ctrl+点击可选中导出",
+  ];
+  return lines.filter(Boolean).join("\n");
 }
 
 export function VersionTree({
@@ -57,8 +74,8 @@ export function VersionTree({
   );
   const x = (depth: number) => PAD + depth * COL;
   const y = (lane: number) => PAD + lane * ROW;
-  const width = PAD * 2 + Math.max(0, layout.depthCount - 1) * COL;
-  const height = PAD * 2 + Math.max(0, layout.laneCount - 1) * ROW;
+  const width = PAD * 2 + Math.max(0, layout.depthCount - 1) * COL + 24;
+  const height = PAD * 2 + Math.max(0, layout.laneCount - 1) * ROW + 18;
 
   return (
     <div className="panel-scroll h-full overflow-auto">
@@ -88,11 +105,13 @@ export function VersionTree({
           const current = version.id === currentVersionId;
           const busy = isVersionBusy(version);
           const exportSelected = exportSelectedIds?.has(version.id) ?? false;
+          const label = shortLabel(versionDisplayName(version, node.depth === 0));
           return (
             <g
               key={version.id}
               role="treeitem"
               aria-selected={current}
+              aria-label={`v${node.ordinal} ${label}`}
               tabIndex={disabled ? -1 : 0}
               transform={`translate(${x(node.depth)} ${y(node.lane)})`}
               className={disabled ? "cursor-not-allowed" : "cursor-pointer"}
@@ -131,6 +150,15 @@ export function VersionTree({
                 fill="var(--color-ink)"
               >
                 {`v${node.ordinal}`}
+              </text>
+              <text
+                y={RADIUS + 12}
+                textAnchor="middle"
+                dominantBaseline="hanging"
+                fontSize={9}
+                fill="var(--color-muted)"
+              >
+                {label}
               </text>
             </g>
           );

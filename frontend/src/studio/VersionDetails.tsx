@@ -195,7 +195,10 @@ export function VersionDetails({ version, entityNames }: VersionDetailsProps) {
       ) : null}
       <div>
         <h2 className="mb-1 text-xs font-semibold tracking-wide">本轮修改</h2>
-        <p className="text-ink">{version.instruction}</p>
+        {version.title?.trim() ? (
+          <p className="mb-1 text-xs font-medium text-ink">{version.title.trim()}</p>
+        ) : null}
+        <p className="text-ink">{version.instruction ?? (version.parent_id ? "—" : "原图")}</p>
         {version.input_version_ids && version.input_version_ids.length > 1 ? (
           <p className="mt-1 text-faint">
             合并来源 {version.input_version_ids.length} 个版本（树边仅显示主父节点）

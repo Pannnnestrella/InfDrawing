@@ -50,6 +50,21 @@ describe("ChatComposer", () => {
     expect(onOpenLayers).toHaveBeenCalledTimes(1);
   });
 
+  it("opens the mask window from inpaint mode", () => {
+    const onOpenMaskEditor = vi.fn();
+    render(
+      <ChatComposer
+        {...baseProps}
+        mode="inpaint"
+        canvasReady
+        canvasHasSelection
+        onOpenMaskEditor={onOpenMaskEditor}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "打开 Mask 重绘" }));
+    expect(onOpenMaskEditor).toHaveBeenCalledTimes(1);
+  });
+
   it("shows ready copy when decompose selection hint is null", () => {
     render(
       <ChatComposer

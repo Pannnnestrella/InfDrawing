@@ -12,15 +12,19 @@ import {
   ControlledEditApiError,
   checkoutVersion,
   createSession,
+  deleteSession,
   deleteVersion,
   exportSessionWorkflow,
   fetchArtifactBlobUrl,
   getSessionTree,
   isVersionBusy,
   listSessions,
+  renameSession,
+  renameVersion,
   submitTurn,
   updateEntityBBox,
   updateEntityStatus,
+  versionDisplayName,
   type BBox,
   type EditSession,
   type EditVersion,
@@ -75,6 +79,8 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
   const [localSelection, setLocalSelection] = useState<LocalSelection | null>(null);
   const [localModeVersionId, setLocalModeVersionId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [renamingVersion, setRenamingVersion] = useState(false);
+  const [renamingSession, setRenamingSession] = useState(false);
   const [exportSelectedIds, setExportSelectedIds] = useState<Set<string>>(() => new Set());
   const [exportingWorkflow, setExportingWorkflow] = useState(false);
   const [pendingEntityId, setPendingEntityId] = useState<string | null>(null);
@@ -280,6 +286,7 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
       void refreshSessions();
     } catch (err) {
       setError(errorMessage(err));
+      void refreshSessions();
     } finally {
       setCreating(false);
     }
@@ -298,6 +305,7 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
       void refreshSessions();
     } catch (err) {
       setError(errorMessage(err));
+      void refreshSessions();
     } finally {
       setCreating(false);
     }
@@ -358,6 +366,77 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
       setError(errorMessage(err));
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleRenameCurrent = async () => {
+    if (!tree || !current) return;
+    const isRoot = !current.parent_id;
+    const fallback = versionDisplayName(current, isRoot);
+    const next = window.prompt("节点名称（留空则恢复默认）", current.title?.trim() || fallback);
+    if (next === null) return;
+    setRenamingVersion(true);
+    setError(null);
+    try {
+      const updated = await renameVersion(tree.session.id, current.id, next.trim());
+      setTree((prev) => (prev ? replaceVersion(prev, updated) : prev));
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setRenamingVersion(false);
+    }
+  };
+
+  const handleRenameSession = async (sessionId: string, title: string) => {
+    setError(null);
+    try {
+      const updated = await renameSession(sessionId, title);
+      setSessions((prev) =>
+        prev
+          .map((item) => (item.id === updated.id ? updated : item))
+          .sort((a, b) => b.updated_at.localeCompare(a.updated_at)),
+      );
+      setTree((prev) =>
+        prev && prev.session.id === updated.id ? { ...prev, session: updated } : prev,
+      );
+    } catch (err) {
+      setError(errorMessage(err));
+      throw err;
+    }
+  };
+
+  const handleRenameOpenSession = async () => {
+    if (!tree) return;
+    const next = window.prompt("会话名称", tree.session.title);
+    if (next === null) return;
+    const cleaned = next.trim();
+    if (!cleaned) {
+      setError("会话标题不能为空");
+      return;
+    }
+    setRenamingSession(true);
+    try {
+      await handleRenameSession(tree.session.id, cleaned);
+    } catch {
+      // error already surfaced
+    } finally {
+      setRenamingSession(false);
+    }
+  };
+
+  const handleDeleteSession = async (sessionId: string) => {
+    setError(null);
+    try {
+      await deleteSession(sessionId);
+      setSessions((prev) => prev.filter((item) => item.id !== sessionId));
+      if (tree?.session.id === sessionId) {
+        setTree(null);
+        setConflict(null);
+        setExportSelectedIds(new Set());
+      }
+    } catch (err) {
+      setError(errorMessage(err));
+      throw err;
     }
   };
 
@@ -481,7 +560,15 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
           )}
           <h1 className="text-sm font-semibold tracking-wide">多轮可控编辑</h1>
           {tree ? (
-            <span className="truncate text-xs text-muted">/ {tree.session.title}</span>
+            <button
+              type="button"
+              disabled={renamingSession}
+              title="点击改名"
+              onClick={() => void handleRenameOpenSession()}
+              className="truncate text-xs text-muted hover:text-ink disabled:opacity-40"
+            >
+              / {tree.session.title}
+            </button>
           ) : null}
         </div>
         <div className="flex items-center gap-2">
@@ -539,6 +626,8 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
             onCreate={(file, title) => void handleCreate(file, title)}
             onCreateFromCanvas={() => void handleCreateFromCanvas()}
             onOpen={(id) => void handleOpen(id)}
+            onRenameSession={handleRenameSession}
+            onDeleteSession={handleDeleteSession}
           />
         </main>
       ) : (
@@ -597,6 +686,15 @@ export function StudioWorkspace({ layout = "float" }: { layout?: "page" | "float
                       className="rounded-md border border-line px-2 py-1 text-[10px] hover:bg-surface-2 disabled:opacity-40"
                     >
                       {exportingWorkflow ? "导出中…" : "存为工作流"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={renamingVersion || deleting}
+                      title="重命名当前节点"
+                      onClick={() => void handleRenameCurrent()}
+                      className="rounded-md border border-line px-2 py-1 text-[10px] hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {renamingVersion ? "改名中…" : "重命名"}
                     </button>
                     <button
                       type="button"

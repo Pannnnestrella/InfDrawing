@@ -226,6 +226,54 @@ def test_unknown_session_is_404(harness: dict[str, Any]) -> None:
     assert response.status_code == 404
 
 
+def test_rename_and_delete_session_endpoints(harness: dict[str, Any]) -> None:
+    client: TestClient = harness["client"]
+    tree = client.post(
+        "/api/v1/controlled-edit/sessions",
+        files={"image": ("a.png", _png(), "image/png")},
+        data={"title": "Knight"},
+    ).json()
+    session_id = tree["session"]["id"]
+    root_id = tree["versions"][0]["id"]
+
+    renamed_version = client.patch(
+        f"/api/v1/controlled-edit/sessions/{session_id}/versions/{root_id}",
+        json={"title": "原图备份"},
+    )
+    assert renamed_version.status_code == 200
+    assert renamed_version.json()["title"] == "原图备份"
+
+    renamed_session = client.patch(
+        f"/api/v1/controlled-edit/sessions/{session_id}",
+        json={"title": "骑士改名"},
+    )
+    assert renamed_session.status_code == 200
+    assert renamed_session.json()["title"] == "骑士改名"
+
+    deleted = client.delete(f"/api/v1/controlled-edit/sessions/{session_id}")
+    assert deleted.status_code == 204
+    assert client.get(f"/api/v1/controlled-edit/sessions/{session_id}").status_code == 404
+    assert client.get("/api/v1/controlled-edit/sessions").json() == []
+
+
+def test_delete_busy_session_returns_409(harness: dict[str, Any]) -> None:
+    client: TestClient = harness["client"]
+    tree = client.post(
+        "/api/v1/controlled-edit/sessions",
+        files={"image": ("a.png", _png(), "image/png")},
+    ).json()
+    session_id = tree["session"]["id"]
+    root_id = tree["versions"][0]["id"]
+    turn = client.post(
+        f"/api/v1/controlled-edit/sessions/{session_id}/turns",
+        json={"parent_version_id": root_id, "instruction": "天空换成夜晚"},
+    )
+    assert turn.status_code == 202
+    busy = client.delete(f"/api/v1/controlled-edit/sessions/{session_id}")
+    assert busy.status_code == 409
+    assert "生成中" in busy.json()["error"]["message"]
+
+
 def test_capability_follows_openai_key() -> None:
     comfy = ServiceStatus(ok=False, url="http://127.0.0.1:8188")
     models = ModelsCapability()

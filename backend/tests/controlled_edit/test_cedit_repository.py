@@ -68,6 +68,10 @@ def test_repository_tree_with_branching() -> None:
         with pytest.raises(KeyError):
             await repo.add_version(EditVersion(session_id=session.id, parent_id="missing"))
 
+        await repo.delete_session(session.id)
+        assert await repo.get_session(session.id, "owner") is None
+        assert await repo.list_versions(session.id) == []
+
     _run(scenario())
 
 

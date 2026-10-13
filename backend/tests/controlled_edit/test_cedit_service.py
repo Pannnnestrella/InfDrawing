@@ -28,6 +28,7 @@ from app.controlled_edit.schemas import (
 from app.controlled_edit.service import (
     ControlledEditService,
     LockConflictError,
+    SessionNotDeletableError,
     SessionNotFoundError,
     VersionNotDeletableError,
     VersionNotReadyError,
@@ -517,6 +518,42 @@ def test_delete_busy_version_is_rejected(tmp_path: Path) -> None:
         with pytest.raises(VersionNotDeletableError):
             await service.delete_version(OWNER, session_id, child.id)
         scheduled.pop().close()
+
+    asyncio.run(scenario())
+
+
+def test_rename_version_and_session(tmp_path: Path) -> None:
+    async def scenario() -> None:
+        service, _, _, _ = _build(tmp_path, [])
+        session_id, root_id = await _session_with_locked_face(service)
+        renamed = await service.rename_version(OWNER, session_id, root_id, "  开场  ")
+        assert renamed.title == "开场"
+        cleared = await service.rename_version(OWNER, session_id, root_id, "   ")
+        assert cleared.title is None
+        session = await service.rename_session(OWNER, session_id, "骑士线")
+        assert session.title == "骑士线"
+        with pytest.raises(ValueError):
+            await service.rename_session(OWNER, session_id, "  ")
+
+    asyncio.run(scenario())
+
+
+def test_delete_session_removes_tree_and_rejects_busy(tmp_path: Path) -> None:
+    async def scenario() -> None:
+        service, _, _, scheduled = _build(tmp_path, [PASS])
+        session_id, root_id = await _session_with_locked_face(service)
+        child = await service.submit_turn(
+            OWNER, session_id, EditTurnRequest(parent_version_id=root_id, instruction="x")
+        )
+        with pytest.raises(SessionNotDeletableError):
+            await service.delete_session(OWNER, session_id)
+        scheduled.pop().close()
+        child.status = VersionStatus.FAILED
+        await service._repository.save_version(child)
+        await service.delete_session(OWNER, session_id)
+        with pytest.raises(SessionNotFoundError):
+            await service.get_tree(OWNER, session_id)
+        assert await service.list_sessions(OWNER) == []
 
     asyncio.run(scenario())
 
